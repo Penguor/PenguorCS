@@ -1,0 +1,21 @@
+<!--
+#
+# PenguorCS Compiler
+# __________________
+#
+# (c) Carl Schierig 2019
+# all rights reserved
+#
+-->
+
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Penguor.Debug</RootNamespace>
+    <AssemblyName>PDebug</AssemblyName>
+    <Copyright>(c) 2019 Carl Schierig</Copyright>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,11 @@
+**/[Bb]in/
+**/[Oo]bj/
+
+# Builds
+[Bb]uild/
+
+
+# .vscode folder ignore
+.vscode/settings.json
+.vscode/solution-explorer/
+.VSCodeCounter/
