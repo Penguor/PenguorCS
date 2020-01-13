@@ -8,6 +8,8 @@ This repository contains the source code of the PenguorCS compiler for the Pengu
 
 Penguor is an in-development data-oriented language. Currently, it is in a very early stage and it does not have many features yet. The ultimate goal is to create a fast, feature-rich language optimized for games and other applications which need to handle lots of data.
 
+Documentation can be found [here](https://github.com/Penguor/PenguorDocs)
+
 ## Roadmap
 
 - finish assembly generation
