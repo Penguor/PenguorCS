@@ -85,7 +85,7 @@ namespace Penguor.Parsing
             while (!Match(TokenType.HEADEND))
             {
                 Consume(TokenType.INCLUDE, 1);
-                includeLhs.Add(CallExpr());
+                includeLhs.Add(CallExpr(parent));
                 Consume(TokenType.SEMICOLON, 1);
             }
 
