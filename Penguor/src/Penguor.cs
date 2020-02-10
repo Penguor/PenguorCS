@@ -3,7 +3,7 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2019
+# (c) Carl Schierig 2020
 # all rights reserved
 # 
 */
@@ -26,7 +26,7 @@ namespace Penguor
             if (args.Length == 0)
             {
                 // print the Penguor info
-                Console.WriteLine("Penguor\n\n (c) 2019 Carl Schierig");
+                Console.WriteLine("Penguor\n\n (c) 2020 Carl Schierig");
                 Debug.Log("Penguor info displayed", LogLevel.Info);
             }
             else
@@ -44,7 +44,6 @@ namespace Penguor
                             Console.WriteLine("    --help, -h: This help");
                             Console.WriteLine("    --build");
                             Console.WriteLine("        <file>: Build a program from a single file");
-                            Console.WriteLine("        [--grammar <folder>]: Build only grammar");
 
                             Debug.Log("Printed help", LogLevel.Info);
                             break;
