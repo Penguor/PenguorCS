@@ -4,7 +4,7 @@
 # ------------------
 #
 # (c) Carl Schierig 2019
-# all rights reserved
+# 
 # 
 # code in method ToUpperCase(this string input)
 # has originally been written here:

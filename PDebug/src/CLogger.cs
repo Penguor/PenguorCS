@@ -4,7 +4,7 @@
 # ------------------
 #
 # (c) Carl Schierig 2019
-# all rights reserved
+# 
 # 
 */
 

@@ -4,7 +4,7 @@
 # ------------------
 #
 # (c) Carl Schierig 2019
-# all rights reserved
+# 
 # 
 */
 // TODO: remove name tokens form ast nodes, now replaced by id
