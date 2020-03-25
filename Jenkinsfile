@@ -6,14 +6,15 @@ pipeline {
 
   }
   stages {
-    stage('Restore') {
+    stage('Check versions') {
       steps {
         sh 'dotnet --version'
       }
     }
 
-    stage('error') {
+    stage('Build') {
       steps {
+        dir(path: './Penguor/')
         sh 'dotnet restore'
       }
     }
