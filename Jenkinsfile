@@ -8,8 +8,7 @@ pipeline {
   stages {
     stage('Check versions') {
       steps {
-        sh '''dotnet --version
-docker --version'''
+        sh 'dotnet --version'
       }
     }
 
