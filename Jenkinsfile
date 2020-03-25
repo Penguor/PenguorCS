@@ -15,8 +15,10 @@ docker --version'''
 
     stage('Build') {
       steps {
-        dir(path: './Penguor/')
-        sh 'dotnet restore'
+        dir(path: './Penguor/') {
+          sh 'dotnet restore'
+        }
+
       }
     }
 
