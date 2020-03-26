@@ -44,8 +44,14 @@ dotnet clean ./PDebug'''
 
     stage('Publish') {
       steps {
-        sh 'dotnet publish ./Penguor -o /artifacts'
+        sh 'dotnet publish ./Penguor'
         archiveArtifacts(artifacts: '/artifacts', onlyIfSuccessful: true)
+      }
+    }
+
+    stage('Post-Clean') {
+      steps {
+        cleanWs(cleanWhenFailure: true, cleanWhenAborted: true, cleanWhenNotBuilt: true, cleanWhenSuccess: true, cleanWhenUnstable: true, cleanupMatrixParent: true, deleteDirs: true, disableDeferredWipeout: true)
       }
     }
 
