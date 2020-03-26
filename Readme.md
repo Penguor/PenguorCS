@@ -1,12 +1,14 @@
 # PenguorCS
 
+### This repository is no longer in use! Please head over to [Penguor/PenguorHS](https://github.com/Penguor/PenguorHS)
+
 This repository contains the source code of the PenguorCS compiler for the Penguor language.
 
 ## Overview
 
 Penguor is an in-development data-oriented language. Currently, it is in a very early stage and it does not have many features yet. The ultimate goal is to create a fast, feature-rich language optimized for games and other applications which need to handle lots of data.
 
-Documentation can be found [here](https://github.com/Penguor/PenguorDocs).s
+Work-in-progress documentation can be found [here](https://penguor.readthedocs.io/).
 
 ## Roadmap
 

@@ -4,7 +4,7 @@
 # ------------------
 #
 # (c) Carl Schierig 2019
-# all rights reserved
+# 
 # 
 */
 
@@ -101,7 +101,7 @@ $@"/*
 # ------------------
 #
 # (c) Carl Schierig 2020
-# all rights reserved
+# 
 # 
 */
 
@@ -216,7 +216,7 @@ $@"/*
 # ------------------
 #
 # (c) Carl Schierig 2020
-# all rights reserved
+# 
 # 
 */
 
