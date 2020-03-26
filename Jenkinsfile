@@ -45,7 +45,6 @@ dotnet clean ./PDebug'''
     stage('Publish') {
       steps {
         sh 'dotnet publish ./Penguor'
-        archiveArtifacts(artifacts: '/artifacts', onlyIfSuccessful: true)
       }
     }
 
