@@ -413,11 +413,11 @@ namespace Penguor.Parsing
 
         private Expr UnaryExpr(LinkedList<Guid> parent)
         {
+            Expr rhs;
             if (Match(TokenType.EXCL_MARK, TokenType.MINUS))
             {
                 TokenType op = GetPrevious().type;
 
-                Expr rhs;
                 if (Check(TokenType.LPAREN))
                 {
                     rhs = GroupingExpr(parent);
@@ -426,7 +426,11 @@ namespace Penguor.Parsing
                 rhs = UnaryExpr(parent);
                 return new UnaryExpr(op, rhs, parent);
             }
-
+            if (Check(TokenType.LPAREN))
+            {
+                rhs = GroupingExpr(parent);
+                return new UnaryExpr(TokenType.OTHER, rhs, parent);
+            }
             return CallExpr(parent);
         }
 
