@@ -23,7 +23,11 @@ namespace Penguor.Lexing
     {
         private List<Token> tokens = new List<Token>();
 
-        private string idf;
+        string source;
+
+        int current = 0;
+        int offset = 0;
+
 
         /// <summary>
         /// scans a text file and breaks it into tokens
@@ -33,198 +37,149 @@ namespace Penguor.Lexing
         public List<Token> Tokenize(string filePath)
         {
             Debug.Log("Starting Tokenize()", LogLevel.Info);
-
-            StreamReader reader = new StreamReader(filePath);
+            current = 0;
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                source = reader.ReadToEnd();
+                reader.Close();
+            }
 
             StringBuilder idfBuilder = new StringBuilder();
             StringBuilder numBuilder = new StringBuilder();
-            int line = 1;
 
-            while (!reader.EndOfStream)
+            while (!AtEnd())
             {
-                char current = ' ';
+                idfBuilder.Clear();
+                while (char.IsWhiteSpace(source[current])) Advance();
 
-                while (current == ' ')
+                offset = current;
+
+                if (char.IsLetter(source[current]) || source[current] == '_')
                 {
-                    current = (char)reader.Read();
-                }
-
-                if (char.IsLetter(current))
-                {
-                    idfBuilder.Append(current);
-                    while (char.IsLetterOrDigit((current = (char)reader.Read())))
-                    {
-                        idfBuilder.Append(current);
-                    }
-
-                    idf = idfBuilder.ToString();
-                    idfBuilder.Clear();
-
+                    idfBuilder.Append(Advance());
+                    while (char.IsLetterOrDigit(source[current]) || source[current] == '_') idfBuilder.Append(Advance());
+                    string idf = idfBuilder.ToString();
                     switch (idf)
                     {
-                        case "fn":
-                            tokens.Add(new Token(TokenType.FN, "fn", line));
-                            break;
                         case "null":
-                            tokens.Add(new Token(TokenType.NULL, "null", line));
+                            AddToken(TokenType.NULL);
                             break;
                         case "system":
-                            tokens.Add(new Token(TokenType.SYSTEM, "system", line));
+                            AddToken(TokenType.SYSTEM);
                             break;
-                        case "component":
-                            tokens.Add(new Token(TokenType.COMPONENT, "component", line));
+                        case "container":
+                            AddToken(TokenType.CONTAINER);
                             break;
                         case "datatype":
-                            tokens.Add(new Token(TokenType.DATATYPE, "datatype", line));
+                            AddToken(TokenType.DATATYPE);
+                            break;
+                        case "library":
+                            AddToken(TokenType.LIBRARY);
                             break;
                         case "if":
-                            tokens.Add(new Token(TokenType.IF, "if", line));
+                            AddToken(TokenType.IF);
+                            break;
+                        case "elif":
+                            AddToken(TokenType.ELIF);
+                            break;
+                        case "else":
+                            AddToken(TokenType.ELSE);
                             break;
                         case "while":
-                            tokens.Add(new Token(TokenType.WHILE, "while", line));
+                            AddToken(TokenType.WHILE);
                             break;
                         case "for":
-                            tokens.Add(new Token(TokenType.FOR, "for", line));
+                            AddToken(TokenType.FOR);
                             break;
                         case "do":
-                            tokens.Add(new Token(TokenType.DO, "do", line));
+                            AddToken(TokenType.DO);
                             break;
                         case "from":
-                            tokens.Add(new Token(TokenType.FROM, "from", line));
+                            AddToken(TokenType.FROM);
                             break;
                         case "include":
-                            tokens.Add(new Token(TokenType.INCLUDE, "include", line));
+                            AddToken(TokenType.INCLUDE);
                             break;
-                        case "var":
-                            tokens.Add(new Token(TokenType.VAR, "var", line));
+                        case "safety":
+                            AddToken(TokenType.SAFETY);
+                            break;
+                        case "public":
+                            AddToken(TokenType.PUBLIC);
+                            break;
+                        case "private":
+                            AddToken(TokenType.PRIVATE);
+                            break;
+                        case "protected":
+                            AddToken(TokenType.PROTECTED);
+                            break;
+                        case "restricted":
+                            AddToken(TokenType.RESTRICTED);
+                            break;
+                        case "static":
+                            AddToken(TokenType.STATIC);
+                            break;
+                        case "dynamic":
+                            AddToken(TokenType.DYNAMIC);
+                            break;
+                        case "abstract":
+                            AddToken(TokenType.ABSTRACT);
+                            break;
+                        case "const":
+                            AddToken(TokenType.CONST);
                             break;
                         case "true":
-                            tokens.Add(new Token(TokenType.TRUE, "true", line));
+                            AddToken(TokenType.TRUE);
                             break;
                         case "false":
-                            tokens.Add(new Token(TokenType.FALSE, "false", line));
+                            AddToken(TokenType.FALSE);
+                            break;
+                        case "switch":
+                            AddToken(TokenType.SWITCH);
+                            break;
+                        case "case":
+                            AddToken(TokenType.CASE);
+                            break;
+                        case "default":
+                            AddToken(TokenType.DEFAULT);
                             break;
                         default:
-                            tokens.Add(new Token(TokenType.IDF, idf, line));
+                            AddToken(TokenType.IDF, idf);
                             break;
                     }
+                    continue;
                 }
-                if (char.IsDigit(current))
-                {
-                    do
-                    {
-                        numBuilder.Append(current);
-                        current = (char)reader.Read();
-                    } while (char.IsDigit(current) || current == '.');
-                    tokens.Add(new Token(TokenType.NUM, numBuilder.ToString(), line));
-                    numBuilder.Clear();
-                }
-                if (current == '"')
-                {
-                    while ('"' != (current = (char)reader.Read()))
-                    {
-                        idfBuilder.Append(current);
-                    }
 
-                    tokens.Add(new Token(TokenType.STRING, idfBuilder.ToString(), line));
-                    idfBuilder.Clear();
-                }
-                if (current == '\n')
+                switch (source[current])
                 {
-                    line++;
-                }
-                switch (current)
-                {
-                    case '/':
-                        if ('/' == (current = (char)reader.Read()))
-                        {
-                            do
-                            {
-                                current = (char)reader.Read();
-                            } while (current != '\n');
-                            break;
-                        }
-                        else if ('*' == (current = (char)reader.Read()))
-                        {
-                            bool comment = true;
-                            do
-                            {
-                                current = (char)reader.Read();
-                                if ('*' == current)
-                                {
-                                    if ('/' == (current = (char)reader.Read())) comment = false;
-                                }
-                            } while (comment);
-                        }
-                        else tokens.Add(new Token(TokenType.DIV, "/", line));
-                        break;
-                    case '!':
-                        if ('#' == (current = (char)reader.Read())) tokens.Add(new Token(TokenType.HEADSTART, "!#", line));
-                        else if ('=' == (current = (char)reader.Read())) tokens.Add(new Token(TokenType.NEQUALS, "!=", line));
-                        else tokens.Add(new Token(TokenType.NOT, "!", line));
-                        break;
-                    case '#':
-                        if ('!' == (current = (char)reader.Read())) tokens.Add(new Token(TokenType.HEADEND, "#!", line));
-                        break;
-                    case '|':
-                        if ('|' == (current = (char)reader.Read())) tokens.Add(new Token(TokenType.OR, "||", line));
-                        else Debug.CastPGR(1, line);
-                        break;
-                    case '&':
-                        if ('&' == (current = (char)reader.Read())) tokens.Add(new Token(TokenType.AND, "&&", line));
-                        else Debug.CastPGR(1, line);
-                        break;
-                    case '=':
-                        if ('=' == (current = (char)reader.Read())) tokens.Add(new Token(TokenType.EQUALS, "==", line));
-                        else tokens.Add(new Token(TokenType.ASSIGN, "=", line));
-                        break;
                     case '+':
-                        tokens.Add(new Token(TokenType.PLUS, "+", line));
-                        break;
-                    case '-':
-                        tokens.Add(new Token(TokenType.MINUS, "-", line));
-                        break;
-                    case '*':
-                        tokens.Add(new Token(TokenType.MUL, "*", line));
-                        break;
-                    case '(':
-                        tokens.Add(new Token(TokenType.LPAREN, "(", line));
-                        break;
-                    case ')':
-                        tokens.Add(new Token(TokenType.RPAREN, ")", line));
-                        break;
-                    case '{':
-                        tokens.Add(new Token(TokenType.LBRACE, "{", line));
-                        break;
-                    case '}':
-                        tokens.Add(new Token(TokenType.RBRACE, "}", line));
-                        break;
-                    case '[':
-                        tokens.Add(new Token(TokenType.LBRACK, "[", line));
-                        break;
-                    case ']':
-                        tokens.Add(new Token(TokenType.RBRACK, "]", line));
-                        break;
-                    case ':':
-                        tokens.Add(new Token(TokenType.COLON, ":", line));
-                        break;
-                    case ';':
-                        tokens.Add(new Token(TokenType.SEMICOLON, ";", line));
-                        break;
-                    case '<':
-                        tokens.Add(new Token(TokenType.LESS, "<", line));
-                        break;
-                    case '.':
-                        tokens.Add(new Token(TokenType.DOT, ".", line));
-                        break;
-                    default:
-                        if (!char.IsWhiteSpace(current) && current != '"')
-                            tokens.Add(new Token(TokenType.OTHER, current.ToString(), line));
+                        AddToken(Match('=') ? TokenType.ADD_ASSIGN : Match('+') ? TokenType.DPLUS : TokenType.PLUS);
                         break;
                 }
             }
-            tokens.Add(new Token(TokenType.EOF, "EOF", line));
+
+            AddToken(TokenType.EOF);
             return tokens;
         }
+
+        private bool AtEnd() => current < source.Length;
+
+        private char Advance()
+        {
+            current++;
+            return source[current - 1];
+        }
+
+        private bool Match(char expected)
+        {
+            if (AtEnd()) return false;
+            if ((current != expected)) return false;
+
+            Advance();
+            return true;
+        }
+
+        private void AddToken(TokenType type) => AddToken(type, "");
+
+        private void AddToken(TokenType type, string literal) => tokens.Add(new Token(type, literal, offset, current - offset));
     }
 }

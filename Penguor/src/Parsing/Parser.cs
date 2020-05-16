@@ -44,7 +44,7 @@ namespace Penguor.Parsing
         /// <returns>a statement containing the AST of the parsed file</returns>
         public Stmt Parse()
         {
-            Consume(TokenType.HEADSTART, 1);
+            Consume(TokenType.HASHTAG, 1);
             string library;
             Stmt head = HeadStmt(out library);
 
@@ -82,7 +82,7 @@ namespace Penguor.Parsing
 
             definition.TryGetValue("library", out library);
 
-            while (!Match(TokenType.HEADEND))
+            while (!Match(TokenType.HASHTAG))
             {
                 Consume(TokenType.INCLUDE, 1);
                 includeLhs.Add(CallExpr(parent));
@@ -95,10 +95,10 @@ namespace Penguor.Parsing
         private Stmt Declaration(LinkedList<Guid> parent)
         {
             if (Match(TokenType.SYSTEM)) return SystemStmt(parent);
-            if (Match(TokenType.COMPONENT)) return ComponentStmt(parent);
+            if (Match(TokenType.CONTAINER)) return ComponentStmt(parent);
             if (Match(TokenType.DATATYPE)) return DataTypeStmt(parent);
-            if (Match(TokenType.VAR)) return VarStmt(parent);
-            if (Match(TokenType.FN)) return FunctionStmt(parent);
+            if (Match(TokenType.IDF)) return VarStmt(parent);
+            if (Match(TokenType.IDF)) return FunctionStmt(parent);
             return Statement(parent);
         }
 
@@ -472,7 +472,7 @@ namespace Penguor.Parsing
             else if (Match(TokenType.NULL)) return new NullExpr(parent);
             else if (Match(TokenType.IDF)) return new IdentifierExpr(GetPrevious().type, parent);
 
-            throw new PenguorException(1, GetCurrent().lineNumber);
+            throw new PenguorException(1, GetCurrent().offset);
         }
 
         private Expr GroupingExpr(LinkedList<Guid> parent)
@@ -542,7 +542,7 @@ namespace Penguor.Parsing
             {
                 if (item.Value == name) return item.Key;
             }
-            throw new PenguorException(1, GetCurrent().lineNumber); // TODO: add own exception for "idf not found"
+            throw new PenguorException(1, GetCurrent().offset); // TODO: add own exception for "idf not found"
         }
 
 
@@ -574,7 +574,7 @@ namespace Penguor.Parsing
         private Token Consume(TokenType type, ushort msgNumber, char expected = ' ')
         {
             if (Check(type)) return Advance();
-            throw new PenguorException(msgNumber, GetCurrent().lineNumber, expected);
+            throw new PenguorException(msgNumber, GetCurrent().offset, expected);
         }
 
         /// <summary>

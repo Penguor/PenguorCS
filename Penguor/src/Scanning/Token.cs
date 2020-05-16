@@ -26,21 +26,27 @@ namespace Penguor.Parsing
         public readonly string token;
 
         /// <summary>
-        /// line number of the token
+        /// offset of the token
         /// </summary>
-        public readonly int lineNumber;
+        public readonly int offset;
+        /// <summary>
+        /// length of the token
+        /// </summary>
+        public readonly int length;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="type"></param>
         /// <param name="token"></param>
-        /// <param name="line"></param>
-        public Token(TokenType type, string token, int line)
+        /// <param name="offset">the offset of the token in the source file</param>
+        /// <param name="length">the length of the token</param>
+        public Token(TokenType type, string token, int offset, int length)
         {
             this.type = type;
             this.token = token;
-            lineNumber = line;
+            this.offset = offset;
+            this.length = length;
         }
 
         /// <summary>
@@ -49,7 +55,7 @@ namespace Penguor.Parsing
         /// <returns>returns a string of the token with line number and type</returns>
         public override string ToString()
         {
-            return ("type: " + type.ToString() + ", token: " + token + ", line number: " + lineNumber);
+            return ("type: " + type.ToString() + ", token: " + token + ", line number: " + offset);
         }
     }
 }
