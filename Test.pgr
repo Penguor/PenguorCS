@@ -1,0 +1,38 @@
+#safety 1
+
+#include Math
+#include Hello
+
+library ShowPenguor
+{
+    restricted dynamic system HelloWorld < Parent
+    {
+        public void execute(string t)
+        {
+            string a = "";
+            int b = 2;
+            a = "Hello " + name;
+            if(true || false) 
+            {
+                a += "no";
+            } 
+            elif(b & 1)
+            {
+                b |= .2;
+                a += "why?";
+            }
+        }
+    }
+
+    // containers are there to store data
+    container HelloData
+    {
+        string n1;
+        string n2; 
+        string n3; 
+
+        n1 = a;
+        n2 = "Frank";
+        n3 = "Anna";
+    }
+}

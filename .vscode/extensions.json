@@ -1,6 +1,6 @@
 {
 	"recommendations": [
-		"ms-vscode.csharp",
+		"ms-dotnettools.csharp",
 		"k--kato.docomment",
 		"aaron-bond.better-comments"
 	]

@@ -51,14 +51,14 @@ namespace Penguor.Build
 
             parser = new Parser(tokens);
 
-            // foreach (Token token in tokens)
-            // {
-            //     Debug.Log(token.ToString(), LogLevel.Debug);
-            // }
+            foreach (Token token in tokens)
+            {
+                Debug.Log(token.ToString(), LogLevel.Debug);
+            }
 
-            Stmt program = parser.Parse();
+            //     Stmt program = parser.Parse();
 
-            Library ilCode = iLGenerator.GenerateFromAST(program);
+            //     Library ilCode = iLGenerator.GenerateFromAST(program);
         }
     }
 }

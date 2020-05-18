@@ -14,10 +14,6 @@
     <ProjectReference Include="..\PDebug\PDebug.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-*" />
-  </ItemGroup>
-
   <PropertyGroup>
     <RootNamespace>Penguor</RootNamespace>
     <AssemblyName>Penguor</AssemblyName>

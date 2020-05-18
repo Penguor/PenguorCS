@@ -55,7 +55,7 @@ namespace Penguor.Parsing
         /// <returns>returns a string of the token with line number and type</returns>
         public override string ToString()
         {
-            return ("type: " + type.ToString() + ", token: " + token + ", line number: " + offset);
+            return ($"type: {type.ToString()}, token: {token}, offset: {offset}, length: {length}");
         }
     }
 }

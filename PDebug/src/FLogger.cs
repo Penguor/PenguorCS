@@ -49,7 +49,7 @@ namespace Penguor.Debugging
         }
 
         /// <summary>
-        /// Logs on line of text at three different LogLevels
+        /// Logs on line of text at four different LogLevels
         /// </summary>
         /// <param name="logText">The string that gets logged</param>
         /// <param name="logLevel">Debug, Warn, Error</param>
@@ -62,7 +62,9 @@ namespace Penguor.Debugging
             switch (logLevel)
             {
                 case LogLevel.Debug:
+#if(DEBUG)
                     writer.Write("[Debug] ");
+#endif
                     break;
                 case LogLevel.Info:
                     writer.Write("[Info] ");
