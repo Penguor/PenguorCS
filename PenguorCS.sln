@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PDebug", "PDebug\PDebug.csproj", "{ABBB8123-AE1C-4C18-8A11-B4B497567F45}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Penguor", "Penguor\Penguor.csproj", "{886AEC1B-8236-4FEE-B3B1-E5A29B8B36F8}"
 EndProject
 Global

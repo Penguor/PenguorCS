@@ -8,6 +8,8 @@
 # 
 */
 
+using Penguor.Build;
+
 namespace Penguor.Debugging
 {
     /// <summary>
@@ -61,7 +63,7 @@ namespace Penguor.Debugging
             {
                 cLogger.Log(logText, logLevel);
             }
-            fLogger.Log(logText, logLevel);
+            //fLogger.Log(logText, logLevel);
         }
 
         /// <summary>
@@ -71,7 +73,7 @@ namespace Penguor.Debugging
         /// <param name="logLevel">The loglevel</param>
         public static void Log(string[] logText, LogLevel logLevel)
         {
-            fLogger.Log(logText, logLevel);
+            //fLogger.Log(logText, logLevel);
         }
 
         /// <summary>
@@ -87,7 +89,7 @@ namespace Penguor.Debugging
             switch (message)
             {
                 case 1:
-                    Log("[PGRCS-0001] An unexpected error ocurred.", LogLevel.Error);
+                    Log("[PGRCS-0001] An unexpected error occurred.", LogLevel.Error);
                     break;
                 case 2:
                     Log("[PGRCS-0002] warning.", LogLevel.Warn);
@@ -114,44 +116,80 @@ namespace Penguor.Debugging
         /// log a Penguor language debug message
         /// </summary>
         /// <param name="message"></param>
+        /// <param name="offset">the offset where the error occurred</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        public static void CastPGR(int message, int line, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
+        public static void CastPGR(int message, int offset, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
         {
             string currentMessage = "";
             LogLevel level = LogLevel.Debug;
             switch (message)
             {
                 case 1:
-                    currentMessage = "[PGR-0001] An unexpected error ocurred.";
+                    currentMessage = "[PGR-0001] An unexpected error occurred";
                     level = LogLevel.Error;
                     break;
                 case 2:
-                    currentMessage = "[PGR-0002] warning.";
+                    currentMessage = "[PGR-0002] warning";
                     level = LogLevel.Warn;
                     break;
                 case 3:
-                    currentMessage = "[PGR-0003] debug.";
+                    currentMessage = "[PGR-0003] debug";
                     level = LogLevel.Debug;
                     break;
                 case 4:
-                    currentMessage = "[PGR-0004] info.";
+                    currentMessage = "[PGR-0004] info";
                     level = LogLevel.Info;
                     break;
                 case 5:
-                    currentMessage = "[PGR-0005] Missing header.";
+                    currentMessage = $"[PGR-0005] Source file '{arg0}' not found";
                     level = LogLevel.Error;
                     break;
                 case 6:
-                    currentMessage = "[PGR-0006] Expecting \"system\", \"component\" or \"datatype\".";
+                    currentMessage = "[PGR-0006] Expecting \"system\", \"component\" or \"datatype\"";
+                    level = LogLevel.Error;
+                    break;
+                case 7:
+                    currentMessage = $"[PGR-0007] Unexpected char '{arg0}'";
                     level = LogLevel.Error;
                     break;
             }
-            currentMessage += $" [line {line}]";
+            currentMessage += " " + GetSourcePosition(offset);
+            Builder.ExitCode = message;
 
             Log(currentMessage, level);
+        }
+
+        private static string GetSourcePosition(int offset)
+        {
+            string source;
+            using (System.IO.StreamReader reader = new System.IO.StreamReader(Builder.ActiveFile)) { source = reader.ReadToEnd(); }
+            uint line = 1;
+            int column = 0;
+            bool gotLine = false;
+            for (int i = 0; i < source.Length; i++)
+            {
+                if (offset == i) gotLine = true;
+                if (source[i] == '\n')
+                {
+                    if (gotLine) break;
+                    line++;
+                    column = 0;
+                    continue;
+                }
+                else if (source[i] == '\r')
+                {
+                    if (gotLine) break;
+                    i++;
+                    line++;
+                    column = 0;
+                    continue;
+                }
+                column++;
+            }
+            return $"({Builder.ActiveFile}:{line}:{column})";
         }
 
         /// <summary>

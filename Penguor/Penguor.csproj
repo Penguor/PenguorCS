@@ -9,11 +9,6 @@
 -->
 
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\PDebug\PDebug.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <RootNamespace>Penguor</RootNamespace>
     <AssemblyName>Penguor</AssemblyName>

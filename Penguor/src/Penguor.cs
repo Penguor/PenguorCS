@@ -27,7 +27,7 @@ namespace Penguor
             {
                 // print the Penguor info
                 Console.WriteLine("Penguor\n\n (c) 2020 Carl Schierig");
-                Debug.Log("Penguor info displayed", LogLevel.Info);
+                Debugging.Debug.Log("Penguor info displayed", LogLevel.Info);
             }
             else
             {
@@ -37,7 +37,7 @@ namespace Penguor
                     case "--help": // display help
                     case "-h":
                         {
-                            Debug.Log("Printing help", LogLevel.Info);
+                            Debugging.Debug.Log("Printing help", LogLevel.Info);
 
                             Console.WriteLine("\nPenguor help");
                             Console.WriteLine("------------\n");
@@ -45,13 +45,13 @@ namespace Penguor
                             Console.WriteLine("    --build");
                             Console.WriteLine("        <file>: Build a program from a single file");
 
-                            Debug.Log("Printed help", LogLevel.Info);
+                            Debugging.Debug.Log("Printed help", LogLevel.Info);
                             break;
                         }
                     case "-b":
                     case "--build": // build a program from source or Penguor project
                         {
-                            Debug.Log("Penguor main: build started", LogLevel.Info);
+                            Debugging.Debug.Log("Penguor main: build started", LogLevel.Info);
 
                             if (args.Length == 1)
                             {
@@ -85,7 +85,7 @@ namespace Penguor
 #endif
                     default:
                         {
-                            Debug.CastPGRCS(6, args[0]);
+                            Debugging.Debug.CastPGRCS(6, args[0]);
                             goto case "-h";
                         }
                 }
@@ -95,7 +95,7 @@ namespace Penguor
         // build program from  source
         static void BuildSource(string file)
         {
-            Debug.Log("Penguor main: Build process started", LogLevel.Info);
+            Debugging.Debug.Log("Penguor main: Build process started", LogLevel.Info);
             Builder builder = new Builder();
             builder.BuildFromSource(file);
         }

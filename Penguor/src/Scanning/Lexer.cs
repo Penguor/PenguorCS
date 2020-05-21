@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System;
 using Penguor.Debugging;
 using Penguor.Parsing;
 
@@ -36,12 +37,17 @@ namespace Penguor.Lexing
         /// <returns>a list of tokens</returns>
         public List<Token> Tokenize(string filePath)
         {
-            Debug.Log("Starting Tokenize()", LogLevel.Info);
+            Debugging.Debug.Log("Starting Tokenize()", LogLevel.Info);
             current = 0;
-            using (StreamReader reader = new StreamReader(filePath))
+            try
             {
+                using StreamReader reader = new StreamReader(filePath);
                 source = reader.ReadToEnd();
-                reader.Close();
+            }
+            catch (FileNotFoundException)
+            {
+                Debugging.Debug.CastPGR(5, 0, filePath);
+                return tokens;
             }
 
             StringBuilder stringBuilder = new StringBuilder();
@@ -254,7 +260,7 @@ namespace Penguor.Lexing
                         AddToken(Match('=') ? TokenType.EQUALS : TokenType.ASSIGN);
                         break;
                     default:
-                        Debug.Log($"unexpected character '{c}'", LogLevel.Error);
+                        Debug.CastPGR(7, offset, c.ToString());
                         break;
                 }
             }
