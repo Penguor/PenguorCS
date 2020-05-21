@@ -12,7 +12,7 @@ using System;
 
 namespace Penguor.Debugging
 {
-    public class CLogger
+    internal class CLogger
     {
         public void Log(string logText, LogLevel logLevel)
         {

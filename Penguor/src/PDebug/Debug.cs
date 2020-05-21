@@ -3,7 +3,7 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2019
+# (c) Carl Schierig 2020
 # 
 # 
 */
@@ -18,7 +18,7 @@ namespace Penguor.Debugging
     /// <remarks>
     /// Logging levels are: Debug, Warn, Error
     /// </remarks>
-    public enum LogLevel : byte
+    internal enum LogLevel : byte
     {
         /// <summary>
         /// Info Level
@@ -39,9 +39,9 @@ namespace Penguor.Debugging
     }
 
     /// <summary>
-    /// Log something to a file in AppData
+    /// Log something
     /// </summary>
-    public static class Debug
+    internal static class Debug
     {
         private static FLogger fLogger;
         private static CLogger cLogger;
@@ -71,6 +71,7 @@ namespace Penguor.Debugging
         /// </summary>
         /// <param name="logText">The lines to log</param>
         /// <param name="logLevel">The loglevel</param>
+        [System.Obsolete("Currently not working")]
         public static void Log(string[] logText, LogLevel logLevel)
         {
             //fLogger.Log(logText, logLevel);
@@ -148,7 +149,7 @@ namespace Penguor.Debugging
                     level = LogLevel.Error;
                     break;
                 case 6:
-                    currentMessage = "[PGR-0006] Expecting \"system\", \"component\" or \"datatype\"";
+                    currentMessage = $"[PGR-0006] Expecting \"{arg0}\"";
                     level = LogLevel.Error;
                     break;
                 case 7:
@@ -158,7 +159,6 @@ namespace Penguor.Debugging
             }
             currentMessage += " " + GetSourcePosition(offset);
             Builder.ExitCode = message;
-
             Log(currentMessage, level);
         }
 

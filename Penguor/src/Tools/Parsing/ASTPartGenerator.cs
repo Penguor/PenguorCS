@@ -3,19 +3,18 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2019
+# (c) Carl Schierig 2020
 # 
 # 
 */
-
-#if(DEBUG)
 
 using System.IO;
 using System.Collections.Generic;
 
 namespace Penguor.Tools
 {
-    public class ASTPartGenerator
+    //! improve code, currently terrible
+    internal class ASTPartGenerator
     {
         StreamWriter writer;
         StreamReader reader;
@@ -311,4 +310,3 @@ namespace Penguor.Parsing.AST
         }
     }
 }
-#endif

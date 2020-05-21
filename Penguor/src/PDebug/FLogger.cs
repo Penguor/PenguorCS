@@ -18,7 +18,7 @@ namespace Penguor.Debugging
     /// The <c>Logger</c> class writes logs
     /// to the AppData/ApplicationName/logs folder
     /// </summary>
-    public class FLogger
+    internal class FLogger
     {
         // the writer for the log
         private StreamWriter writer;

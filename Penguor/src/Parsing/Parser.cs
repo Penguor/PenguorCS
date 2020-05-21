@@ -92,7 +92,7 @@ namespace Penguor.Parsing
             return new HeadStmt(definition, includeLhs, parent);
         }
 
-        private Stmt Declaration(LinkedList<Guid> parent)
+        private Stmt Declaration()
         {
             if (Match(TokenType.SYSTEM)) return SystemStmt(parent);
             if (Match(TokenType.CONTAINER)) return ComponentStmt(parent);
@@ -102,7 +102,7 @@ namespace Penguor.Parsing
             return Statement(parent);
         }
 
-        private Stmt SystemStmt(LinkedList<Guid> parent)
+        private Stmt SystemStmt()
         {
             Token name = Consume(TokenType.IDF, 6);
             parent.AddLast(new LinkedListNode<Guid>(AddId(name.token)));
@@ -117,7 +117,7 @@ namespace Penguor.Parsing
             return new SystemStmt(name, parentSystem, block, parent);
         }
 
-        private Stmt ComponentStmt(LinkedList<Guid> parent)
+        private Stmt ComponentStmt()
         {
             Token name = Consume(TokenType.IDF, 6);
             parent.AddLast(new LinkedListNode<Guid>(AddId(name.token)));
@@ -132,7 +132,7 @@ namespace Penguor.Parsing
             return new ComponentStmt(name, parentComponent, block, parent);
         }
 
-        private Stmt DataTypeStmt(LinkedList<Guid> parent)
+        private Stmt DataTypeStmt()
         {
             Token name = Consume(TokenType.IDF, 6);
             parent.AddLast(new LinkedListNode<Guid>(AddId(name.token)));
@@ -147,7 +147,7 @@ namespace Penguor.Parsing
             return new DataTypeStmt(name, parentType, block, parent);
         }
 
-        private Stmt Statement(LinkedList<Guid> parent)
+        private Stmt Statement()
         {
             if (Match(TokenType.LBRACE)) return BlockStmt(parent);
             if (Match(TokenType.IF)) return IfStmt(parent);
@@ -159,7 +159,7 @@ namespace Penguor.Parsing
             return ExprStmt(parent);
         }
 
-        private Stmt BlockStmt(LinkedList<Guid> parent)
+        private Stmt BlockStmt()
         {
             parent.AddLast(new LinkedListNode<Guid>(AddId()));
             List<Stmt> declarations = new List<Stmt>();
@@ -172,7 +172,7 @@ namespace Penguor.Parsing
             return new BlockStmt(declarations, parent);
         }
 
-        private Stmt IfStmt(LinkedList<Guid> parent)
+        private Stmt IfStmt()
         {
             parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LPAREN, 1);
@@ -189,7 +189,7 @@ namespace Penguor.Parsing
             return new IfStmt(condition, statements, parent);
         }
 
-        private Stmt WhileStmt(LinkedList<Guid> parent)
+        private Stmt WhileStmt()
         {
             parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LPAREN, 1);
@@ -206,7 +206,7 @@ namespace Penguor.Parsing
             return new WhileStmt(condition, statements, parent);
         }
 
-        private Stmt ForStmt(LinkedList<Guid> parent)
+        private Stmt ForStmt()
         {
             parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LPAREN, 1);
@@ -222,7 +222,7 @@ namespace Penguor.Parsing
             return new ForStmt(currentVar, vars, statements, parent);
         }
 
-        private Stmt DoStmt(LinkedList<Guid> parent)
+        private Stmt DoStmt()
         {
             parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LBRACE, 1);
@@ -238,7 +238,7 @@ namespace Penguor.Parsing
             return new DoStmt(statements, condition, parent);
         }
 
-        private Stmt SwitchStmt(LinkedList<Guid> parent)
+        private Stmt SwitchStmt()
         {
             parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LPAREN, 1);
@@ -255,9 +255,8 @@ namespace Penguor.Parsing
             return new SwitchStmt(condition, cases, parent);
         }
 
-        private Stmt CaseStmt(LinkedList<Guid> parent)
+        private Stmt CaseStmt()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Expr condition;
             if (GetPrevious().type == TokenType.CASE)
             {
@@ -278,19 +277,19 @@ namespace Penguor.Parsing
             return new CaseStmt(condition, statements, parent);
         }
 
-        private Stmt ExprStmt(LinkedList<Guid> parent)
+        private Stmt ExprStmt()
         {
             parent.AddLast(new LinkedListNode<Guid>(AddId()));
 
             Expr expression = Expression(parent);
-            Consume(TokenType.SEMICOLON, 7, ';');
+            Consume(TokenType.SEMICOLON, 7);
 
             return new ExprStmt(expression, parent);
         }
 
-        private Expr Expression(LinkedList<Guid> parent) => AssignExpr(parent);
+        private Expr Expression() => AssignExpr(parent);
 
-        private Expr AssignExpr(LinkedList<Guid> parent)
+        private Expr AssignExpr()
         {
             Expr lhs = OrExpr(parent);
 
@@ -429,7 +428,8 @@ namespace Penguor.Parsing
             if (Check(TokenType.LPAREN))
             {
                 rhs = GroupingExpr(parent);
-                return new UnaryExpr(TokenType.OTHER, rhs, parent);
+                //TODO: fix this mess
+                return new UnaryExpr(TokenType.EOF, rhs, parent); //! this will error later on
             }
             return CallExpr(parent);
         }
@@ -569,12 +569,13 @@ namespace Penguor.Parsing
         /// </summary>
         /// <param name="type">the type to compare the current token to</param>
         /// <param name="msgNumber">the debug message to cast if token doesn't match</param>
-        /// <param name="expected">the expected char for error message</param>
         /// <returns></returns>
-        private Token Consume(TokenType type, ushort msgNumber, char expected = ' ')
+        private Token Consume(TokenType type, ushort msgNumber)
         {
             if (Check(type)) return Advance();
-            throw new PenguorException(msgNumber, GetCurrent().offset, expected);
+            Debug.CastPGR(6, GetCurrent().offset, TTypePrettyString(type));
+            var tmp = Advance();
+            return new Token(type, "", tmp.offset, tmp.length);
         }
 
         /// <summary>
@@ -620,6 +621,91 @@ namespace Penguor.Parsing
         {
             if (tokens[current].type == TokenType.EOF) return true;
             else return false;
+        }
+
+        private string TTypePrettyString(TokenType type)
+        {
+            switch (type)
+            {
+                case TokenType.HASHTAG: return "#";
+                case TokenType.FROM: return "from";
+                case TokenType.INCLUDE: return "include";
+                case TokenType.SAFETY: return "safety";
+                case TokenType.PUBLIC: return "public";
+                case TokenType.PRIVATE: return "private";
+                case TokenType.PROTECTED: return "protected";
+                case TokenType.RESTRICTED: return "restricted";
+                case TokenType.STATIC: return "static";
+                case TokenType.DYNAMIC: return "dynamic";
+                case TokenType.ABSTRACT: return "abstract";
+                case TokenType.CONST: return "const";
+                case TokenType.LPAREN: return "(";
+                case TokenType.RPAREN: return ")";
+                case TokenType.LBRACE: return "{";
+                case TokenType.RBRACE: return "}";
+                case TokenType.LBRACK: return "[";
+                case TokenType.RBRACK: return "]";
+                case TokenType.PLUS: return "+";
+                case TokenType.MINUS: return "-";
+                case TokenType.MUL: return "*";
+                case TokenType.DIV: return "/";
+                case TokenType.PERCENT: return "%";
+                case TokenType.DPLUS: return "++";
+                case TokenType.DMINUS: return "--";
+                case TokenType.GREATER: return ">";
+                case TokenType.LESS: return "<";
+                case TokenType.GREATER_EQUALS: return ">=";
+                case TokenType.LESS_EQUALS: return "<=";
+                case TokenType.EQUALS: return "==";
+                case TokenType.NEQUALS: return "!=";
+                case TokenType.AND: return "&&";
+                case TokenType.OR: return "||";
+                case TokenType.XOR: return "^^";
+                case TokenType.BW_AND: return "&";
+                case TokenType.BW_OR: return "|";
+                case TokenType.BW_XOR: return "^";
+                case TokenType.BW_NOT: return "~";
+                case TokenType.BS_LEFT: return "<<";
+                case TokenType.BS_RIGHT: return ">>";
+                case TokenType.ASSIGN: return "=";
+                case TokenType.ADD_ASSIGN: return "+=";
+                case TokenType.SUB_ASSIGN: return "-=";
+                case TokenType.MUL_ASSIGN: return "*=";
+                case TokenType.DIV_ASSIGN: return "/=";
+                case TokenType.PERCENT_ASSIGN: return "%=";
+                case TokenType.BW_AND_ASSIGN: return "&=";
+                case TokenType.BW_OR_ASSIGN: return "|=";
+                case TokenType.BW_XOR_ASSIGN: return "^=";
+                case TokenType.BS_LEFT_ASSIGN: return "<<=";
+                case TokenType.BS_RIGHT_ASSIGN: return ">>=";
+                case TokenType.NULL: return "null";
+                case TokenType.COLON: return ":";
+                case TokenType.SEMICOLON: return ";";
+                case TokenType.DOT: return ".";
+                case TokenType.COMMA: return ",";
+                case TokenType.EXCL_MARK: return "!";
+                case TokenType.NUM: return "number";
+                case TokenType.STRING: return "string";
+                case TokenType.IDF: return "identifier";
+                case TokenType.TRUE: return "true";
+                case TokenType.FALSE: return "false";
+                case TokenType.CONTAINER: return "container";
+                case TokenType.SYSTEM: return "system";
+                case TokenType.DATATYPE: return "datatype";
+                case TokenType.LIBRARY: return "library";
+                case TokenType.IF: return "if";
+                case TokenType.ELIF: return "elif";
+                case TokenType.ELSE: return "else";
+                case TokenType.FOR: return "for";
+                case TokenType.WHILE: return "while";
+                case TokenType.DO: return "do";
+                case TokenType.SWITCH: return "switch";
+                case TokenType.CASE: return "case";
+                case TokenType.DEFAULT: return "default";
+                case TokenType.EOF: return "end of file";
+                default:
+                    throw new ArgumentException();
+            }
         }
     }
 }
