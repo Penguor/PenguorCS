@@ -26,6 +26,7 @@ namespace Penguor.Tools
             reader = new StreamReader(file);
             string mode = null;
             string folder = null;
+            string line = null;
             while (!reader.EndOfStream)
             {
                 Advance();
@@ -44,8 +45,8 @@ namespace Penguor.Tools
 
                     case "groupHead":
                         tmp = "";
-                        while (!Match('"')) Advance();
-                        while (!Match('"'))
+                        while (char.IsWhiteSpace(current)) Advance();
+                        while (!char.IsWhiteSpace(current))
                         {
                             tmp += current;
                             Advance();
@@ -65,15 +66,15 @@ namespace Penguor.Tools
                         name = "";
                         types = new List<string>();
                         names = new List<string>();
-                        while (!Match('"')) Advance();
-                        while (!Match('"'))
+                        while (char.IsWhiteSpace(current)) Advance();
+                        while (!char.IsWhiteSpace(current)) Advance();
                         {
                             name += current;
                             Advance();
                         }
-                        while (!Match('\n') && !Match('\r'))
+                        while (!Match('\n') && (!Match('\r') && !Match('\n')))
                         {
-                            while (!Match('"')) Advance();
+                            while (char.IsWhiteSpace(current)) Advance();
                             while (!Match('"'))
                             {
                                 tmp += current;

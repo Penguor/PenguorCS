@@ -48,14 +48,11 @@ namespace Penguor.Parsing
             string library;
             Stmt head = HeadStmt(out library);
 
-            LinkedList<Guid> parent = new LinkedList<Guid>();
-            parent.AddLast(new LinkedListNode<Guid>(AddId(library)));
-
             List<Stmt> declarations = new List<Stmt>();
 
-            while (!Match(TokenType.EOF)) declarations.Add(Declaration(parent));
+            while (!Match(TokenType.EOF)) declarations.Add(Declaration());
 
-            return new ProgramStmt(head, declarations, parent);
+            return new ProgramStmt(head, declarations, null);
         }
 
         // todo: implement form ... include ...
@@ -65,7 +62,6 @@ namespace Penguor.Parsing
         /// <returns>An AST of the program head</returns>
         private Stmt HeadStmt(out string library)
         {
-            LinkedList<Guid> parent = new LinkedList<Guid>();
             Dictionary<string, string> definition = new Dictionary<string, string>();
 
             while (!Check(TokenType.INCLUDE))
@@ -85,174 +81,166 @@ namespace Penguor.Parsing
             while (!Match(TokenType.HASHTAG))
             {
                 Consume(TokenType.INCLUDE, 1);
-                includeLhs.Add(CallExpr(parent));
+                includeLhs.Add(CallExpr());
                 Consume(TokenType.SEMICOLON, 1);
             }
 
-            return new HeadStmt(definition, includeLhs, parent);
+            return new HeadStmt(definition, includeLhs, null);
         }
 
         private Stmt Declaration()
         {
-            if (Match(TokenType.SYSTEM)) return SystemStmt(parent);
-            if (Match(TokenType.CONTAINER)) return ComponentStmt(parent);
-            if (Match(TokenType.DATATYPE)) return DataTypeStmt(parent);
-            if (Match(TokenType.IDF)) return VarStmt(parent);
-            if (Match(TokenType.IDF)) return FunctionStmt(parent);
-            return Statement(parent);
+            if (Match(TokenType.SYSTEM)) return SystemStmt();
+            if (Match(TokenType.CONTAINER)) return ComponentStmt();
+            if (Match(TokenType.DATATYPE)) return DataTypeStmt();
+            if (Match(TokenType.IDF)) return VarStmt();
+            if (Match(TokenType.IDF)) return FunctionStmt();
+            return Statement();
         }
 
         private Stmt SystemStmt()
         {
             Token name = Consume(TokenType.IDF, 6);
-            parent.AddLast(new LinkedListNode<Guid>(AddId(name.token)));
 
             Token parentSystem = new Token();
             if (Match(TokenType.LESS)) parentSystem = Consume(TokenType.IDF, 1);
 
             Stmt block;
-            if (Match(TokenType.LBRACE)) block = BlockStmt(parent);
+            if (Match(TokenType.LBRACE)) block = BlockStmt();
             else block = null;
 
-            return new SystemStmt(name, parentSystem, block, parent);
+            return new SystemStmt(name, parentSystem, block, null);
         }
 
         private Stmt ComponentStmt()
         {
             Token name = Consume(TokenType.IDF, 6);
-            parent.AddLast(new LinkedListNode<Guid>(AddId(name.token)));
+
 
             Token parentComponent = new Token();
             if (Match(TokenType.LESS)) parentComponent = Consume(TokenType.IDF, 1);
 
             Stmt block;
-            if (Match(TokenType.LBRACE)) block = BlockStmt(parent);
+            if (Match(TokenType.LBRACE)) block = BlockStmt();
             else block = null;
 
-            return new ComponentStmt(name, parentComponent, block, parent);
+            return new ComponentStmt(name, parentComponent, block, null);
         }
 
         private Stmt DataTypeStmt()
         {
             Token name = Consume(TokenType.IDF, 6);
-            parent.AddLast(new LinkedListNode<Guid>(AddId(name.token)));
 
             Token parentType = new Token();
             if (Match(TokenType.LESS)) parentType = Consume(TokenType.IDF, 1);
 
             Stmt block;
-            if (Match(TokenType.LBRACE)) block = BlockStmt(parent);
+            if (Match(TokenType.LBRACE)) block = BlockStmt();
             else block = null;
 
-            return new DataTypeStmt(name, parentType, block, parent);
+            return new DataTypeStmt(name, parentType, block, null);
         }
 
         private Stmt Statement()
         {
-            if (Match(TokenType.LBRACE)) return BlockStmt(parent);
-            if (Match(TokenType.IF)) return IfStmt(parent);
-            if (Match(TokenType.WHILE)) return WhileStmt(parent);
-            if (Match(TokenType.FOR)) return ForStmt(parent);
-            if (Match(TokenType.DO)) return DoStmt(parent);
-            if (Match(TokenType.SWITCH)) return SwitchStmt(parent);
+            if (Match(TokenType.LBRACE)) return BlockStmt();
+            if (Match(TokenType.IF)) return IfStmt();
+            if (Match(TokenType.WHILE)) return WhileStmt();
+            if (Match(TokenType.FOR)) return ForStmt();
+            if (Match(TokenType.DO)) return DoStmt();
+            if (Match(TokenType.SWITCH)) return SwitchStmt();
 
-            return ExprStmt(parent);
+            return ExprStmt();
         }
 
         private Stmt BlockStmt()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
             List<Stmt> declarations = new List<Stmt>();
 
             while (!Match(TokenType.RBRACE))
             {
-                declarations.Add(Declaration(parent));
+                declarations.Add(Declaration());
             }
 
-            return new BlockStmt(declarations, parent);
+            return new BlockStmt(declarations, null);
         }
 
         private Stmt IfStmt()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LPAREN, 1);
-            Expr condition = Expression(parent);
+            Expr condition = Expression();
             Consume(TokenType.RPAREN, 1);
 
             List<Stmt> statements = new List<Stmt>();
             Consume(TokenType.LBRACE, 1);
             while (!Match(TokenType.RBRACE))
             {
-                statements.Add(Statement(parent));
+                statements.Add(Statement());
             }
 
-            return new IfStmt(condition, statements, parent);
+            return new IfStmt(condition, statements, null);
         }
 
         private Stmt WhileStmt()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LPAREN, 1);
-            Expr condition = Expression(parent);
+            Expr condition = Expression();
             Consume(TokenType.RPAREN, 1);
 
             List<Stmt> statements = new List<Stmt>();
             Consume(TokenType.LBRACE, 1);
             while (!Match(TokenType.RBRACE))
             {
-                statements.Add(Statement(parent));
+                statements.Add(Statement());
             }
 
-            return new WhileStmt(condition, statements, parent);
+            return new WhileStmt(condition, statements, null);
         }
 
         private Stmt ForStmt()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LPAREN, 1);
-            Stmt currentVar = VarStmt(parent);
+            Stmt currentVar = VarStmt();
             Consume(TokenType.COLON, 1);
-            Expr vars = VariableExpr(parent);
+            Expr vars = VariableExpr();
             Consume(TokenType.RPAREN, 1);
 
             List<Stmt> statements = new List<Stmt>();
             Consume(TokenType.LBRACE, 1);
-            while (!Match(TokenType.RBRACE)) statements.Add(Statement(parent));
+            while (!Match(TokenType.RBRACE)) statements.Add(Statement());
 
-            return new ForStmt(currentVar, vars, statements, parent);
+            return new ForStmt(currentVar, vars, statements, null);
         }
 
         private Stmt DoStmt()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LBRACE, 1);
 
             List<Stmt> statements = new List<Stmt>();
-            while (!Match(TokenType.RBRACE)) statements.Add(Statement(parent));
+            while (!Match(TokenType.RBRACE)) statements.Add(Statement());
 
             Consume(TokenType.WHILE, 1);
             Consume(TokenType.LPAREN, 1);
-            Expr condition = Expression(parent);
+            Expr condition = Expression();
             Consume(TokenType.RPAREN, 1);
 
-            return new DoStmt(statements, condition, parent);
+            return new DoStmt(statements, condition, null);
         }
 
         private Stmt SwitchStmt()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
             Consume(TokenType.LPAREN, 1);
-            Expr condition = VariableExpr(parent);
+            Expr condition = VariableExpr();
             Consume(TokenType.RPAREN, 1);
 
             List<Stmt> cases = new List<Stmt>();
             Consume(TokenType.RBRACE, 1);
             while (!Match(TokenType.RBRACE))
             {
-                if (Match(TokenType.CASE, TokenType.DEFAULT)) cases.Add(CaseStmt(parent));
+                if (Match(TokenType.CASE, TokenType.DEFAULT)) cases.Add(CaseStmt());
             }
 
-            return new SwitchStmt(condition, cases, parent);
+            return new SwitchStmt(condition, cases, null);
         }
 
         private Stmt CaseStmt()
@@ -261,7 +249,7 @@ namespace Penguor.Parsing
             if (GetPrevious().type == TokenType.CASE)
             {
                 Consume(TokenType.LPAREN, 1);
-                condition = VariableExpr(parent);
+                condition = VariableExpr();
                 Consume(TokenType.RPAREN, 1);
             }
             else condition = null;
@@ -271,146 +259,145 @@ namespace Penguor.Parsing
             List<Stmt> statements = new List<Stmt>();
             while (!Check(TokenType.CASE) && !Check(TokenType.DEFAULT))
             {
-                statements.Add(Statement(parent));
+                statements.Add(Statement());
             }
 
-            return new CaseStmt(condition, statements, parent);
+            return new CaseStmt(condition, statements, null);
         }
 
         private Stmt ExprStmt()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
 
-            Expr expression = Expression(parent);
+            Expr expression = Expression();
             Consume(TokenType.SEMICOLON, 7);
 
-            return new ExprStmt(expression, parent);
+            return new ExprStmt(expression, null);
         }
 
-        private Expr Expression() => AssignExpr(parent);
+        private Expr Expression() => AssignExpr();
 
         private Expr AssignExpr()
         {
-            Expr lhs = OrExpr(parent);
+            Expr lhs = OrExpr();
 
             if (Match(TokenType.ASSIGN))
             {
-                Expr rhs = AssignExpr(parent);
-                return new AssignExpr(lhs, rhs, parent);
+                Expr rhs = AssignExpr();
+                return new AssignExpr(lhs, rhs, null);
             }
 
             return lhs;
         }
 
-        private Expr OrExpr(LinkedList<Guid> parent)
+        private Expr OrExpr()
         {
-            Expr lhs = AndExpr(parent);
+            Expr lhs = AndExpr();
 
             if (Match(TokenType.OR))
             {
-                Expr rhs = AndExpr(parent);
-                return new BinaryExpr(lhs, TokenType.OR, rhs, parent);
+                Expr rhs = AndExpr();
+                return new BinaryExpr(lhs, TokenType.OR, rhs, null);
             }
 
             return lhs;
         }
 
-        private Expr AndExpr(LinkedList<Guid> parent)
+        private Expr AndExpr()
         {
-            Expr lhs = EqualityExpr(parent);
+            Expr lhs = EqualityExpr();
 
             if (Match(TokenType.AND))
             {
-                Expr rhs = EqualityExpr(parent);
-                return new BinaryExpr(lhs, TokenType.AND, rhs, parent);
+                Expr rhs = EqualityExpr();
+                return new BinaryExpr(lhs, TokenType.AND, rhs, null);
             }
 
             return lhs;
         }
 
-        private Expr EqualityExpr(LinkedList<Guid> parent)
+        private Expr EqualityExpr()
         {
-            Expr lhs = RelationExpr(parent);
+            Expr lhs = RelationExpr();
 
             if (Match(TokenType.EQUALS))
             {
-                Expr rhs = RelationExpr(parent);
-                return new BinaryExpr(lhs, TokenType.EQUALS, rhs, parent);
+                Expr rhs = RelationExpr();
+                return new BinaryExpr(lhs, TokenType.EQUALS, rhs, null);
             }
             else if (Match(TokenType.NEQUALS))
             {
-                Expr rhs = RelationExpr(parent);
-                return new BinaryExpr(lhs, TokenType.NEQUALS, rhs, parent);
+                Expr rhs = RelationExpr();
+                return new BinaryExpr(lhs, TokenType.NEQUALS, rhs, null);
             }
 
             return lhs;
         }
 
-        private Expr RelationExpr(LinkedList<Guid> parent)
+        private Expr RelationExpr()
         {
-            Expr lhs = AdditionExpr(parent);
+            Expr lhs = AdditionExpr();
 
             if (Match(TokenType.LESS))
             {
-                Expr rhs = AdditionExpr(parent);
-                return new BinaryExpr(lhs, TokenType.LESS, rhs, parent);
+                Expr rhs = AdditionExpr();
+                return new BinaryExpr(lhs, TokenType.LESS, rhs, null);
             }
             else if (Match(TokenType.LESS_EQUALS))
             {
-                Expr rhs = AdditionExpr(parent);
-                return new BinaryExpr(lhs, TokenType.LESS_EQUALS, rhs, parent);
+                Expr rhs = AdditionExpr();
+                return new BinaryExpr(lhs, TokenType.LESS_EQUALS, rhs, null);
             }
             else if (Match(TokenType.GREATER_EQUALS))
             {
-                Expr rhs = AdditionExpr(parent);
-                return new BinaryExpr(lhs, TokenType.GREATER_EQUALS, rhs, parent);
+                Expr rhs = AdditionExpr();
+                return new BinaryExpr(lhs, TokenType.GREATER_EQUALS, rhs, null);
             }
             else if (Match(TokenType.GREATER))
             {
-                Expr rhs = AdditionExpr(parent);
-                return new BinaryExpr(lhs, TokenType.GREATER, rhs, parent);
+                Expr rhs = AdditionExpr();
+                return new BinaryExpr(lhs, TokenType.GREATER, rhs, null);
             }
 
             return lhs;
         }
 
-        private Expr AdditionExpr(LinkedList<Guid> parent)
+        private Expr AdditionExpr()
         {
-            Expr lhs = MultiplicationExpr(parent);
+            Expr lhs = MultiplicationExpr();
 
             if (Match(TokenType.PLUS))
             {
-                Expr rhs = MultiplicationExpr(parent);
-                return new BinaryExpr(lhs, TokenType.PLUS, rhs, parent);
+                Expr rhs = MultiplicationExpr();
+                return new BinaryExpr(lhs, TokenType.PLUS, rhs, null);
             }
             else if (Match(TokenType.MINUS))
             {
-                Expr rhs = MultiplicationExpr(parent);
-                return new BinaryExpr(lhs, TokenType.MINUS, rhs, parent);
+                Expr rhs = MultiplicationExpr();
+                return new BinaryExpr(lhs, TokenType.MINUS, rhs, null);
             }
 
             return lhs;
         }
 
-        private Expr MultiplicationExpr(LinkedList<Guid> parent)
+        private Expr MultiplicationExpr()
         {
-            Expr lhs = UnaryExpr(parent);
+            Expr lhs = UnaryExpr();
 
             if (Match(TokenType.MUL))
             {
-                Expr rhs = UnaryExpr(parent);
-                return new BinaryExpr(lhs, TokenType.MUL, rhs, parent);
+                Expr rhs = UnaryExpr();
+                return new BinaryExpr(lhs, TokenType.MUL, rhs, null);
             }
             else if (Match(TokenType.DIV))
             {
-                Expr rhs = UnaryExpr(parent);
-                return new BinaryExpr(lhs, TokenType.DIV, rhs, parent);
+                Expr rhs = UnaryExpr();
+                return new BinaryExpr(lhs, TokenType.DIV, rhs, null);
             }
 
             return lhs;
         }
 
-        private Expr UnaryExpr(LinkedList<Guid> parent)
+        private Expr UnaryExpr()
         {
             Expr rhs;
             if (Match(TokenType.EXCL_MARK, TokenType.MINUS))
@@ -419,132 +406,101 @@ namespace Penguor.Parsing
 
                 if (Check(TokenType.LPAREN))
                 {
-                    rhs = GroupingExpr(parent);
-                    return new UnaryExpr(op, rhs, parent);
+                    rhs = GroupingExpr();
+                    return new UnaryExpr(op, rhs, null);
                 }
-                rhs = UnaryExpr(parent);
-                return new UnaryExpr(op, rhs, parent);
+                rhs = UnaryExpr();
+                return new UnaryExpr(op, rhs, null);
             }
             if (Check(TokenType.LPAREN))
             {
-                rhs = GroupingExpr(parent);
+                rhs = GroupingExpr();
                 //TODO: fix this mess
-                return new UnaryExpr(TokenType.EOF, rhs, parent); //! this will error later on
+                return new UnaryExpr(TokenType.EOF, rhs, null); //! this will error later on
             }
-            return CallExpr(parent);
+            return CallExpr();
         }
 
-        private Expr CallExpr(LinkedList<Guid> parent)
+        private Expr CallExpr()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
-            Expr expr = BaseExpr(parent);
+            Expr expr = BaseExpr();
             List<Expr> arguments = new List<Expr>();
 
             while (true)
             {
                 if (Match(TokenType.LPAREN))
                 {
-                    if (Match(TokenType.RPAREN)) return new CallExpr(expr, arguments, parent);
+                    if (Match(TokenType.RPAREN)) return new CallExpr(expr, arguments, null);
                     while (true)
                     {
-                        arguments.Add(Expression(parent));
+                        arguments.Add(Expression());
                         if (!Match(TokenType.RPAREN)) Consume(TokenType.COMMA, 1);
                         else break;
                     }
                 }
                 else if (Match(TokenType.DOT))
                 {
-                    parent.AddLast(new LinkedListNode<Guid>(AddId(Consume(TokenType.IDF, 1).token)));
                 }
                 else break;
             }
 
-            return new CallExpr(expr, arguments, parent);
+            return new CallExpr(expr, arguments, null);
         }
 
-        private Expr BaseExpr(LinkedList<Guid> parent)
+        private Expr BaseExpr()
         {
-            parent.AddLast(new LinkedListNode<Guid>(AddId()));
-
-            if (Match(TokenType.NUM)) return new NumExpr(Convert.ToDouble(GetPrevious().token), parent);
-            else if (Match(TokenType.STRING)) return new StringExpr(GetPrevious().token, parent);
-            else if (Match(TokenType.TRUE, TokenType.FALSE)) return new BooleanExpr(Convert.ToBoolean(GetPrevious().token), parent);
-            else if (Match(TokenType.NULL)) return new NullExpr(parent);
-            else if (Match(TokenType.IDF)) return new IdentifierExpr(GetPrevious().type, parent);
+            if (Match(TokenType.NUM)) return new NumExpr(Convert.ToDouble(GetPrevious().token), null);
+            else if (Match(TokenType.STRING)) return new StringExpr(GetPrevious().token, null);
+            else if (Match(TokenType.TRUE, TokenType.FALSE)) return new BooleanExpr(Convert.ToBoolean(GetPrevious().token), null);
+            else if (Match(TokenType.NULL)) return new NullExpr(null);
+            else if (Match(TokenType.IDF)) return new IdentifierExpr(GetPrevious().type, null);
 
             throw new PenguorException(1, GetCurrent().offset);
         }
 
-        private Expr GroupingExpr(LinkedList<Guid> parent)
+        private Expr GroupingExpr()
         {
             Consume(TokenType.LPAREN, 1);
-            Expr expr = Expression(parent);
+            Expr expr = Expression();
             Consume(TokenType.RPAREN, 1);
 
             return expr;
         }
 
-        private Expr VariableExpr(LinkedList<Guid> parent)
+        private Expr VariableExpr()
         {
-            return CallExpr(parent);
+            return CallExpr();
         }
 
-        private Stmt VarStmt(LinkedList<Guid> parent)
+        private Stmt VarStmt()
         {
             Token type = Consume(TokenType.IDF, 7);
             Token name = Consume(TokenType.IDF, 7);
-            parent.AddLast(new LinkedListNode<Guid>(AddId(name.token)));
 
             Expr rhs = null;
-            if (Match(TokenType.ASSIGN)) rhs = Expression(parent);
+            if (Match(TokenType.ASSIGN)) rhs = Expression();
             Consume(TokenType.SEMICOLON, 1);
 
-            return new VarStmt(type, name, rhs, parent);
+            return new VarStmt(type, name, rhs, null);
         }
 
-        private Stmt FunctionStmt(LinkedList<Guid> parent)
+        private Stmt FunctionStmt()
         {
             List<Expr> arguments = new List<Expr>();
             Token returns = Consume(TokenType.IDF, 1);
             Token name = Consume(TokenType.IDF, 1);
-            parent.AddLast(new LinkedListNode<Guid>(AddId(name.token)));
 
             Consume(TokenType.LPAREN, 1);
             List<Stmt> parameters = new List<Stmt>();
-            if (Match(TokenType.RPAREN)) return new FunctionStmt(returns, name, parameters, parent);
+            if (Match(TokenType.RPAREN)) return new FunctionStmt(returns, name, parameters, null);
             while (true)
             {
-                parameters.Add(VarStmt(parent));
+                parameters.Add(VarStmt());
                 if (!Match(TokenType.RPAREN)) Consume(TokenType.COMMA, 1);
                 else break;
             }
-            return new FunctionStmt(returns, name, parameters, parent);
+            return new FunctionStmt(returns, name, parameters, null);
         }
-
-
-        private Guid AddId(string name = "")
-        {
-        Start:
-            Guid newId = new Guid();
-            foreach (id item in idList)
-            {
-                if (item.Value == name && name != "") return item.Key;
-                if (item.Key == newId) goto Start;
-            }
-            idList.Add(new id(newId, name));
-
-            return newId;
-        }
-
-        private Guid GetId(string name)
-        {
-            foreach (id item in idList)
-            {
-                if (item.Value == name) return item.Key;
-            }
-            throw new PenguorException(1, GetCurrent().offset); // TODO: add own exception for "idf not found"
-        }
-
 
         /// <summary>
         /// <c>Match() </c> consumes a token if matching
