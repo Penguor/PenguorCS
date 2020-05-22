@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,18 +21,18 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of SwitchStmt
         /// </summary>
-        public SwitchStmt(Expr condition, List<Stmt> cases, LinkedList<Guid> id)
+        public SwitchStmt(Expr condition, List<Stmt> cases, List<Stmt> defaultcase)
         {
             Condition = condition;
             Cases = cases;
-            Id = id;
+            DefaultCase = defaultcase;
         }
         /// <summary></summary>
         public Expr Condition { get; private set; }
         /// <summary></summary>
         public List<Stmt> Cases { get; private set; }
         /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
+        public List<Stmt> DefaultCase { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

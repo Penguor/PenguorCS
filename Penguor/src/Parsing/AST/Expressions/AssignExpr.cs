@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,18 +21,15 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of AssignExpr
         /// </summary>
-        public AssignExpr(Expr name, Expr value, LinkedList<Guid> id)
+        public AssignExpr(Expr lhs, Expr value)
         {
-            Name = name;
+            Lhs = lhs;
             Value = value;
-            Id = id;
         }
         /// <summary></summary>
-        public Expr Name { get; private set; }
+        public Expr Lhs { get; private set; }
         /// <summary></summary>
         public Expr Value { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

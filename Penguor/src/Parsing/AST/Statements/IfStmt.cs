@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,18 +21,18 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of IfStmt
         /// </summary>
-        public IfStmt(Expr condition, List<Stmt> statements, LinkedList<Guid> id)
+        public IfStmt(Expr condition, List<Stmt> elif, List<Stmt> elsec)
         {
             Condition = condition;
-            Statements = statements;
-            Id = id;
+            Elif = elif;
+            ElseC = elsec;
         }
         /// <summary></summary>
         public Expr Condition { get; private set; }
         /// <summary></summary>
-        public List<Stmt> Statements { get; private set; }
+        public List<Stmt> Elif { get; private set; }
         /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
+        public List<Stmt> ElseC { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

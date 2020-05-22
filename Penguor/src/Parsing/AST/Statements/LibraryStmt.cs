@@ -9,34 +9,27 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A VarStmt expression
+    /// A LibraryStmt expression
     /// </summary>
-    public sealed class VarStmt : Stmt
+    public sealed class LibraryStmt : Stmt
     {
         /// <summary>
-        /// creates a new instance of VarStmt
+        /// creates a new instance of LibraryStmt
         /// </summary>
-        public VarStmt(Token type, Token name, Expr rhs, LinkedList<Guid> id)
+        public LibraryStmt(Token name, Stmt content)
         {
-            Type = type;
             Name = name;
-            Rhs = rhs;
-            Id = id;
+            Content = content;
         }
-        /// <summary></summary>
-        public Token Type { get; private set; }
         /// <summary></summary>
         public Token Name { get; private set; }
         /// <summary></summary>
-        public Expr Rhs { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
+        public Stmt Content { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -55,9 +48,9 @@ namespace Penguor.Parsing.AST
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a VarStmt
+        /// visit a LibraryStmt
         /// </summary>
         /// <returns></returns>
-        string Visit(VarStmt stmt);
+        string Visit(LibraryStmt stmt);
     }
 }

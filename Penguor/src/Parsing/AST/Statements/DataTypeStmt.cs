@@ -9,34 +9,36 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A DataTypeStmt expression
+    /// A DatatypeStmt expression
     /// </summary>
-    public sealed class DataTypeStmt : Stmt
+    public sealed class DatatypeStmt : Stmt
     {
         /// <summary>
-        /// creates a new instance of DataTypeStmt
+        /// creates a new instance of DatatypeStmt
         /// </summary>
-        public DataTypeStmt(Token name, Token parent, Stmt content, LinkedList<Guid> id)
+        public DatatypeStmt(Token accessmod, Token[] nonaccessmod, Token name, Token parent, Stmt content)
         {
+            AccessMod = accessmod;
+            NonAccessMod = nonaccessmod;
             Name = name;
             Parent = parent;
             Content = content;
-            Id = id;
         }
+        /// <summary></summary>
+        public Token AccessMod { get; private set; }
+        /// <summary></summary>
+        public Token[] NonAccessMod { get; private set; }
         /// <summary></summary>
         public Token Name { get; private set; }
         /// <summary></summary>
         public Token Parent { get; private set; }
         /// <summary></summary>
         public Stmt Content { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -55,9 +57,9 @@ namespace Penguor.Parsing.AST
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a DataTypeStmt
+        /// visit a DatatypeStmt
         /// </summary>
         /// <returns></returns>
-        string Visit(DataTypeStmt stmt);
+        string Visit(DatatypeStmt stmt);
     }
 }

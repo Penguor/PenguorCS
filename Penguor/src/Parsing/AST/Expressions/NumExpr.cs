@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,15 +21,12 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of NumExpr
         /// </summary>
-        public NumExpr(double value, LinkedList<Guid> id)
+        public NumExpr(double value)
         {
             Value = value;
-            Id = id;
         }
         /// <summary></summary>
         public double Value { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

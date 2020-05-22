@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,18 +21,15 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of DoStmt
         /// </summary>
-        public DoStmt(List<Stmt> statements, Expr condition, LinkedList<Guid> id)
+        public DoStmt(List<Stmt> statements, Expr condition)
         {
             Statements = statements;
             Condition = condition;
-            Id = id;
         }
         /// <summary></summary>
         public List<Stmt> Statements { get; private set; }
         /// <summary></summary>
         public Expr Condition { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

@@ -9,31 +9,27 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A HeadStmt expression
+    /// A ElifStmt expression
     /// </summary>
-    public sealed class HeadStmt : Stmt
+    public sealed class ElifStmt : Stmt
     {
         /// <summary>
-        /// creates a new instance of HeadStmt
+        /// creates a new instance of ElifStmt
         /// </summary>
-        public HeadStmt(Dictionary<string, string> definition, List<Expr> includelhs, LinkedList<Guid> id)
+        public ElifStmt(Expr condition, List<Stmt> content)
         {
-            Definition = definition;
-            IncludeLhs = includelhs;
-            Id = id;
+            Condition = condition;
+            Content = content;
         }
         /// <summary></summary>
-        public Dictionary<string, string> Definition { get; private set; }
+        public Expr Condition { get; private set; }
         /// <summary></summary>
-        public List<Expr> IncludeLhs { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
+        public List<Stmt> Content { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -52,9 +48,9 @@ namespace Penguor.Parsing.AST
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a HeadStmt
+        /// visit a ElifStmt
         /// </summary>
         /// <returns></returns>
-        string Visit(HeadStmt stmt);
+        string Visit(ElifStmt stmt);
     }
 }

@@ -14,25 +14,31 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A ForStmt expression
+    /// A VarExpr expression
     /// </summary>
-    public sealed class ForStmt : Stmt
+    public sealed class VarExpr : Expr
     {
         /// <summary>
-        /// creates a new instance of ForStmt
+        /// creates a new instance of VarExpr
         /// </summary>
-        public ForStmt(Stmt currentvar, Expr vars, List<Stmt> statements)
+        public VarExpr(Token accessmod, Token[] nonaccessmod, Expr type, Token name, Expr init)
         {
-            CurrentVar = currentvar;
-            Vars = vars;
-            Statements = statements;
+            AccessMod = accessmod;
+            NonAccessMod = nonaccessmod;
+            Type = type;
+            Name = name;
+            Init = init;
         }
         /// <summary></summary>
-        public Stmt CurrentVar { get; private set; }
+        public Token AccessMod { get; private set; }
         /// <summary></summary>
-        public Expr Vars { get; private set; }
+        public Token[] NonAccessMod { get; private set; }
         /// <summary></summary>
-        public List<Stmt> Statements { get; private set; }
+        public Expr Type { get; private set; }
+        /// <summary></summary>
+        public Token Name { get; private set; }
+        /// <summary></summary>
+        public Expr Init { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -46,14 +52,14 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all statements
+    /// Contains methods to visit all expressions
     /// </summary>
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a ForStmt
+        /// visit a VarExpr
         /// </summary>
         /// <returns></returns>
-        string Visit(ForStmt stmt);
+        string Visit(VarExpr expr);
     }
 }

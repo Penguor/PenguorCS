@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,18 +21,12 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of ProgramStmt
         /// </summary>
-        public ProgramStmt(Stmt head, List<Stmt> declarations, LinkedList<Guid> id)
+        public ProgramStmt(List<Stmt> declarations)
         {
-            Head = head;
             Declarations = declarations;
-            Id = id;
         }
         /// <summary></summary>
-        public Stmt Head { get; private set; }
-        /// <summary></summary>
         public List<Stmt> Declarations { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

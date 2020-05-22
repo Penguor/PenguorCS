@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,21 +21,24 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of SystemStmt
         /// </summary>
-        public SystemStmt(Token name, Token parent, Stmt content, LinkedList<Guid> id)
+        public SystemStmt(Token accessmod, Token[] nonaccessmod, Token name, Token parent, Stmt content)
         {
+            AccessMod = accessmod;
+            NonAccessMod = nonaccessmod;
             Name = name;
             Parent = parent;
             Content = content;
-            Id = id;
         }
+        /// <summary></summary>
+        public Token AccessMod { get; private set; }
+        /// <summary></summary>
+        public Token[] NonAccessMod { get; private set; }
         /// <summary></summary>
         public Token Name { get; private set; }
         /// <summary></summary>
         public Token Parent { get; private set; }
         /// <summary></summary>
         public Stmt Content { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

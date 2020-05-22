@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,15 +21,12 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of IdentifierExpr
         /// </summary>
-        public IdentifierExpr(object value, LinkedList<Guid> id)
+        public IdentifierExpr(object value)
         {
             Value = value;
-            Id = id;
         }
         /// <summary></summary>
         public object Value { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

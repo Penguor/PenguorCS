@@ -14,25 +14,22 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A ForStmt expression
+    /// A PPStmt expression
     /// </summary>
-    public sealed class ForStmt : Stmt
+    public sealed class PPStmt : Stmt
     {
         /// <summary>
-        /// creates a new instance of ForStmt
+        /// creates a new instance of PPStmt
         /// </summary>
-        public ForStmt(Stmt currentvar, Expr vars, List<Stmt> statements)
+        public PPStmt(Token dir, object[] val)
         {
-            CurrentVar = currentvar;
-            Vars = vars;
-            Statements = statements;
+            Dir = dir;
+            Val = val;
         }
         /// <summary></summary>
-        public Stmt CurrentVar { get; private set; }
+        public Token Dir { get; private set; }
         /// <summary></summary>
-        public Expr Vars { get; private set; }
-        /// <summary></summary>
-        public List<Stmt> Statements { get; private set; }
+        public object[] Val { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -51,9 +48,9 @@ namespace Penguor.Parsing.AST
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a ForStmt
+        /// visit a PPStmt
         /// </summary>
         /// <returns></returns>
-        string Visit(ForStmt stmt);
+        string Visit(PPStmt stmt);
     }
 }

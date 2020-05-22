@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,12 +21,9 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of NullExpr
         /// </summary>
-        public NullExpr(LinkedList<Guid> id)
+        public NullExpr()
         {
-            Id = id;
         }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

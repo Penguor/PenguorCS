@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,15 +21,12 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of BlockStmt
         /// </summary>
-        public BlockStmt(List<Stmt> contents, LinkedList<Guid> id)
+        public BlockStmt(List<Stmt> content)
         {
-            Contents = contents;
-            Id = id;
+            Content = content;
         }
         /// <summary></summary>
-        public List<Stmt> Contents { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
+        public List<Stmt> Content { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

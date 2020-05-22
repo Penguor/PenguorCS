@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,18 +21,18 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of CallExpr
         /// </summary>
-        public CallExpr(Expr callee, List<Expr> args, LinkedList<Guid> id)
+        public CallExpr(List<Expr> callee, List<Expr> args, TokenType? postfix)
         {
             Callee = callee;
             Args = args;
-            Id = id;
+            Postfix = postfix;
         }
         /// <summary></summary>
-        public Expr Callee { get; private set; }
+        public List<Expr> Callee { get; private set; }
         /// <summary></summary>
         public List<Expr> Args { get; private set; }
         /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
+        public TokenType? Postfix { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

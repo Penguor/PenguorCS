@@ -38,11 +38,11 @@ namespace Penguor.Tools
 
                 string tmp = "";
                 string name = "";
+                int c = 0;
                 List<string> types = new List<string>();
                 List<string> names = new List<string>();
                 switch (mode)
                 {
-
                     case "groupHead":
                         tmp = "";
                         while (char.IsWhiteSpace(current)) Advance();
@@ -62,31 +62,35 @@ namespace Penguor.Tools
                         folder = tmp;
                         break;
                     case "Expr":
+                        c = 0;
                         tmp = "";
                         name = "";
                         types = new List<string>();
                         names = new List<string>();
                         while (char.IsWhiteSpace(current)) Advance();
-                        while (!char.IsWhiteSpace(current)) Advance();
+                        line = current + reader.ReadLine();
+                        do
                         {
-                            name += current;
-                            Advance();
+                            name += line[c];
+                            c++;
                         }
-                        while (!Match('\n') && (!Match('\r') && !Match('\n')))
+                        while (c < line.Length && !char.IsWhiteSpace(line[c]));
+
+                        while (c < line.Length)
                         {
-                            while (char.IsWhiteSpace(current)) Advance();
-                            while (!Match('"'))
+                            while (char.IsWhiteSpace(line[c])) c++;
+                            while (!char.IsWhiteSpace(line[c]))
                             {
-                                tmp += current;
-                                Advance();
+                                tmp += line[c];
+                                c++;
                             }
                             types.Add(tmp);
                             tmp = "";
-                            while (!Match('"')) Advance();
-                            while (!Match('"'))
+                            while (char.IsWhiteSpace(line[c])) c++;
+                            while (c < line.Length && !char.IsWhiteSpace(line[c]))
                             {
-                                tmp += current;
-                                Advance();
+                                tmp += line[c];
+                                c++;
                             }
                             names.Add(tmp);
                             tmp = "";
@@ -177,32 +181,38 @@ namespace Penguor.Parsing.AST
                         writer = null;
                         break;
                     case "Stmt":
+                        c = 0;
                         tmp = "";
                         name = "";
                         types = new List<string>();
                         names = new List<string>();
-                        while (!Match('"')) Advance();
-                        while (!Match('"'))
+                        while (char.IsWhiteSpace(current)) Advance();
+                        line = current + reader.ReadLine();
+                        do
                         {
-                            name += current;
-                            Advance();
+                            name += line[c];
+                            c++;
                         }
-                        while (!Match('\n') && !Match('\r'))
+                        while (!char.IsWhiteSpace(line[c]));
+
+                        while (c < line.Length)
                         {
-                            while (!Match('"')) Advance();
-                            while (!Match('"'))
+                            while (char.IsWhiteSpace(line[c])) c++;
+                            do
                             {
-                                tmp += current;
-                                Advance();
+                                tmp += line[c];
+                                c++;
                             }
+                            while (!char.IsWhiteSpace(line[c]));
                             types.Add(tmp);
                             tmp = "";
-                            while (!Match('"')) Advance();
-                            while (!Match('"'))
+                            while (char.IsWhiteSpace(line[c])) c++;
+                            do
                             {
-                                tmp += current;
-                                Advance();
+                                tmp += line[c];
+                                c++;
                             }
+                            while (c < line.Length && !char.IsWhiteSpace(line[c]));
                             names.Add(tmp);
                             tmp = "";
                         }

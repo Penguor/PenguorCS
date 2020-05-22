@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,18 +21,15 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of UnaryExpr
         /// </summary>
-        public UnaryExpr(TokenType op, Expr rhs, LinkedList<Guid> id)
+        public UnaryExpr(TokenType op, Expr rhs)
         {
             Op = op;
             Rhs = rhs;
-            Id = id;
         }
         /// <summary></summary>
         public TokenType Op { get; private set; }
         /// <summary></summary>
         public Expr Rhs { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

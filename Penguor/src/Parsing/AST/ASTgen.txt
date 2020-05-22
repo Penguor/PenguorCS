@@ -1,29 +1,32 @@
-; "Expr" "C:\Users\Schwe\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Expressions"
-"AssignExpr" "Expr" "name" "Expr" "value"
-"BinaryExpr" "Expr" "lhs" "TokenType" "op" "Expr" "rhs"
-"BooleanExpr" "bool" "value"
-"CallExpr" "Expr" "callee" "List<Expr>" "args"
-"EOFExpr"
-"GroupingExpr"
-"IdentifierExpr" "object" "value"
-"NullExpr"
-"NumExpr" "double" "value"
-"StringExpr" "string" "value"
-"UnaryExpr" "TokenType" "op" "Expr" "rhs"
-; "Stmt" "C:\Users\Schwe\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Statements"
-"SystemStmt" "Token" "name" "Token" "parent" "Stmt" "Content"
-"ContainerStmt" "Token" "name" "Token" "parent" "Stmt" "Content"
-"DataTypeStmt" "Token" "name" "Token" "parent" "Stmt" "Content"
-"VarStmt" "Token" "type" "Token" "name" "Expr" "rhs"
-"FunctionStmt" "Token" "returns" "Token" "name" "List<Stmt>" "parameters"
-"Library" "List<Stmt>" "contents"
-"BlockStmt" "List<Stmt>" "contents"
-"CaseStmt" "Expr" "condition" "List<Stmt>" "statements"
-"DoStmt" "List<Stmt>" "statements" "Expr" "condition"
-"ExprStmt" "Expr" "expr"
-"ForStmt" "Stmt" "currentVar" "Expr" "vars" "List<Stmt>" "statements"
-"HeadStmt" "Dictionary<string, string>" "definition" "List<Expr>" "includeLhs"
-"IfStmt" "Expr" "condition" "List<Stmt>" "statements"
-"ProgramStmt" "Stmt" "head" "List<Stmt>" "declarations"
-"SwitchStmt" "Expr" "condition" "List<Stmt>" "cases"
-"WhileStmt" "Expr" "condition" "List<Stmt>" "statements"
+; Expr "some path here"
+AssignExpr Expr lhs Expr value
+BinaryExpr Expr lhs TokenType op Expr rhs
+UnaryExpr TokenType op Expr rhs
+CallExpr List<Expr> callee List<Expr> args TokenType? postfix
+BooleanExpr bool value
+NullExpr
+GroupingExpr
+VarExpr Token accessMod Token[] nonAccessMod Expr type Token name Expr init
+IdentifierExpr object value
+NumExpr double value
+StringExpr string value
+EOFExpr
+; Stmt "some path here :)"
+ProgramStmt List<Stmt> declarations
+UsingStmt Expr lib
+SystemStmt Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
+ContainerStmt Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
+DatatypeStmt Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
+FunctionStmt Token accessMod Token[] nonAccessMod Token returns Token name List<Stmt> parameters
+LibraryStmt Token name Stmt content
+PPStmt Token dir object[] val
+BlockStmt List<Stmt> content
+IfStmt Expr condition List<Stmt> elif List<Stmt> elseC
+ElifStmt Expr condition List<Stmt> content
+CaseStmt Expr condition List<Stmt> statements
+WhileStmt Expr condition List<Stmt> statements
+DoStmt List<Stmt> statements Expr condition
+ForStmt Stmt currentVar Expr vars List<Stmt> statements
+SwitchStmt Expr condition List<Stmt> cases List<Stmt> defaultCase
+CaseStmt Expr condition List<Stmt> statements
+ExprStmt Expr expr

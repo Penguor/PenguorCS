@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,15 +21,12 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of ExprStmt
         /// </summary>
-        public ExprStmt(Expr expr, LinkedList<Guid> id)
+        public ExprStmt(Expr expr)
         {
             Expr = expr;
-            Id = id;
         }
         /// <summary></summary>
         public Expr Expr { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

@@ -9,7 +9,6 @@
 */
 
 using System.Collections.Generic;
-using System;
 
 namespace Penguor.Parsing.AST
 {
@@ -22,18 +21,15 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of WhileStmt
         /// </summary>
-        public WhileStmt(Expr condition, List<Stmt> statements, LinkedList<Guid> id)
+        public WhileStmt(Expr condition, List<Stmt> statements)
         {
             Condition = condition;
             Statements = statements;
-            Id = id;
         }
         /// <summary></summary>
         public Expr Condition { get; private set; }
         /// <summary></summary>
         public List<Stmt> Statements { get; private set; }
-        /// <summary></summary>
-        public LinkedList<Guid> Id { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
