@@ -61,7 +61,7 @@ namespace Penguor.Tools
                         }
                         folder = tmp;
                         break;
-                    case "Expr":
+                    default:
                         c = 0;
                         tmp = "";
                         name = "";
@@ -115,9 +115,9 @@ namespace Penguor.Parsing.AST
 {{
 
     /// <summary>
-    /// A {name.ToUppercase()} expression
+    /// A {name.ToUppercase()} {mode}
     /// </summary>
-    public sealed class {name.ToUppercase()} : Expr
+    public sealed class {name.ToUppercase()} : {mode}
     {{
         /// <summary>
         /// creates a new instance of {name.ToUppercase()}
@@ -164,7 +164,7 @@ namespace Penguor.Parsing.AST
     }}
 
     /// <summary>
-    /// Contains methods to visit all expressions
+    /// Contains methods to visit all {mode}
     /// </summary>
     public partial interface Visitor
     {{
@@ -172,7 +172,7 @@ namespace Penguor.Parsing.AST
         /// visit a {name.ToUppercase()}
         /// </summary>
         /// <returns></returns>
-        string Visit({name.ToUppercase()} expr);
+        string Visit({name.ToUppercase()} {mode.ToLower()});
     }}
 }}
 ");
@@ -180,127 +180,127 @@ namespace Penguor.Parsing.AST
                         writer.Close();
                         writer = null;
                         break;
-                    case "Stmt":
-                        c = 0;
-                        tmp = "";
-                        name = "";
-                        types = new List<string>();
-                        names = new List<string>();
-                        while (char.IsWhiteSpace(current)) Advance();
-                        line = current + reader.ReadLine();
-                        do
-                        {
-                            name += line[c];
-                            c++;
-                        }
-                        while (!char.IsWhiteSpace(line[c]));
+//                     case "Stmt":
+//                         c = 0;
+//                         tmp = "";
+//                         name = "";
+//                         types = new List<string>();
+//                         names = new List<string>();
+//                         while (char.IsWhiteSpace(current)) Advance();
+//                         line = current + reader.ReadLine();
+//                         do
+//                         {
+//                             name += line[c];
+//                             c++;
+//                         }
+//                         while (!char.IsWhiteSpace(line[c]));
 
-                        while (c < line.Length)
-                        {
-                            while (char.IsWhiteSpace(line[c])) c++;
-                            do
-                            {
-                                tmp += line[c];
-                                c++;
-                            }
-                            while (!char.IsWhiteSpace(line[c]));
-                            types.Add(tmp);
-                            tmp = "";
-                            while (char.IsWhiteSpace(line[c])) c++;
-                            do
-                            {
-                                tmp += line[c];
-                                c++;
-                            }
-                            while (c < line.Length && !char.IsWhiteSpace(line[c]));
-                            names.Add(tmp);
-                            tmp = "";
-                        }
-                        writer = new StreamWriter(Path.Combine(folder, name.ToUppercase()) + ".cs");
-                        writer.AutoFlush = true;
+//                         while (c < line.Length)
+//                         {
+//                             while (char.IsWhiteSpace(line[c])) c++;
+//                             do
+//                             {
+//                                 tmp += line[c];
+//                                 c++;
+//                             }
+//                             while (!char.IsWhiteSpace(line[c]));
+//                             types.Add(tmp);
+//                             tmp = "";
+//                             while (char.IsWhiteSpace(line[c])) c++;
+//                             do
+//                             {
+//                                 tmp += line[c];
+//                                 c++;
+//                             }
+//                             while (c < line.Length && !char.IsWhiteSpace(line[c]));
+//                             names.Add(tmp);
+//                             tmp = "";
+//                         }
+//                         writer = new StreamWriter(Path.Combine(folder, name.ToUppercase()) + ".cs");
+//                         writer.AutoFlush = true;
 
-                        writer.Write(
-$@"/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2020
-# 
-# 
-*/
+//                         writer.Write(
+// $@"/*
+// #
+// # PenguorCS Compiler
+// # ------------------
+// #
+// # (c) Carl Schierig 2020
+// # 
+// # 
+// */
 
-using System.Collections.Generic;
+// using System.Collections.Generic;
 
-namespace Penguor.Parsing.AST
-{{
+// namespace Penguor.Parsing.AST
+// {{
 
-    /// <summary>
-    /// A {name.ToUppercase()} expression
-    /// </summary>
-    public sealed class {name.ToUppercase()} : Stmt
-    {{
-        /// <summary>
-        /// creates a new instance of {name.ToUppercase()}
-        /// </summary>
-        public {name.ToUppercase()}(");
+//     /// <summary>
+//     /// A {name.ToUppercase()} statement
+//     /// </summary>
+//     public sealed class {name.ToUppercase()} : Stmt
+//     {{
+//         /// <summary>
+//         /// creates a new instance of {name.ToUppercase()}
+//         /// </summary>
+//         public {name.ToUppercase()}(");
 
-                        for (int i = 0; i < types.Count; i++)
-                        {
-                            writer.Write($"{types[i]} {names[i].ToLower()}");
-                            if (i < types.Count - 1) writer.Write(", ");
-                        }
+//                         for (int i = 0; i < types.Count; i++)
+//                         {
+//                             writer.Write($"{types[i]} {names[i].ToLower()}");
+//                             if (i < types.Count - 1) writer.Write(", ");
+//                         }
 
-                        writer.Write(
-            @")
-        {
-");
+//                         writer.Write(
+//             @")
+//         {
+// ");
 
-                        for (int i = 0; i < names.Count; i++)
-                        {
-                            writer.WriteLine($"            {names[i].ToUppercase()} = {names[i].ToLower()};");
-                        }
+//                         for (int i = 0; i < names.Count; i++)
+//                         {
+//                             writer.WriteLine($"            {names[i].ToUppercase()} = {names[i].ToLower()};");
+//                         }
 
-                        writer.Write(
-            @"        }
-");
+//                         writer.Write(
+//             @"        }
+// ");
 
-                        for (int i = 0; i < types.Count; i++)
-                        {
-                            writer.WriteLine($"        /// <summary></summary>");
-                            writer.WriteLine($"        public {types[i]} {names[i].ToUppercase()} {{ get; private set; }}");
-                        }
+//                         for (int i = 0; i < types.Count; i++)
+//                         {
+//                             writer.WriteLine($"        /// <summary></summary>");
+//                             writer.WriteLine($"        public {types[i]} {names[i].ToUppercase()} {{ get; private set; }}");
+//                         }
 
-                        writer.Write(
-            $@"
-        /// <summary>
-        /// returns Visit() of this instance
-        /// </summary>
-        /// <param name=""visitor"">the visitor which should visit this instance</param>
-        /// <returns>Visit() of this instance</returns>
-        public override string Accept(Visitor visitor)
-        {{
-            return visitor.Visit(this);
-        }}
-    }}
+//                         writer.Write(
+//             $@"
+//         /// <summary>
+//         /// returns Visit() of this instance
+//         /// </summary>
+//         /// <param name=""visitor"">the visitor which should visit this instance</param>
+//         /// <returns>Visit() of this instance</returns>
+//         public override string Accept(Visitor visitor)
+//         {{
+//             return visitor.Visit(this);
+//         }}
+//     }}
 
-    /// <summary>
-    /// Contains methods to visit all statements
-    /// </summary>
-    public partial interface Visitor
-    {{
-        /// <summary>
-        /// visit a {name.ToUppercase()}
-        /// </summary>
-        /// <returns></returns>
-        string Visit({name.ToUppercase()} stmt);
-    }}
-}}
-");
+//     /// <summary>
+//     /// Contains methods to visit all statements
+//     /// </summary>
+//     public partial interface Visitor
+//     {{
+//         /// <summary>
+//         /// visit a {name.ToUppercase()}
+//         /// </summary>
+//         /// <returns></returns>
+//         string Visit({name.ToUppercase()} stmt);
+//     }}
+// }}
+// ");
 
-                        writer.Close();
-                        writer = null;
-                        break;
+//                         writer.Close();
+//                         writer = null;
+//                         break;
                 }
             }
         }
@@ -320,4 +320,5 @@ namespace Penguor.Parsing.AST
             current = (char)reader.Read();
         }
     }
+
 }

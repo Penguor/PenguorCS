@@ -16,7 +16,7 @@
 
 namespace Penguor.Tools
 {
-    public static class StringExtensions
+    internal static class StringExtensions
     {
         public static string ToUppercase(this string input)
         {
