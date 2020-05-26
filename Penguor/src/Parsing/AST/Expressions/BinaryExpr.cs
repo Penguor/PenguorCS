@@ -14,7 +14,7 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A BinaryExpr expression
+    /// A BinaryExpr Expr
     /// </summary>
     public sealed class BinaryExpr : Expr
     {
@@ -46,7 +46,7 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all expressions
+    /// Contains methods to visit all Expr
     /// </summary>
     public partial interface Visitor
     {

@@ -14,7 +14,7 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A SwitchStmt expression
+    /// A SwitchStmt Stmt
     /// </summary>
     public sealed class SwitchStmt : Stmt
     {
@@ -46,7 +46,7 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all statements
+    /// Contains methods to visit all Stmt
     /// </summary>
     public partial interface Visitor
     {

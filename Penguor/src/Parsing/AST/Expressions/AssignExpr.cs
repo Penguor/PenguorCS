@@ -14,7 +14,7 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A AssignExpr expression
+    /// A AssignExpr Expr
     /// </summary>
     public sealed class AssignExpr : Expr
     {
@@ -43,7 +43,7 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all expressions
+    /// Contains methods to visit all Expr
     /// </summary>
     public partial interface Visitor
     {

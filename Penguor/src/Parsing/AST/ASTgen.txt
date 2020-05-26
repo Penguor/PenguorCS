@@ -1,4 +1,4 @@
-; Expr "some path here"
+; Expr "D:\Carl\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Expressions"
 AssignExpr Expr lhs Expr value
 BinaryExpr Expr lhs TokenType op Expr rhs
 UnaryExpr TokenType op Expr rhs
@@ -6,19 +6,13 @@ CallExpr List<Expr> callee List<Expr> args TokenType? postfix
 BooleanExpr bool value
 NullExpr
 GroupingExpr
-VarExpr Token accessMod Token[] nonAccessMod Expr type Token name Expr init
+VarExpr Expr type Token name
 IdentifierExpr object value
 NumExpr double value
 StringExpr string value
 EOFExpr
-; Stmt "some path here :)"
-ProgramStmt List<Stmt> declarations
-UsingStmt Expr lib
-SystemStmt Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
-ContainerStmt Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
-DatatypeStmt Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
+; Stmt "D:\Carl\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Statements"
 FunctionStmt Token accessMod Token[] nonAccessMod Token returns Token name List<Stmt> parameters
-LibraryStmt Token name Stmt content
 PPStmt Token dir object[] val
 BlockStmt List<Stmt> content
 IfStmt Expr condition List<Stmt> elif List<Stmt> elseC
@@ -30,3 +24,11 @@ ForStmt Stmt currentVar Expr vars List<Stmt> statements
 SwitchStmt Expr condition List<Stmt> cases List<Stmt> defaultCase
 CaseStmt Expr condition List<Stmt> statements
 ExprStmt Expr expr
+; Decl "D:\Carl\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Declarations"
+ProgramDecl List<Stmt> declarations
+UsingDecl Expr lib
+SystemDecl Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
+ContainerDecl Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
+DatatypeDecl Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
+LibraryDecl Token name Stmt content
+VarDecl Token type Token name

@@ -14,7 +14,7 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A CaseStmt expression
+    /// A CaseStmt Stmt
     /// </summary>
     public sealed class CaseStmt : Stmt
     {
@@ -43,7 +43,7 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all statements
+    /// Contains methods to visit all Stmt
     /// </summary>
     public partial interface Visitor
     {

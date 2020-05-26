@@ -14,14 +14,14 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A SystemStmt expression
+    /// A DatatypeDecl Decl
     /// </summary>
-    public sealed class SystemStmt : Stmt
+    public sealed class DatatypeDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of SystemStmt
+        /// creates a new instance of DatatypeDecl
         /// </summary>
-        public SystemStmt(Token accessmod, Token[] nonaccessmod, Token name, Token parent, Stmt content)
+        public DatatypeDecl(Token accessmod, Token[] nonaccessmod, Token name, Token parent, Stmt content)
         {
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
@@ -52,14 +52,14 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all statements
+    /// Contains methods to visit all Decl
     /// </summary>
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a SystemStmt
+        /// visit a DatatypeDecl
         /// </summary>
         /// <returns></returns>
-        string Visit(SystemStmt stmt);
+        string Visit(DatatypeDecl decl);
     }
 }

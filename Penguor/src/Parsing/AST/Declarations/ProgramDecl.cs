@@ -14,16 +14,19 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A EOFExpr Expr
+    /// A ProgramDecl Decl
     /// </summary>
-    public sealed class EOFExpr : Expr
+    public sealed class ProgramDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of EOFExpr
+        /// creates a new instance of ProgramDecl
         /// </summary>
-        public EOFExpr()
+        public ProgramDecl(List<Stmt> declarations)
         {
+            Declarations = declarations;
         }
+        /// <summary></summary>
+        public List<Stmt> Declarations { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -37,14 +40,14 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Expr
+    /// Contains methods to visit all Decl
     /// </summary>
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a EOFExpr
+        /// visit a ProgramDecl
         /// </summary>
         /// <returns></returns>
-        string Visit(EOFExpr expr);
+        string Visit(ProgramDecl decl);
     }
 }

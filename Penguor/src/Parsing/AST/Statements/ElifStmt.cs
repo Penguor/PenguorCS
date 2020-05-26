@@ -14,7 +14,7 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A ElifStmt expression
+    /// A ElifStmt Stmt
     /// </summary>
     public sealed class ElifStmt : Stmt
     {
@@ -43,7 +43,7 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all statements
+    /// Contains methods to visit all Stmt
     /// </summary>
     public partial interface Visitor
     {

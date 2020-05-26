@@ -14,7 +14,7 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A FunctionStmt expression
+    /// A FunctionStmt Stmt
     /// </summary>
     public sealed class FunctionStmt : Stmt
     {
@@ -52,7 +52,7 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all statements
+    /// Contains methods to visit all Stmt
     /// </summary>
     public partial interface Visitor
     {

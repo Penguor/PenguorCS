@@ -14,7 +14,7 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A NullExpr expression
+    /// A NullExpr Expr
     /// </summary>
     public sealed class NullExpr : Expr
     {
@@ -37,7 +37,7 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all expressions
+    /// Contains methods to visit all Expr
     /// </summary>
     public partial interface Visitor
     {

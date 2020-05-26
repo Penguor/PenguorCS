@@ -14,7 +14,7 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A BlockStmt expression
+    /// A BlockStmt Stmt
     /// </summary>
     public sealed class BlockStmt : Stmt
     {
@@ -40,7 +40,7 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all statements
+    /// Contains methods to visit all Stmt
     /// </summary>
     public partial interface Visitor
     {

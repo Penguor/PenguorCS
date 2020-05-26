@@ -14,19 +14,22 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A ProgramStmt expression
+    /// A VarDecl Decl
     /// </summary>
-    public sealed class ProgramStmt : Stmt
+    public sealed class VarDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of ProgramStmt
+        /// creates a new instance of VarDecl
         /// </summary>
-        public ProgramStmt(List<Stmt> declarations)
+        public VarDecl(Token type, Token name)
         {
-            Declarations = declarations;
+            Type = type;
+            Name = name;
         }
         /// <summary></summary>
-        public List<Stmt> Declarations { get; private set; }
+        public Token Type { get; private set; }
+        /// <summary></summary>
+        public Token Name { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -40,14 +43,14 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all statements
+    /// Contains methods to visit all Decl
     /// </summary>
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a ProgramStmt
+        /// visit a VarDecl
         /// </summary>
         /// <returns></returns>
-        string Visit(ProgramStmt stmt);
+        string Visit(VarDecl decl);
     }
 }

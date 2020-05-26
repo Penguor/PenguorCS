@@ -14,7 +14,7 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A BooleanExpr expression
+    /// A BooleanExpr Expr
     /// </summary>
     public sealed class BooleanExpr : Expr
     {
@@ -40,7 +40,7 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all expressions
+    /// Contains methods to visit all Expr
     /// </summary>
     public partial interface Visitor
     {

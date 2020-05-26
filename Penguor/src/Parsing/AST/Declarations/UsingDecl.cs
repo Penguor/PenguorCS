@@ -14,22 +14,19 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A LibraryStmt expression
+    /// A UsingDecl Decl
     /// </summary>
-    public sealed class LibraryStmt : Stmt
+    public sealed class UsingDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of LibraryStmt
+        /// creates a new instance of UsingDecl
         /// </summary>
-        public LibraryStmt(Token name, Stmt content)
+        public UsingDecl(Expr lib)
         {
-            Name = name;
-            Content = content;
+            Lib = lib;
         }
         /// <summary></summary>
-        public Token Name { get; private set; }
-        /// <summary></summary>
-        public Stmt Content { get; private set; }
+        public Expr Lib { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -43,14 +40,14 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all statements
+    /// Contains methods to visit all Decl
     /// </summary>
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a LibraryStmt
+        /// visit a UsingDecl
         /// </summary>
         /// <returns></returns>
-        string Visit(LibraryStmt stmt);
+        string Visit(UsingDecl decl);
     }
 }
