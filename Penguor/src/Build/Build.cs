@@ -14,42 +14,59 @@ using Penguor.Lexing;
 using Penguor.Parsing;
 using Penguor.Parsing.AST;
 
-namespace Penguor.Build {
-    public class Builder {
-        List<Token> tokens;
+//! Builder should maybe be static
+namespace Penguor.Build
+{
 
-        private Lexer lexer; // the lexer
-        private Parser parser;
-
-        public static int ExitCode = 0;
-        public static string ActiveFile { get; set; }
+    /// <summary>
+    /// This class handles the management for building a Penguor source file
+    /// </summary>
+    public class Builder
+    {
+        private static string? activeFile;
+        List<Token>? tokens;
 
         /// <summary>
-        /// Initialize a new Builder with the given values
+        /// The code the program exits with. If it isn't 0, an error has occurred
         /// </summary>
-        public Builder () {
-            lexer = new Lexer ();
+        public static int ExitCode = 0;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <value></value>
+        public static string ActiveFile
+        {
+            get
+            {
+                if (activeFile != null) return activeFile;
+                throw new PenguorCSException(9);
+            }
+            set => activeFile = value;
         }
 
         /// <summary>
         /// Build a program from a single file
         /// </summary>
         /// <param name="fileName">the source file to build from</param>
-        public void BuildFromSource (string fileName) {
-            Debugging.Debug.Log ("Building from source", LogLevel.Info);
-            // the tokens constructed by the Lexer
+        public void BuildFromSource(string fileName)
+        {
+            Debugging.Debug.Log("Building from source", LogLevel.Info);
 
             ActiveFile = fileName;
-            tokens = lexer.Tokenize (fileName);
+            Lexer lexer = new Lexer(fileName);
+            CheckExit();
+            tokens = lexer.Tokenize();
+            CheckExit();
 
-            if (ExitCode > 0) System.Environment.Exit (ExitCode);
+            Parser parser = new Parser(tokens);
+            CheckExit();
+            Decl program = parser.Parse();
+            CheckExit();
+        }
 
-            parser = new Parser (tokens);
-
-            Stmt program = parser.Parse ();
-            if (ExitCode > 0) System.Environment.Exit (ExitCode);
-
-            //     Library ilCode = iLGenerator.GenerateFromAST(program);
+        private void CheckExit()
+        {
+            if (ExitCode > 0) System.Environment.Exit(ExitCode);
         }
     }
 }

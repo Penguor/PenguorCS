@@ -27,7 +27,7 @@ namespace Penguor
             {
                 // print the Penguor info
                 Console.WriteLine("Penguor\n\n (c) 2020 Carl Schierig");
-                Debugging.Debug.Log("Penguor info displayed", LogLevel.Info);
+                Debug.Log("Penguor info displayed", LogLevel.Info);
             }
             else
             {
@@ -37,7 +37,7 @@ namespace Penguor
                     case "--help": // display help
                     case "-h":
                         {
-                            Debugging.Debug.Log("Printing help", LogLevel.Info);
+                            Debug.Log("Printing help", LogLevel.Info);
 
                             Console.WriteLine("\nPenguor help");
                             Console.WriteLine("------------\n");
@@ -45,7 +45,7 @@ namespace Penguor
                             Console.WriteLine("    --build");
                             Console.WriteLine("        <file>: Build a program from a single file");
 
-                            Debugging.Debug.Log("Printed help", LogLevel.Info);
+                            Debug.Log("Printed help", LogLevel.Info);
                             break;
                         }
                     case "-b":
@@ -66,6 +66,23 @@ namespace Penguor
                             }
                             break;
                         }
+                    // case "--lex": // build a program from source or Penguor project
+                    //     {
+                    //         Debug.Log("Penguor main: build started", LogLevel.Info);
+
+                    //         if (args.Length == 1)
+                    //         {
+                    //             Console.ForegroundColor = ConsoleColor.Yellow;
+                    //             Console.WriteLine("Usage: Penguor --build [script]");
+                    //             Console.ForegroundColor = ConsoleColor.White;
+                    //         }
+                    //         else if (args.Length == 2)
+                    //         {
+                    //             Lexing.Lexer l = new Lexing.Lexer();
+                    //             l.Tokenize(args[1]);
+                    //         }
+                    //         break;
+                    //     }
 #if (DEBUG)
                     case "--tools":
                         {
@@ -85,7 +102,7 @@ namespace Penguor
 #endif
                     default:
                         {
-                            Debugging.Debug.CastPGRCS(6, args[0]);
+                            Debug.CastPGRCS(6, args[0]);
                             goto case "-h";
                         }
                 }

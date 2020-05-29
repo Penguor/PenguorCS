@@ -12,9 +12,8 @@ NumExpr double value
 StringExpr string value
 EOFExpr
 ; Stmt "D:\Carl\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Statements"
-FunctionStmt Token accessMod Token[] nonAccessMod Token returns Token name List<Stmt> parameters
 PPStmt Token dir object[] val
-BlockStmt List<Stmt> content
+BlockStmt List<Decl> content
 IfStmt Expr condition List<Stmt> elif List<Stmt> elseC
 ElifStmt Expr condition List<Stmt> content
 CaseStmt Expr condition List<Stmt> statements
@@ -25,10 +24,12 @@ SwitchStmt Expr condition List<Stmt> cases List<Stmt> defaultCase
 CaseStmt Expr condition List<Stmt> statements
 ExprStmt Expr expr
 ; Decl "D:\Carl\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Declarations"
-ProgramDecl List<Stmt> declarations
+ProgramDecl List<Decl> declarations
 UsingDecl Expr lib
-SystemDecl Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
-ContainerDecl Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
-DatatypeDecl Token accessMod Token[] nonAccessMod Token name Token parent Stmt content
-LibraryDecl Token name Stmt content
-VarDecl Token type Token name
+SystemDecl Token? accessMod Token[]? nonAccessMod Token name Token? parent Stmt content
+ContainerDecl Token? accessMod Token[]? nonAccessMod Token name Token? parent Stmt content
+DatatypeDecl Token? accessMod Token[]? nonAccessMod Token name Token? parent Stmt content
+FunctionDecl Token? accessMod Token[]? nonAccessMod Expr variable List<Expr>? parameters
+LibraryDecl Token? accessMod Token[]? nonAccessMod Expr name Stmt content
+VarDecl Token? accessMod Token[]? nonAccessMod Expr variable Expr? init
+DeclStmt Stmt stmt

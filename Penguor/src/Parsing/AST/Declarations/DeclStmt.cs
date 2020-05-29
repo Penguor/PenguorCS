@@ -14,28 +14,19 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A VarDecl Decl
+    /// A DeclStmt Decl
     /// </summary>
-    public sealed class VarDecl : Decl
+    public sealed class DeclStmt : Decl
     {
         /// <summary>
-        /// creates a new instance of VarDecl
+        /// creates a new instance of DeclStmt
         /// </summary>
-        public VarDecl(Token? accessmod, Token[]? nonaccessmod, Expr variable, Expr? init)
+        public DeclStmt(Stmt stmt)
         {
-            AccessMod = accessmod;
-            NonAccessMod = nonaccessmod;
-            Variable = variable;
-            Init = init;
+            Stmt = stmt;
         }
         /// <summary></summary>
-        public Token? AccessMod { get; private set; }
-        /// <summary></summary>
-        public Token[]? NonAccessMod { get; private set; }
-        /// <summary></summary>
-        public Expr Variable { get; private set; }
-        /// <summary></summary>
-        public Expr? Init { get; private set; }
+        public Stmt Stmt { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -54,9 +45,9 @@ namespace Penguor.Parsing.AST
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a VarDecl
+        /// visit a DeclStmt
         /// </summary>
         /// <returns></returns>
-        string Visit(VarDecl decl);
+        string Visit(DeclStmt decl);
     }
 }

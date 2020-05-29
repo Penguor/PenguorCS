@@ -14,31 +14,28 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A FunctionStmt Stmt
+    /// A FunctionDecl Decl
     /// </summary>
-    public sealed class FunctionStmt : Stmt
+    public sealed class FunctionDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of FunctionStmt
+        /// creates a new instance of FunctionDecl
         /// </summary>
-        public FunctionStmt(Token accessmod, Token[] nonaccessmod, Token returns, Token name, List<Stmt> parameters)
+        public FunctionDecl(Token? accessmod, Token[]? nonaccessmod, Expr variable, List<Expr>? parameters)
         {
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
-            Returns = returns;
-            Name = name;
+            Variable = variable;
             Parameters = parameters;
         }
         /// <summary></summary>
-        public Token AccessMod { get; private set; }
+        public Token? AccessMod { get; private set; }
         /// <summary></summary>
-        public Token[] NonAccessMod { get; private set; }
+        public Token[]? NonAccessMod { get; private set; }
         /// <summary></summary>
-        public Token Returns { get; private set; }
+        public Expr Variable { get; private set; }
         /// <summary></summary>
-        public Token Name { get; private set; }
-        /// <summary></summary>
-        public List<Stmt> Parameters { get; private set; }
+        public List<Expr>? Parameters { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -52,14 +49,14 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Stmt
+    /// Contains methods to visit all Decl
     /// </summary>
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a FunctionStmt
+        /// visit a FunctionDecl
         /// </summary>
         /// <returns></returns>
-        string Visit(FunctionStmt stmt);
+        string Visit(FunctionDecl decl);
     }
 }

@@ -29,16 +29,13 @@ namespace Penguor.Lexing
         int current = 0;
         int offset = 0;
 
-
         /// <summary>
-        /// scans a text file and breaks it into tokens
+        /// create a new instance of the Lexer class
         /// </summary>
         /// <param name="filePath">the file to scan</param>
-        /// <returns>a list of tokens</returns>
-        public List<Token> Tokenize(string filePath)
+        public Lexer(string filePath)
         {
-            Debugging.Debug.Log("Starting Tokenize()", LogLevel.Info);
-            current = 0;
+            source = "";
             try
             {
                 using StreamReader reader = new StreamReader(filePath);
@@ -47,8 +44,17 @@ namespace Penguor.Lexing
             catch (FileNotFoundException)
             {
                 Debugging.Debug.CastPGR(5, 0, filePath);
-                return tokens;
             }
+        }
+
+        /// <summary>
+        /// scans a text file and breaks it into tokens
+        /// </summary>
+        /// <returns>a list of tokens</returns>
+        public List<Token> Tokenize()
+        {
+            Debugging.Debug.Log("Starting Tokenize()", LogLevel.Info);
+            current = 0;
 
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -68,6 +74,9 @@ namespace Penguor.Lexing
                     {
                         case "null":
                             AddToken(TokenType.NULL);
+                            break;
+                        case "using":
+                            AddToken(TokenType.USING);
                             break;
                         case "system":
                             AddToken(TokenType.SYSTEM);

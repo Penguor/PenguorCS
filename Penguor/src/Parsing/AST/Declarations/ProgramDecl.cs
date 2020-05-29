@@ -21,12 +21,12 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of ProgramDecl
         /// </summary>
-        public ProgramDecl(List<Stmt> declarations)
+        public ProgramDecl(List<Decl> declarations)
         {
             Declarations = declarations;
         }
         /// <summary></summary>
-        public List<Stmt> Declarations { get; private set; }
+        public List<Decl> Declarations { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

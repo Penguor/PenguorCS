@@ -41,6 +41,7 @@ namespace Penguor.Parsing
     , STRING
     , IDF
     , TRUE, FALSE
+    , USING
     , CONTAINER, SYSTEM, DATATYPE
     , LIBRARY
     , IF, ELIF, ELSE

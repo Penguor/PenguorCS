@@ -8,6 +8,7 @@
 # 
 */
 
+using Penguor.Debugging;
 using System.IO;
 using System.Collections.Generic;
 
@@ -16,17 +17,16 @@ namespace Penguor.Tools
     //! improve code, currently terrible
     internal class ASTPartGenerator
     {
-        StreamWriter writer;
-        StreamReader reader;
+        StreamReader? reader;
 
         char current;
 
         public void Generate(string file)
         {
             reader = new StreamReader(file);
-            string mode = null;
-            string folder = null;
-            string line = null;
+            string? mode = null;
+            string? folder = null;
+            string? line = null;
             while (!reader.EndOfStream)
             {
                 Advance();
@@ -95,11 +95,12 @@ namespace Penguor.Tools
                             names.Add(tmp);
                             tmp = "";
                         }
-                        writer = new StreamWriter(Path.Combine(folder, name.ToUppercase()) + ".cs");
-                        writer.AutoFlush = true;
+                        using (StreamWriter writer = new StreamWriter(Path.Combine(folder, name.ToUppercase()) + ".cs"))
+                        {
+                            writer.AutoFlush = true;
 
-                        writer.Write(
-$@"/*
+                            writer.Write(
+    $@"/*
 #
 # PenguorCS Compiler
 # ------------------
@@ -124,34 +125,34 @@ namespace Penguor.Parsing.AST
         /// </summary>
         public {name.ToUppercase()}(");
 
-                        for (int i = 0; i < types.Count; i++)
-                        {
-                            writer.Write($"{types[i]} {names[i].ToLower()}");
-                            if (i < types.Count - 1) writer.Write(", ");
-                        }
+                            for (int i = 0; i < types.Count; i++)
+                            {
+                                writer.Write($"{types[i]} {names[i].ToLower()}");
+                                if (i < types.Count - 1) writer.Write(", ");
+                            }
 
-                        writer.Write(
-            @")
+                            writer.Write(
+                @")
         {
 ");
 
-                        for (int i = 0; i < names.Count; i++)
-                        {
-                            writer.WriteLine($"            {names[i].ToUppercase()} = {names[i].ToLower()};");
-                        }
+                            for (int i = 0; i < names.Count; i++)
+                            {
+                                writer.WriteLine($"            {names[i].ToUppercase()} = {names[i].ToLower()};");
+                            }
 
-                        writer.Write(
-            @"        }
+                            writer.Write(
+                @"        }
 ");
 
-                        for (int i = 0; i < types.Count; i++)
-                        {
-                            writer.WriteLine($"        /// <summary></summary>");
-                            writer.WriteLine($"        public {types[i]} {names[i].ToUppercase()} {{ get; private set; }}");
-                        }
+                            for (int i = 0; i < types.Count; i++)
+                            {
+                                writer.WriteLine($"        /// <summary></summary>");
+                                writer.WriteLine($"        public {types[i]} {names[i].ToUppercase()} {{ get; private set; }}");
+                            }
 
-                        writer.Write(
-            $@"
+                            writer.Write(
+                $@"
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -176,9 +177,7 @@ namespace Penguor.Parsing.AST
     }}
 }}
 ");
-
-                        writer.Close();
-                        writer = null;
+                        }
                         break;
                 }
             }
@@ -196,7 +195,14 @@ namespace Penguor.Parsing.AST
 
         void Advance()
         {
-            current = (char)reader.Read();
+            try
+            {
+                current = (char)reader.Read();
+            }
+            catch (System.InvalidOperationException)
+            {
+                Debug.CastPGRCS();
+            }
         }
     }
 

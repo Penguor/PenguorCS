@@ -110,6 +110,14 @@ namespace Penguor.Debugging
                 case 7:
                     Log($"[PGRCS-0007] \"{arg0}\" expected.", LogLevel.Error);
                     break;
+                case 8:
+                    Log($"[PGRCS-0008] Parser.tokens equals null", LogLevel.Error);
+                    break;
+                case 9:
+                    Log($"[PGRCS-0009] trying to access active file, but there is none", LogLevel.Error);
+                    break;
+                default:
+                    throw new System.ArgumentOutOfRangeException("message", message, "This PGRCS message doesn't exist");
             }
         }
 
