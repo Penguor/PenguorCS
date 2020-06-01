@@ -16,6 +16,7 @@ namespace Penguor.Debugging
     {
         public void Log(string logText, LogLevel logLevel)
         {
+            var FGColor = Console.ForegroundColor;
             // writes the logging level in front of the actual text
             switch (logLevel)
             {
@@ -39,7 +40,7 @@ namespace Penguor.Debugging
                     break;
             }
             Console.WriteLine(logText); // the text that gets be logged
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = FGColor;
         }
     }
 }

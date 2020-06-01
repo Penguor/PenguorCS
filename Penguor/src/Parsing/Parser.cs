@@ -327,13 +327,13 @@ namespace Penguor.Parsing
             return lhs;
         }
 
-        private Expr CondOrExpr() => Match(OR) ? new AssignExpr(CondXorExpr(), OR, CondOrExpr()) : CondXorExpr();
-        private Expr CondXorExpr() => Match(XOR) ? new AssignExpr(CondAndExpr(), XOR, CondXorExpr()) : CondAndExpr();
-        private Expr CondAndExpr() => Match(OR) ? new AssignExpr(BWOrExpr(), AND, CondAndExpr()) : BWOrExpr();
+        private Expr CondOrExpr() => (lookAhead(1).type == OR) ? new AssignExpr(CondXorExpr(), Consume(OR).type, CondOrExpr()) : CondXorExpr();
+        private Expr CondXorExpr() => (lookAhead(1).type == XOR) ? new AssignExpr(CondAndExpr(), Consume(XOR).type, CondXorExpr()) : CondAndExpr();
+        private Expr CondAndExpr() => (lookAhead(1).type == AND) ? new AssignExpr(BWOrExpr(), Consume(AND).type, CondAndExpr()) : BWOrExpr();
 
-        private Expr BWOrExpr() => Match(BW_OR) ? new AssignExpr(BWXorExpr(), BW_OR, BWOrExpr()) : BWXorExpr();
-        private Expr BWXorExpr() => Match(BW_XOR) ? new AssignExpr(BWAndExpr(), BW_XOR, BWXorExpr()) : BWAndExpr();
-        private Expr BWAndExpr() => Match(BW_AND) ? new AssignExpr(EqualityExpr(), BW_AND, BWAndExpr()) : EqualityExpr();
+        private Expr BWOrExpr() => (lookAhead(1).type == BW_OR) ? new AssignExpr(BWXorExpr(), Consume(BW_OR).type, BWOrExpr()) : BWXorExpr();
+        private Expr BWXorExpr() => (lookAhead(1).type == BW_XOR) ? new AssignExpr(BWAndExpr(), Consume(BW_XOR).type, BWXorExpr()) : BWAndExpr();
+        private Expr BWAndExpr() => (lookAhead(1).type == BW_AND) ? new AssignExpr(EqualityExpr(), Consume(BW_AND).type, BWAndExpr()) : EqualityExpr();
 
         private Expr EqualityExpr()
         {

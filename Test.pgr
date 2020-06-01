@@ -1,7 +1,7 @@
 #safety 1
 
-#include Maths
-#include Hello
+using Math;
+using Hello;
 
 library ShowPenguor
 {
