@@ -1,8 +1,8 @@
-; Expr "D:\Carl\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Expressions"
-AssignExpr Expr lhs Expr value
+; Expr "Penguor\src\Parsing\AST\Expressions"
+AssignExpr Expr lhs TokenType op Expr value
 BinaryExpr Expr lhs TokenType op Expr rhs
-UnaryExpr TokenType op Expr rhs
-CallExpr List<Expr> callee List<Expr> args TokenType? postfix
+UnaryExpr TokenType? op Expr rhs
+CallExpr List<Call> callee TokenType? postfix
 BooleanExpr bool value
 NullExpr
 GroupingExpr
@@ -11,25 +11,28 @@ IdentifierExpr object value
 NumExpr double value
 StringExpr string value
 EOFExpr
-; Stmt "D:\Carl\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Statements"
-PPStmt Token dir object[] val
+; Stmt "Penguor\src\Parsing\AST\Statements"
+PPStmt TokenType dir Token[] val
 BlockStmt List<Decl> content
-IfStmt Expr condition List<Stmt> elif List<Stmt> elseC
+IfStmt Expr condition List<Stmt> statements List<Stmt> elif List<Stmt> elseC
 ElifStmt Expr condition List<Stmt> content
 CaseStmt Expr condition List<Stmt> statements
 WhileStmt Expr condition List<Stmt> statements
 DoStmt List<Stmt> statements Expr condition
-ForStmt Stmt currentVar Expr vars List<Stmt> statements
-SwitchStmt Expr condition List<Stmt> cases List<Stmt> defaultCase
-CaseStmt Expr condition List<Stmt> statements
+ForStmt Expr currentVar Expr vars List<Stmt> statements
+SwitchStmt Expr condition List<Stmt> cases Stmt? defaultCase
+CaseStmt Expr? condition List<Stmt> statements
 ExprStmt Expr expr
-; Decl "D:\Carl\source\repos\Penguor\PenguorCS\Penguor\src\Parsing\AST\Declarations"
+; Decl "Penguor\src\Parsing\AST\Declarations"
 ProgramDecl List<Decl> declarations
 UsingDecl Expr lib
-SystemDecl Token? accessMod Token[]? nonAccessMod Token name Token? parent Stmt content
-ContainerDecl Token? accessMod Token[]? nonAccessMod Token name Token? parent Stmt content
-DatatypeDecl Token? accessMod Token[]? nonAccessMod Token name Token? parent Stmt content
-FunctionDecl Token? accessMod Token[]? nonAccessMod Expr variable List<Expr>? parameters
-LibraryDecl Token? accessMod Token[]? nonAccessMod Expr name Stmt content
-VarDecl Token? accessMod Token[]? nonAccessMod Expr variable Expr? init
+SystemDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Stmt content
+ContainerDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Stmt content
+DatatypeDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Stmt content
+FunctionDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable List<Expr>? parameters
+LibraryDecl TokenType? accessMod TokenType[]? nonAccessMod Expr name Stmt content
+VarDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable Expr? init
 DeclStmt Stmt stmt
+; Call "Penguor\src\Parsing\AST\Calls"
+FunctionCall Token name List<Expr>? args
+IdfCall Token name

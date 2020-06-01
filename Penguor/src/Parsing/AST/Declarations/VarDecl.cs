@@ -21,7 +21,7 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of VarDecl
         /// </summary>
-        public VarDecl(Token? accessmod, Token[]? nonaccessmod, Expr variable, Expr? init)
+        public VarDecl(TokenType? accessmod, TokenType[]? nonaccessmod, Expr variable, Expr? init)
         {
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
@@ -29,9 +29,9 @@ namespace Penguor.Parsing.AST
             Init = init;
         }
         /// <summary></summary>
-        public Token? AccessMod { get; private set; }
+        public TokenType? AccessMod { get; private set; }
         /// <summary></summary>
-        public Token[]? NonAccessMod { get; private set; }
+        public TokenType[]? NonAccessMod { get; private set; }
         /// <summary></summary>
         public Expr Variable { get; private set; }
         /// <summary></summary>

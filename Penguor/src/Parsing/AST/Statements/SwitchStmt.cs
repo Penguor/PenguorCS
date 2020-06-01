@@ -21,7 +21,7 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of SwitchStmt
         /// </summary>
-        public SwitchStmt(Expr condition, List<Stmt> cases, List<Stmt> defaultcase)
+        public SwitchStmt(Expr condition, List<Stmt> cases, Stmt? defaultcase)
         {
             Condition = condition;
             Cases = cases;
@@ -32,7 +32,7 @@ namespace Penguor.Parsing.AST
         /// <summary></summary>
         public List<Stmt> Cases { get; private set; }
         /// <summary></summary>
-        public List<Stmt> DefaultCase { get; private set; }
+        public Stmt? DefaultCase { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

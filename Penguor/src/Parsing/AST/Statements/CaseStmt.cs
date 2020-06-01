@@ -21,13 +21,13 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of CaseStmt
         /// </summary>
-        public CaseStmt(Expr condition, List<Stmt> statements)
+        public CaseStmt(Expr? condition, List<Stmt> statements)
         {
             Condition = condition;
             Statements = statements;
         }
         /// <summary></summary>
-        public Expr Condition { get; private set; }
+        public Expr? Condition { get; private set; }
         /// <summary></summary>
         public List<Stmt> Statements { get; private set; }
 

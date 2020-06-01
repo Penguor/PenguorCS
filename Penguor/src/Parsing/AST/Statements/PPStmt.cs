@@ -21,15 +21,15 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of PPStmt
         /// </summary>
-        public PPStmt(Token dir, object[] val)
+        public PPStmt(TokenType dir, Token[] val)
         {
             Dir = dir;
             Val = val;
         }
         /// <summary></summary>
-        public Token Dir { get; private set; }
+        public TokenType Dir { get; private set; }
         /// <summary></summary>
-        public object[] Val { get; private set; }
+        public Token[] Val { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

@@ -21,13 +21,16 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of AssignExpr
         /// </summary>
-        public AssignExpr(Expr lhs, Expr value)
+        public AssignExpr(Expr lhs, TokenType op, Expr value)
         {
             Lhs = lhs;
+            Op = op;
             Value = value;
         }
         /// <summary></summary>
         public Expr Lhs { get; private set; }
+        /// <summary></summary>
+        public TokenType Op { get; private set; }
         /// <summary></summary>
         public Expr Value { get; private set; }
 

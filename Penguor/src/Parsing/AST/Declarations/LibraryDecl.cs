@@ -21,7 +21,7 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of LibraryDecl
         /// </summary>
-        public LibraryDecl(Token? accessmod, Token[]? nonaccessmod, Expr name, Stmt content)
+        public LibraryDecl(TokenType? accessmod, TokenType[]? nonaccessmod, Expr name, Stmt content)
         {
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
@@ -29,9 +29,9 @@ namespace Penguor.Parsing.AST
             Content = content;
         }
         /// <summary></summary>
-        public Token? AccessMod { get; private set; }
+        public TokenType? AccessMod { get; private set; }
         /// <summary></summary>
-        public Token[]? NonAccessMod { get; private set; }
+        public TokenType[]? NonAccessMod { get; private set; }
         /// <summary></summary>
         public Expr Name { get; private set; }
         /// <summary></summary>

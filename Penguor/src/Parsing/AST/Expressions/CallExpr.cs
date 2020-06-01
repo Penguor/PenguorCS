@@ -21,16 +21,13 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of CallExpr
         /// </summary>
-        public CallExpr(List<Expr> callee, List<Expr> args, TokenType? postfix)
+        public CallExpr(List<Call> callee, TokenType? postfix)
         {
             Callee = callee;
-            Args = args;
             Postfix = postfix;
         }
         /// <summary></summary>
-        public List<Expr> Callee { get; private set; }
-        /// <summary></summary>
-        public List<Expr> Args { get; private set; }
+        public List<Call> Callee { get; private set; }
         /// <summary></summary>
         public TokenType? Postfix { get; private set; }
 

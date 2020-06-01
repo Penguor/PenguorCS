@@ -14,31 +14,19 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A SystemDecl Decl
+    /// A IdfCall Call
     /// </summary>
-    public sealed class SystemDecl : Decl
+    public sealed class IdfCall : Call
     {
         /// <summary>
-        /// creates a new instance of SystemDecl
+        /// creates a new instance of IdfCall
         /// </summary>
-        public SystemDecl(TokenType? accessmod, TokenType[]? nonaccessmod, Token name, Token? parent, Stmt content)
+        public IdfCall(Token name)
         {
-            AccessMod = accessmod;
-            NonAccessMod = nonaccessmod;
             Name = name;
-            Parent = parent;
-            Content = content;
         }
         /// <summary></summary>
-        public TokenType? AccessMod { get; private set; }
-        /// <summary></summary>
-        public TokenType[]? NonAccessMod { get; private set; }
-        /// <summary></summary>
         public Token Name { get; private set; }
-        /// <summary></summary>
-        public Token? Parent { get; private set; }
-        /// <summary></summary>
-        public Stmt Content { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -52,14 +40,14 @@ namespace Penguor.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Decl
+    /// Contains methods to visit all Call
     /// </summary>
     public partial interface Visitor
     {
         /// <summary>
-        /// visit a SystemDecl
+        /// visit a IdfCall
         /// </summary>
         /// <returns></returns>
-        string Visit(SystemDecl decl);
+        string Visit(IdfCall call);
     }
 }

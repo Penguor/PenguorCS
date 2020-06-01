@@ -21,14 +21,14 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of ForStmt
         /// </summary>
-        public ForStmt(Stmt currentvar, Expr vars, List<Stmt> statements)
+        public ForStmt(Expr currentvar, Expr vars, List<Stmt> statements)
         {
             CurrentVar = currentvar;
             Vars = vars;
             Statements = statements;
         }
         /// <summary></summary>
-        public Stmt CurrentVar { get; private set; }
+        public Expr CurrentVar { get; private set; }
         /// <summary></summary>
         public Expr Vars { get; private set; }
         /// <summary></summary>

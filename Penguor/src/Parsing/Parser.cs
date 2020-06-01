@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using Penguor.Debugging;
 using Penguor.Parsing.AST;
+using static Penguor.Parsing.TokenType;
 
 namespace Penguor.Parsing
 {
@@ -39,59 +40,58 @@ namespace Penguor.Parsing
         public Decl Parse()
         {
             List<Decl> declarations = new List<Decl>();
-            while (!Match(TokenType.EOF)) declarations.Add(Declaration());
+            while (!Match(EOF)) declarations.Add(Declaration());
             return new ProgramDecl(declarations);
         }
 
         private Decl Declaration()
         {
-            Token? accessMod = null;
+            TokenType? accessMod = null;
             bool hasAccessMod = false;
-            Token[] nonAccessMods = new Token[3];
+            TokenType[] nonAccessMods = new TokenType[3];
 
-            TokenType[] accessMods = { TokenType.PUBLIC, TokenType.PRIVATE, TokenType.PROTECTED, TokenType.RESTRICTED };
-            if (Array.Exists(accessMods, tok => tok == GetCurrent().type))
+            if (Match(PUBLIC, PRIVATE, PROTECTED, RESTRICTED))
             {
-                accessMod = Advance();
+                accessMod = GetPrevious().type;
                 hasAccessMod = true;
             }
-            if (Check(TokenType.STATIC) != Check(TokenType.DYNAMIC))
+            if (Check(STATIC) != Check(DYNAMIC))
             {
-                nonAccessMods[0] = Advance();
+                nonAccessMods[0] = Advance().type;
                 hasAccessMod = true;
             }
-            if (Check(TokenType.ABSTRACT))
+            if (Check(ABSTRACT))
             {
-                nonAccessMods[1] = Advance();
+                nonAccessMods[1] = Advance().type;
                 hasAccessMod = true;
             }
-            if (Check(TokenType.CONST))
+            if (Check(CONST))
             {
-                nonAccessMods[2] = Advance();
+                nonAccessMods[2] = Advance().type;
                 hasAccessMod = true;
             }
 
             if (!hasAccessMod)
             {
-                if (Match(TokenType.USING)) return UsingDecl();
-                if (Match(TokenType.SYSTEM)) return SystemDecl(null, null);
-                if (Match(TokenType.CONTAINER)) return ContainerDecl(null, null);
-                if (Match(TokenType.DATATYPE)) return DatatypeDecl(null, null);
-                if (Match(TokenType.LIBRARY)) return LibraryDecl(null, null);
-                if (Check(TokenType.IDF) && lookAhead(1).type == TokenType.IDF && lookAhead(2).type == TokenType.LPAREN)
+                if (Match(USING)) return UsingDecl();
+                if (Match(SYSTEM)) return SystemDecl(null, null);
+                if (Match(CONTAINER)) return ContainerDecl(null, null);
+                if (Match(DATATYPE)) return DatatypeDecl(null, null);
+                if (Match(LIBRARY)) return LibraryDecl(null, null);
+                if (Check(IDF) && lookAhead(1).type == IDF && lookAhead(2).type == LPAREN)
                     return FunctionDecl(null, null);
-                else if (Check(TokenType.IDF) && lookAhead(1).type == TokenType.IDF) return VarDecl(null, null);
+                else if (Check(IDF) && lookAhead(1).type == IDF) return VarDecl(null, null);
                 return DeclStmt();
             }
             else
             {
-                if (Match(TokenType.SYSTEM)) return SystemDecl(accessMod, nonAccessMods);
-                if (Match(TokenType.CONTAINER)) return ContainerDecl(accessMod, nonAccessMods);
-                if (Match(TokenType.DATATYPE)) return DatatypeDecl(accessMod, nonAccessMods);
-                if (Match(TokenType.LIBRARY)) return LibraryDecl(accessMod, nonAccessMods);
-                if (Check(TokenType.IDF) && lookAhead(1).type == TokenType.IDF && lookAhead(2).type == TokenType.LPAREN)
+                if (Match(SYSTEM)) return SystemDecl(accessMod, nonAccessMods);
+                if (Match(CONTAINER)) return ContainerDecl(accessMod, nonAccessMods);
+                if (Match(DATATYPE)) return DatatypeDecl(accessMod, nonAccessMods);
+                if (Match(LIBRARY)) return LibraryDecl(accessMod, nonAccessMods);
+                if (Check(IDF) && lookAhead(1).type == IDF && lookAhead(2).type == LPAREN)
                     return FunctionDecl(accessMod, nonAccessMods);
-                else if (Check(TokenType.IDF) && lookAhead(1).type == TokenType.IDF) return VarDecl(accessMod, nonAccessMods);
+                else if (Check(IDF) && lookAhead(1).type == IDF) return VarDecl(accessMod, nonAccessMods);
                 throw new PenguorException(1, GetCurrent().offset);
             }
         }
@@ -99,86 +99,125 @@ namespace Penguor.Parsing
         private Decl UsingDecl()
         {
             Expr call = CallExpr();
-            Consume(TokenType.SEMICOLON);
+            Consume(SEMICOLON);
             return new UsingDecl(call);
         }
 
-        private Decl SystemDecl(Token? accessMod, Token[]? nonAccessMods) => new SystemDecl(accessMod, nonAccessMods, Consume(TokenType.IDF), GetParent(), BlockStmt());
-        private Decl ContainerDecl(Token? accessMod, Token[]? nonAccessMods) => new ContainerDecl(accessMod, nonAccessMods, Consume(TokenType.IDF), GetParent(), BlockStmt());
-        private Decl DatatypeDecl(Token? accessMod, Token[]? nonAccessMods) => new DatatypeDecl(accessMod, nonAccessMods, Consume(TokenType.IDF), GetParent(), BlockStmt());
-        private Token? GetParent() => Match(TokenType.LESS) ? Consume(TokenType.IDF) : (Token?)null;
+        private Decl SystemDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new SystemDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockStmt());
+        private Decl ContainerDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new ContainerDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockStmt());
+        private Decl DatatypeDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new DatatypeDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockStmt());
+        private Token? GetParent() => Match(LESS) ? Consume(IDF) : (Token?)null;
 
-        private Decl FunctionDecl(Token? accessMod, Token[]? nonAccessMods)
+        private Decl FunctionDecl(TokenType? accessMod, TokenType[]? nonAccessMods)
         {
             Expr variable = VarExpr();
 
-            Consume(TokenType.LPAREN);
-            if (Match(TokenType.RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, null);
+            Consume(LPAREN);
+            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, null);
             List<Expr> parameters = new List<Expr>();
             while (true)
             {
                 parameters.Add(VarExpr());
-                if (Match(TokenType.COMMA)) continue;
-                Consume(TokenType.RPAREN);
+                if (Match(COMMA)) continue;
+                Consume(RPAREN);
                 break;
             }
             return new FunctionDecl(accessMod, nonAccessMods, variable, parameters);
         }
 
-        private Decl VarDecl(Token? accessMod, Token[]? nonAccessMods)
+        private Decl VarDecl(TokenType? accessMod, TokenType[]? nonAccessMods)
         {
-            Decl dec = new VarDecl(accessMod, nonAccessMods, VarExpr(), Match(TokenType.ASSIGN) ? Expression() : null);
-            Consume(TokenType.SEMICOLON);
+            Decl dec = new VarDecl(accessMod, nonAccessMods, VarExpr(), Match(ASSIGN) ? Expression() : null);
+            Consume(SEMICOLON);
             return dec;
         }
 
-        private Decl LibraryDecl(Token? accessMod, Token[]? nonAccessMods) => new LibraryDecl(accessMod, nonAccessMods, CallExpr(), BlockStmt());
+        private Decl LibraryDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new LibraryDecl(accessMod, nonAccessMods, CallExpr(), BlockStmt());
         private Decl DeclStmt() => new DeclStmt(Statement());
 
         private Stmt Statement()
         {
-            if (Match(TokenType.LBRACE)) return BlockStmt();
-            if (Match(TokenType.IF)) return IfStmt();
-            if (Match(TokenType.WHILE)) return WhileStmt();
-            if (Match(TokenType.FOR)) return ForStmt();
-            if (Match(TokenType.DO)) return DoStmt();
-            if (Match(TokenType.SWITCH)) return SwitchStmt();
-
+            if (Match(HASHTAG)) return PPStmt();
+            if (Check(LBRACE)) return BlockStmt();
+            if (Match(IF)) return IfStmt();
+            if (Match(WHILE)) return WhileStmt();
+            if (Match(FOR)) return ForStmt();
+            if (Match(DO)) return DoStmt();
+            if (Match(SWITCH)) return SwitchStmt();
             return ExprStmt();
+        }
+
+        private Stmt PPStmt()
+        {
+            Token[] val;
+            TokenType dir = Advance().type;
+            switch (dir)
+            {
+                case SAFETY:
+                    val = new Token[1];
+                    val[0] = Consume(NUM);
+                    if (Convert.ToInt32(val[0].token) < 0 || Convert.ToInt32(val[0].token) > 2) throw new PenguorException(1, val[0].offset);
+                    break;
+                default:
+                    throw new PenguorException(1, GetCurrent().offset);
+            }
+            return new PPStmt(dir, val);
         }
 
         private Stmt BlockStmt()
         {
+            Match(LBRACE);
             List<Decl> declarations = new List<Decl>();
-            while (!Match(TokenType.RBRACE)) declarations.Add(Declaration());
+            while (!Match(RBRACE)) declarations.Add(Declaration());
+
             return new BlockStmt(declarations);
         }
 
         private Stmt IfStmt()
         {
-            Consume(TokenType.LPAREN);
+            Consume(LPAREN);
             Expr condition = Expression();
-            Consume(TokenType.RPAREN);
+            Consume(RPAREN);
 
+            Consume(LBRACE);
             List<Stmt> statements = new List<Stmt>();
-            Consume(TokenType.LBRACE);
-            while (!Match(TokenType.RBRACE))
+            while (!Match(RBRACE)) statements.Add(Statement());
+
+            List<Stmt> elif = new List<Stmt>();
+            while (Match(ELIF)) elif.Add(ElifStmt());
+
+            List<Stmt> elseC = new List<Stmt>();
+            if (Match(ELSE))
             {
-                statements.Add(Statement());
+                Consume(LBRACE);
+                while (!Match(RBRACE)) elseC.Add(Statement());
             }
 
-            return new IfStmt(condition, statements, null);
+            return new IfStmt(condition, statements, elif, elseC);
+        }
+
+        private Stmt ElifStmt()
+        {
+            Consume(LPAREN);
+            Expr condition = Expression();
+            Consume(RPAREN);
+
+            Consume(LBRACE);
+            List<Stmt> statements = new List<Stmt>();
+            while (!Match(RBRACE)) statements.Add(Statement());
+
+            return new ElifStmt(condition, statements);
         }
 
         private Stmt WhileStmt()
         {
-            Consume(TokenType.LPAREN);
+            Consume(LPAREN);
             Expr condition = Expression();
-            Consume(TokenType.RPAREN);
+            Consume(RPAREN);
 
+            Consume(LBRACE);
             List<Stmt> statements = new List<Stmt>();
-            Consume(TokenType.LBRACE);
-            while (!Match(TokenType.RBRACE))
+            while (!Match(RBRACE))
             {
                 statements.Add(Statement());
             }
@@ -188,65 +227,71 @@ namespace Penguor.Parsing
 
         private Stmt ForStmt()
         {
-            Consume(TokenType.LPAREN);
-            Stmt currentVar = null;
-            Consume(TokenType.COLON);
-            Expr vars = VarExpr();
-            Consume(TokenType.RPAREN);
+            Consume(LPAREN);
+            Expr current = VarExpr();
+            Consume(COLON);
+            Expr vars = CallExpr();
+            Consume(RPAREN);
 
+            Consume(LBRACE);
             List<Stmt> statements = new List<Stmt>();
-            Consume(TokenType.LBRACE);
-            while (!Match(TokenType.RBRACE)) statements.Add(Statement());
+            while (!Match(RBRACE)) statements.Add(Statement());
 
-            return new ForStmt(currentVar, vars, statements);
+            return new ForStmt(current, vars, statements);
         }
 
         private Stmt DoStmt()
         {
-            Consume(TokenType.LBRACE);
-
+            Consume(LBRACE);
             List<Stmt> statements = new List<Stmt>();
-            while (!Match(TokenType.RBRACE)) statements.Add(Statement());
+            while (!Match(RBRACE)) statements.Add(Statement());
 
-            Consume(TokenType.WHILE);
-            Consume(TokenType.LPAREN);
+            Consume(WHILE);
+            Consume(LPAREN);
             Expr condition = Expression();
-            Consume(TokenType.RPAREN);
+            Consume(RPAREN);
 
             return new DoStmt(statements, condition);
         }
 
         private Stmt SwitchStmt()
         {
-            Consume(TokenType.LPAREN);
-            Expr condition = VarExpr();
-            Consume(TokenType.RPAREN);
+            Consume(LPAREN);
+            Expr condition = CallExpr();
+            Consume(RPAREN);
 
+            Consume(LBRACE);
             List<Stmt> cases = new List<Stmt>();
-            Consume(TokenType.RBRACE);
-            while (!Match(TokenType.RBRACE))
+            do
             {
-                if (Match(TokenType.CASE, TokenType.DEFAULT)) cases.Add(CaseStmt());
+                Match(CASE);
+                cases.Add(CaseStmt());
+            } while (!Match(RBRACE) && !Check(DEFAULT));
+
+            Stmt? defaultCase = null;
+            if (Match(DEFAULT))
+            {
+                do { cases.Add(CaseStmt()); } while (!Match(RBRACE));
             }
 
-            return new SwitchStmt(condition, cases, null);
+            return new SwitchStmt(condition, cases, defaultCase);
         }
 
         private Stmt CaseStmt()
         {
-            Expr condition;
-            if (GetPrevious().type == TokenType.CASE)
+            Expr? condition;
+            if (GetPrevious().type == CASE)
             {
-                Consume(TokenType.LPAREN);
+                Consume(LPAREN);
                 condition = VarExpr();
-                Consume(TokenType.RPAREN);
+                Consume(RPAREN);
             }
             else condition = null;
 
-            Consume(TokenType.COLON);
+            Consume(COLON);
 
             List<Stmt> statements = new List<Stmt>();
-            while (!Check(TokenType.CASE) && !Check(TokenType.DEFAULT))
+            while (!Check(CASE) && !Check(DEFAULT) && Check(RBRACE))
             {
                 statements.Add(Statement());
             }
@@ -258,7 +303,7 @@ namespace Penguor.Parsing
         {
 
             Expr expression = Expression();
-            Consume(TokenType.SEMICOLON);
+            Consume(SEMICOLON);
 
             return new ExprStmt(expression);
         }
@@ -267,196 +312,127 @@ namespace Penguor.Parsing
 
         private Expr AssignExpr()
         {
-            Expr lhs = OrExpr();
-
-            if (Match(TokenType.ASSIGN))
-            {
-                Expr rhs = AssignExpr();
-                return new AssignExpr(lhs, rhs);
-            }
-
-            return lhs;
-        }
-
-        private Expr OrExpr()
-        {
-            Expr lhs = AndExpr();
-
-            if (Match(TokenType.OR))
-            {
-                Expr rhs = AndExpr();
-                return new BinaryExpr(lhs, TokenType.OR, rhs);
-            }
+            Expr lhs = CondOrExpr();
+            if (Match(ASSIGN,
+                      ADD_ASSIGN,
+                      MUL_ASSIGN,
+                      DIV_ASSIGN,
+                      PERCENT_ASSIGN,
+                      BS_LEFT_ASSIGN,
+                      BS_RIGHT_ASSIGN,
+                      BW_AND_ASSIGN,
+                      BW_OR_ASSIGN,
+                      BW_XOR_ASSIGN)) return new AssignExpr(lhs, GetPrevious().type, CondOrExpr());
 
             return lhs;
         }
 
-        private Expr AndExpr()
-        {
-            Expr lhs = EqualityExpr();
+        private Expr CondOrExpr() => Match(OR) ? new AssignExpr(CondXorExpr(), OR, CondOrExpr()) : CondXorExpr();
+        private Expr CondXorExpr() => Match(XOR) ? new AssignExpr(CondAndExpr(), XOR, CondXorExpr()) : CondAndExpr();
+        private Expr CondAndExpr() => Match(OR) ? new AssignExpr(BWOrExpr(), AND, CondAndExpr()) : BWOrExpr();
 
-            if (Match(TokenType.AND))
-            {
-                Expr rhs = EqualityExpr();
-                return new BinaryExpr(lhs, TokenType.AND, rhs);
-            }
-
-            return lhs;
-        }
+        private Expr BWOrExpr() => Match(BW_OR) ? new AssignExpr(BWXorExpr(), BW_OR, BWOrExpr()) : BWXorExpr();
+        private Expr BWXorExpr() => Match(BW_XOR) ? new AssignExpr(BWAndExpr(), BW_XOR, BWXorExpr()) : BWAndExpr();
+        private Expr BWAndExpr() => Match(BW_AND) ? new AssignExpr(EqualityExpr(), BW_AND, BWAndExpr()) : EqualityExpr();
 
         private Expr EqualityExpr()
         {
             Expr lhs = RelationExpr();
-
-            if (Match(TokenType.EQUALS))
-            {
-                Expr rhs = RelationExpr();
-                return new BinaryExpr(lhs, TokenType.EQUALS, rhs);
-            }
-            else if (Match(TokenType.NEQUALS))
-            {
-                Expr rhs = RelationExpr();
-                return new BinaryExpr(lhs, TokenType.NEQUALS, rhs);
-            }
-
+            if (Match(EQUALS, NEQUALS)) return new BinaryExpr(lhs, GetPrevious().type, EqualityExpr());
             return lhs;
         }
 
         private Expr RelationExpr()
         {
             Expr lhs = AdditionExpr();
-
-            if (Match(TokenType.LESS))
-            {
-                Expr rhs = AdditionExpr();
-                return new BinaryExpr(lhs, TokenType.LESS, rhs);
-            }
-            else if (Match(TokenType.LESS_EQUALS))
-            {
-                Expr rhs = AdditionExpr();
-                return new BinaryExpr(lhs, TokenType.LESS_EQUALS, rhs);
-            }
-            else if (Match(TokenType.GREATER_EQUALS))
-            {
-                Expr rhs = AdditionExpr();
-                return new BinaryExpr(lhs, TokenType.GREATER_EQUALS, rhs);
-            }
-            else if (Match(TokenType.GREATER))
-            {
-                Expr rhs = AdditionExpr();
-                return new BinaryExpr(lhs, TokenType.GREATER, rhs);
-            }
-
+            if (Match(LESS, GREATER, LESS_EQUALS, GREATER_EQUALS)) return new BinaryExpr(lhs, GetPrevious().type, RelationExpr());
             return lhs;
         }
 
         private Expr AdditionExpr()
         {
             Expr lhs = MultiplicationExpr();
-
-            if (Match(TokenType.PLUS))
-            {
-                Expr rhs = MultiplicationExpr();
-                return new BinaryExpr(lhs, TokenType.PLUS, rhs);
-            }
-            else if (Match(TokenType.MINUS))
-            {
-                Expr rhs = MultiplicationExpr();
-                return new BinaryExpr(lhs, TokenType.MINUS, rhs);
-            }
-
+            if (Match(PLUS, MINUS)) return new BinaryExpr(lhs, GetPrevious().type, AdditionExpr());
             return lhs;
         }
 
         private Expr MultiplicationExpr()
         {
             Expr lhs = UnaryExpr();
-
-            if (Match(TokenType.MUL))
-            {
-                Expr rhs = UnaryExpr();
-                return new BinaryExpr(lhs, TokenType.MUL, rhs);
-            }
-            else if (Match(TokenType.DIV))
-            {
-                Expr rhs = UnaryExpr();
-                return new BinaryExpr(lhs, TokenType.DIV, rhs);
-            }
-
+            if (Match(MUL, DIV)) return new BinaryExpr(lhs, GetPrevious().type, MultiplicationExpr());
             return lhs;
         }
 
         private Expr UnaryExpr()
         {
-            Expr rhs;
-            if (Match(TokenType.EXCL_MARK, TokenType.MINUS))
-            {
-                TokenType op = GetPrevious().type;
+            TokenType? op = null;
+            if (Match(EXCL_MARK, PLUS, MINUS, BW_NOT, DPLUS, DMINUS)) op = GetPrevious().type;
+            if (Check(LPAREN)) return new UnaryExpr(op, GroupingExpr());
+            return BaseExpr();
+        }
 
-                if (Check(TokenType.LPAREN))
-                {
-                    rhs = GroupingExpr();
-                    return new UnaryExpr(op, rhs);
-                }
-                rhs = UnaryExpr();
-                return new UnaryExpr(op, rhs);
-            }
-            if (Check(TokenType.LPAREN))
-            {
-                rhs = GroupingExpr();
-                //TODO: fix this mess
-                return new UnaryExpr(TokenType.EOF, rhs); //! this will error later on
-            }
+        private Expr BaseExpr()
+        {
+            if (Match(TRUE)) return new BooleanExpr(true);
+            if (Match(FALSE)) return new BooleanExpr(false);
+            if (Match(NULL)) return new NullExpr();
+            if (Match(NUM)) return new NumExpr(Convert.ToDouble(GetPrevious().token));
+            if (Match(STRING)) return new StringExpr(GetPrevious().token);
             return CallExpr();
         }
 
         private Expr CallExpr()
         {
-            Expr expr = BaseExpr();
-            List<Expr> arguments = new List<Expr>();
+            List<Call> callee = new List<Call>();
+            TokenType? postfix = null;
 
             while (true)
             {
-                if (Match(TokenType.LPAREN))
+                Token idf = Consume(IDF);
+                if (Match(DOT))
                 {
-                    if (Match(TokenType.RPAREN)) return new CallExpr(null, arguments, null);
-                    while (true)
-                    {
-                        arguments.Add(Expression());
-                        if (!Match(TokenType.RPAREN)) Consume(TokenType.COMMA);
-                        else break;
-                    }
+                    callee.Add(new IdfCall(idf));
+                    continue;
                 }
-                else if (Match(TokenType.DOT)) { } else break;
+                else if (Match(LPAREN))
+                {
+                    callee.Add(FunctionCall(idf));
+                    if (Match(DOT)) continue;
+                }
+                else if (Match(DPLUS, DMINUS))
+                {
+                    postfix = GetPrevious().type;
+                }
+                break;
             }
 
-            return new CallExpr(null, arguments, null);
-        }
+            return new CallExpr(callee, postfix);
 
-        private Expr BaseExpr()
-        {
-            if (Match(TokenType.NUM)) return new NumExpr(Convert.ToDouble(GetPrevious().token));
-            else if (Match(TokenType.STRING)) return new StringExpr(GetPrevious().token);
-            else if (Match(TokenType.TRUE, TokenType.FALSE)) return new BooleanExpr(Convert.ToBoolean(GetPrevious().token));
-            else if (Match(TokenType.NULL)) return new NullExpr();
-            else if (Match(TokenType.IDF)) return new IdentifierExpr(GetPrevious().type);
-
-            throw new PenguorException(1, GetCurrent().offset);
+            Call FunctionCall(Token name)
+            {
+                Consume(LPAREN);
+                List<Expr> args = new List<Expr>();
+                if (!Match(RPAREN)) args.Add(CallExpr());
+                else return new FunctionCall(name, null);
+                while (true)
+                {
+                    if (Match(COMMA)) args.Add(CallExpr());
+                    else break;
+                }
+                return new FunctionCall(name, args);
+            }
         }
 
         private Expr GroupingExpr()
         {
-            Consume(TokenType.LPAREN);
+            Consume(LPAREN);
             Expr expr = Expression();
-            Consume(TokenType.RPAREN);
+            Consume(RPAREN);
 
             return expr;
         }
 
-        private Expr VarExpr()
-        {
-            return CallExpr();
-        }
+        private Expr VarExpr() => new VarExpr(CallExpr(), Consume(IDF));
 
         /// <summary>
         /// <c>Match() </c> consumes a token if matching
@@ -536,7 +512,7 @@ namespace Penguor.Parsing
         /// <returns>true if the parser has reached the end of the file, otherwise false</returns>
         private bool AtEnd()
         {
-            if (GetCurrent().type == TokenType.EOF) return true;
+            if (GetCurrent().type == EOF) return true;
             else return false;
         }
 
@@ -544,160 +520,83 @@ namespace Penguor.Parsing
         {
             switch (type)
             {
-                case TokenType.HASHTAG:
-                    return "#";
-                case TokenType.FROM:
-                    return "from";
-                case TokenType.INCLUDE:
-                    return "include";
-                case TokenType.SAFETY:
-                    return "safety";
-                case TokenType.PUBLIC:
-                    return "public";
-                case TokenType.PRIVATE:
-                    return "private";
-                case TokenType.PROTECTED:
-                    return "protected";
-                case TokenType.RESTRICTED:
-                    return "restricted";
-                case TokenType.STATIC:
-                    return "static";
-                case TokenType.DYNAMIC:
-                    return "dynamic";
-                case TokenType.ABSTRACT:
-                    return "abstract";
-                case TokenType.CONST:
-                    return "const";
-                case TokenType.LPAREN:
-                    return "(";
-                case TokenType.RPAREN:
-                    return ")";
-                case TokenType.LBRACE:
-                    return "{";
-                case TokenType.RBRACE:
-                    return "}";
-                case TokenType.LBRACK:
-                    return "[";
-                case TokenType.RBRACK:
-                    return "]";
-                case TokenType.PLUS:
-                    return "+";
-                case TokenType.MINUS:
-                    return "-";
-                case TokenType.MUL:
-                    return "*";
-                case TokenType.DIV:
-                    return "/";
-                case TokenType.PERCENT:
-                    return "%";
-                case TokenType.DPLUS:
-                    return "++";
-                case TokenType.DMINUS:
-                    return "--";
-                case TokenType.GREATER:
-                    return ">";
-                case TokenType.LESS:
-                    return "<";
-                case TokenType.GREATER_EQUALS:
-                    return ">=";
-                case TokenType.LESS_EQUALS:
-                    return "<=";
-                case TokenType.EQUALS:
-                    return "==";
-                case TokenType.NEQUALS:
-                    return "!=";
-                case TokenType.AND:
-                    return "&&";
-                case TokenType.OR:
-                    return "||";
-                case TokenType.XOR:
-                    return "^^";
-                case TokenType.BW_AND:
-                    return "&";
-                case TokenType.BW_OR:
-                    return "|";
-                case TokenType.BW_XOR:
-                    return "^";
-                case TokenType.BW_NOT:
-                    return "~";
-                case TokenType.BS_LEFT:
-                    return "<<";
-                case TokenType.BS_RIGHT:
-                    return ">>";
-                case TokenType.ASSIGN:
-                    return "=";
-                case TokenType.ADD_ASSIGN:
-                    return "+=";
-                case TokenType.SUB_ASSIGN:
-                    return "-=";
-                case TokenType.MUL_ASSIGN:
-                    return "*=";
-                case TokenType.DIV_ASSIGN:
-                    return "/=";
-                case TokenType.PERCENT_ASSIGN:
-                    return "%=";
-                case TokenType.BW_AND_ASSIGN:
-                    return "&=";
-                case TokenType.BW_OR_ASSIGN:
-                    return "|=";
-                case TokenType.BW_XOR_ASSIGN:
-                    return "^=";
-                case TokenType.BS_LEFT_ASSIGN:
-                    return "<<=";
-                case TokenType.BS_RIGHT_ASSIGN:
-                    return ">>=";
-                case TokenType.NULL:
-                    return "null";
-                case TokenType.COLON:
-                    return ":";
-                case TokenType.SEMICOLON:
-                    return ";";
-                case TokenType.DOT:
-                    return ".";
-                case TokenType.COMMA:
-                    return ",";
-                case TokenType.EXCL_MARK:
-                    return "!";
-                case TokenType.NUM:
-                    return "number";
-                case TokenType.STRING:
-                    return "string";
-                case TokenType.IDF:
-                    return "identifier";
-                case TokenType.TRUE:
-                    return "true";
-                case TokenType.FALSE:
-                    return "false";
-                case TokenType.CONTAINER:
-                    return "container";
-                case TokenType.SYSTEM:
-                    return "system";
-                case TokenType.DATATYPE:
-                    return "datatype";
-                case TokenType.LIBRARY:
-                    return "library";
-                case TokenType.IF:
-                    return "if";
-                case TokenType.ELIF:
-                    return "elif";
-                case TokenType.ELSE:
-                    return "else";
-                case TokenType.FOR:
-                    return "for";
-                case TokenType.WHILE:
-                    return "while";
-                case TokenType.DO:
-                    return "do";
-                case TokenType.SWITCH:
-                    return "switch";
-                case TokenType.CASE:
-                    return "case";
-                case TokenType.DEFAULT:
-                    return "default";
-                case TokenType.EOF:
-                    return "end of file";
-                default:
-                    throw new ArgumentException();
+                case HASHTAG: return "#";
+                case FROM: return "from";
+                case INCLUDE: return "include";
+                case SAFETY: return "safety";
+                case PUBLIC: return "public";
+                case PRIVATE: return "private";
+                case PROTECTED: return "protected";
+                case RESTRICTED: return "restricted";
+                case STATIC: return "static";
+                case DYNAMIC: return "dynamic";
+                case ABSTRACT: return "abstract";
+                case CONST: return "const";
+                case LPAREN: return "(";
+                case RPAREN: return ")";
+                case LBRACE: return "{";
+                case RBRACE: return "}";
+                case LBRACK: return "[";
+                case RBRACK: return "]";
+                case PLUS: return "+";
+                case MINUS: return "-";
+                case MUL: return "*";
+                case DIV: return "/";
+                case PERCENT: return "%";
+                case DPLUS: return "++";
+                case DMINUS: return "--";
+                case GREATER: return ">";
+                case LESS: return "<";
+                case GREATER_EQUALS: return ">=";
+                case LESS_EQUALS: return "<=";
+                case EQUALS: return "==";
+                case NEQUALS: return "!=";
+                case AND: return "&&";
+                case OR: return "||";
+                case XOR: return "^^";
+                case BW_AND: return "&";
+                case BW_OR: return "|";
+                case BW_XOR: return "^";
+                case BW_NOT: return "~";
+                case BS_LEFT: return "<<";
+                case BS_RIGHT: return ">>";
+                case ASSIGN: return "=";
+                case ADD_ASSIGN: return "+=";
+                case SUB_ASSIGN: return "-=";
+                case MUL_ASSIGN: return "*=";
+                case DIV_ASSIGN: return "/=";
+                case PERCENT_ASSIGN: return "%=";
+                case BW_AND_ASSIGN: return "&=";
+                case BW_OR_ASSIGN: return "|=";
+                case BW_XOR_ASSIGN: return "^=";
+                case BS_LEFT_ASSIGN: return "<<=";
+                case BS_RIGHT_ASSIGN: return ">>=";
+                case NULL: return "null";
+                case COLON: return ":";
+                case SEMICOLON: return ";";
+                case DOT: return ".";
+                case COMMA: return ",";
+                case EXCL_MARK: return "!";
+                case NUM: return "number";
+                case STRING: return "string";
+                case IDF: return "identifier";
+                case TRUE: return "true";
+                case FALSE: return "false";
+                case CONTAINER: return "container";
+                case SYSTEM: return "system";
+                case DATATYPE: return "datatype";
+                case LIBRARY: return "library";
+                case IF: return "if";
+                case ELIF: return "elif";
+                case ELSE: return "else";
+                case FOR: return "for";
+                case WHILE: return "while";
+                case DO: return "do";
+                case SWITCH: return "switch";
+                case CASE: return "case";
+                case DEFAULT: return "default";
+                case EOF: return "end of file";
+                default: throw new ArgumentException();
             }
         }
     }

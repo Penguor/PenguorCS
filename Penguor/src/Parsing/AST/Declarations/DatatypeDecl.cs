@@ -21,7 +21,7 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of DatatypeDecl
         /// </summary>
-        public DatatypeDecl(Token? accessmod, Token[]? nonaccessmod, Token name, Token? parent, Stmt content)
+        public DatatypeDecl(TokenType? accessmod, TokenType[]? nonaccessmod, Token name, Token? parent, Stmt content)
         {
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
@@ -30,9 +30,9 @@ namespace Penguor.Parsing.AST
             Content = content;
         }
         /// <summary></summary>
-        public Token? AccessMod { get; private set; }
+        public TokenType? AccessMod { get; private set; }
         /// <summary></summary>
-        public Token[]? NonAccessMod { get; private set; }
+        public TokenType[]? NonAccessMod { get; private set; }
         /// <summary></summary>
         public Token Name { get; private set; }
         /// <summary></summary>
