@@ -5,10 +5,9 @@
 #
 # (c) Carl Schierig 2020
 # 
-# 
 */
 
-using Penguor.Debugging;
+using System;
 using System.IO;
 using System.Collections.Generic;
 
@@ -60,6 +59,35 @@ namespace Penguor.Tools
                             Advance();
                         }
                         folder = tmp;
+                        using (StreamWriter writer = new StreamWriter(Path.Combine(folder, mode + ".cs")))
+                        {
+                            writer.Write($@"
+/*
+#
+# PenguorCS Compiler
+# ------------------
+#
+# (c) Carl Schierig {DateTime.Now.Year.ToString()}
+# 
+*/
+
+namespace Penguor.Parsing.AST
+{{
+    /// <summary>
+    /// Base class for penguor {mode}
+    /// </summary>
+    public abstract class {mode}
+    {{
+        /// <summary>
+        /// <c>Accept</c> returns the visit method for the {mode}
+        /// </summary>
+        /// <param name=""visitor"">the visitor which visits this instance of {mode}</param>
+        /// <returns></returns>
+        public abstract T Accept<T>(Visitor<T> visitor);
+    }}
+}}
+");
+                        }
                         break;
                     default:
                         c = 0;
@@ -95,7 +123,7 @@ namespace Penguor.Tools
                             names.Add(tmp);
                             tmp = "";
                         }
-                        using (StreamWriter writer = new StreamWriter(Path.Combine(folder, name.ToUppercase()) + ".cs"))
+                        using (StreamWriter writer = new StreamWriter(Path.Combine(folder!, name.ToUppercase()) + ".cs"))
                         {
                             writer.AutoFlush = true;
 
@@ -105,8 +133,7 @@ namespace Penguor.Tools
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2020
-# 
+# (c) Carl Schierig {DateTime.Now.Year.ToString()}
 # 
 */
 
@@ -158,7 +185,7 @@ namespace Penguor.Parsing.AST
         /// </summary>
         /// <param name=""visitor"">the visitor which should visit this instance</param>
         /// <returns>Visit() of this instance</returns>
-        public override string Accept(Visitor visitor)
+        public override T Accept<T>(Visitor<T> visitor)
         {{
             return visitor.Visit(this);
         }}
@@ -167,13 +194,13 @@ namespace Penguor.Parsing.AST
     /// <summary>
     /// Contains methods to visit all {mode}
     /// </summary>
-    public partial interface Visitor
+    public partial interface Visitor<T>
     {{
         /// <summary>
         /// visit a {name.ToUppercase()}
         /// </summary>
         /// <returns></returns>
-        string Visit({name.ToUppercase()} {mode.ToLower()});
+        T Visit({name.ToUppercase()} {mode!.ToLower()});
     }}
 }}
 ");
@@ -195,14 +222,8 @@ namespace Penguor.Parsing.AST
 
         void Advance()
         {
-            try
-            {
-                current = (char)reader.Read();
-            }
-            catch (System.InvalidOperationException)
-            {
-                Debug.CastPGRCS();
-            }
+            if (reader != null) current = (char)reader.Read();
+            else throw new System.NullReferenceException();
         }
     }
 

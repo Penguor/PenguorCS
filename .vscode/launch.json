@@ -12,7 +12,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/Penguor/bin/Debug/netcoreapp3.1/Penguor.dll",
-            "args": "--tools \"D:\\Carl\\source\\repos\\Penguor\\PenguorCS\\Penguor\\src\\Parsing\\AST\\ASTgen.txt\"",
+            "args": "--build \"..\\Test.pgr\"",
             "cwd": "${workspaceFolder}/Penguor",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",

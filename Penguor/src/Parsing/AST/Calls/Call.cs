@@ -1,16 +1,25 @@
 
+/*
+#
+# PenguorCS Compiler
+# ------------------
+#
+# (c) Carl Schierig 2020
+# 
+*/
+
 namespace Penguor.Parsing.AST
 {
     /// <summary>
-    /// base class for Penguor Declarations
+    /// Base class for penguor Call
     /// </summary>
     public abstract class Call
     {
         /// <summary>
-        /// <c>Accept</c> returns this visit method for the declaration type
+        /// <c>Accept</c> returns the visit method for the Call
         /// </summary>
-        /// <param name="visitor">the visitor which visits this instance of Decl</param>
+        /// <param name="visitor">the visitor which visits this instance of Call</param>
         /// <returns></returns>
-        public abstract string Accept(Visitor visitor);
+        public abstract T Accept<T>(Visitor<T> visitor);
     }
 }
