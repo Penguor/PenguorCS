@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Penguor", "Penguor\Penguor.csproj", "{886AEC1B-8236-4FEE-B3B1-E5A29B8B36F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{F1C01D18-C3B2-46DC-BFC8-365608D122FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,17 @@ Global
 		{886AEC1B-8236-4FEE-B3B1-E5A29B8B36F8}.Release|x64.Build.0 = Release|Any CPU
 		{886AEC1B-8236-4FEE-B3B1-E5A29B8B36F8}.Release|x86.ActiveCfg = Release|Any CPU
 		{886AEC1B-8236-4FEE-B3B1-E5A29B8B36F8}.Release|x86.Build.0 = Release|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Release|x64.ActiveCfg = Release|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Release|x64.Build.0 = Release|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{F1C01D18-C3B2-46DC-BFC8-365608D122FD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
