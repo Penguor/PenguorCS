@@ -3,7 +3,7 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2020
+# (c) Carl Schierig 2019-2020
 # 
 # 
 */
@@ -164,6 +164,10 @@ namespace Penguor.Debugging
                     currentMessage = $"[PGR-0007] Unexpected char '{arg0}'";
                     level = LogLevel.Error;
                     break;
+                case 8:
+                    currentMessage = $"[PGR-0008] Unknown preprocessor statement '{arg0}'";
+                    level = LogLevel.Error;
+                    break;
             }
             currentMessage += " " + GetSourcePosition(offset);
             Builder.ExitCode = message;
@@ -173,29 +177,32 @@ namespace Penguor.Debugging
         private static string GetSourcePosition(int offset)
         {
             string source;
-            using (System.IO.StreamReader reader = new System.IO.StreamReader(Builder.ActiveFile)) { source = reader.ReadToEnd(); }
+            using (System.IO.StreamReader reader = new System.IO.StreamReader(Builder.ActiveFile))
+            {
+                source = reader.ReadToEnd();
+            }
             uint line = 1;
-            int column = 0;
-            bool gotLine = false;
+            int column = 1;
+            bool gotPos = false;
             for (int i = 0; i < source.Length; i++)
             {
-                if (offset == i) gotLine = true;
+                if (offset == i) gotPos = true;
                 if (source[i] == '\n')
                 {
-                    if (gotLine) break;
+                    if (gotPos) break;
                     line++;
                     column = 0;
                     continue;
                 }
                 else if (source[i] == '\r')
                 {
-                    if (gotLine) break;
+                    if (gotPos) break;
                     i++;
                     line++;
                     column = 0;
                     continue;
                 }
-                column++;
+                if (!gotPos) column++;
             }
             return $"({Builder.ActiveFile}:{line}:{column})";
         }

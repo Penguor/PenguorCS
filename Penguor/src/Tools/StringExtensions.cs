@@ -3,7 +3,7 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2019
+# (c) Carl Schierig 2019-2020
 # 
 # 
 # code in method ToUpperCase(this string input)

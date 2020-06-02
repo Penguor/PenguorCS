@@ -3,7 +3,7 @@
 # PenguorCS Compiler
 # __________________
 #
-# (c) Carl Schierig 2019
+# (c) Carl Schierig 2019-2020
 # 
 #
 -->
@@ -18,7 +18,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <Copyright>(c) 2020 Carl Schierig</Copyright>
+    <Copyright>(c) 2019-2020 Carl Schierig</Copyright>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -3,7 +3,7 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2020
+# (c) Carl Schierig 2019-2020
 # 
 # 
 */
@@ -26,7 +26,7 @@ namespace Penguor
             if (args.Length == 0)
             {
                 // print the Penguor info
-                Console.WriteLine("Penguor\n\n (c) 2020 Carl Schierig");
+                Console.WriteLine("Penguor\n\n (c) 2019-2020 Carl Schierig");
                 Debug.Log("Penguor info displayed", LogLevel.Info);
             }
             else

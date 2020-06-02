@@ -4,7 +4,7 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2020
+# (c) Carl Schierig 2019-2020
 # 
 */
 

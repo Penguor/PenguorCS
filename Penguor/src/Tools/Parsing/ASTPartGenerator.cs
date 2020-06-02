@@ -3,7 +3,7 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2020
+# (c) Carl Schierig 2019-2020
 # 
 */
 
@@ -67,7 +67,7 @@ namespace Penguor.Tools
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig {DateTime.Now.Year.ToString()}
+# (c) Carl Schierig 2019-{DateTime.Now.Year.ToString()}
 # 
 */
 
@@ -133,7 +133,7 @@ namespace Penguor.Parsing.AST
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig {DateTime.Now.Year.ToString()}
+# (c) Carl Schierig 2019-{DateTime.Now.Year.ToString()}
 # 
 */
 

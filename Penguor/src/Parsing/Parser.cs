@@ -3,11 +3,10 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2019
+# (c) Carl Schierig 2019-2020
 # 
 # 
 */
-// TODO: remove name tokens form ast nodes, now replaced by id
 
 using System;
 using System.Collections.Generic;
@@ -150,8 +149,8 @@ namespace Penguor.Parsing
         private Stmt PPStmt()
         {
             Token[] val;
-            TokenType dir = Advance().type;
-            switch (dir)
+            Token dir = Advance();
+            switch (dir.type)
             {
                 case SAFETY:
                     val = new Token[1];
@@ -159,9 +158,9 @@ namespace Penguor.Parsing
                     if (Convert.ToInt32(val[0].token) < 0 || Convert.ToInt32(val[0].token) > 2) throw new PenguorException(1, val[0].offset);
                     break;
                 default:
-                    throw new PenguorException(1, GetCurrent().offset);
+                    throw new PenguorException(8, dir.offset, (dir.type == IDF || dir.type == NUM) ? dir.token : TTypePrettyString(dir.type));
             }
-            return new PPStmt(dir, val);
+            return new PPStmt(dir.type, val);
         }
 
         private Stmt BlockStmt()

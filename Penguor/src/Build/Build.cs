@@ -3,11 +3,12 @@
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2019
+# (c) Carl Schierig 2019-2020
 # all rights reserved
 # 
 */
 
+using System;
 using System.Collections.Generic;
 using Penguor.Debugging;
 using Penguor.Lexing;
@@ -60,7 +61,15 @@ namespace Penguor.Build
 
             Parser parser = new Parser(tokens);
             CheckExit();
-            Decl program = parser.Parse();
+            try
+            {
+                Decl program = parser.Parse();
+            }
+            catch (PenguorException)
+            {
+                if (ExitCode != 0) Environment.Exit(ExitCode);
+                else Environment.Exit(1);
+            }
             CheckExit();
         }
 
