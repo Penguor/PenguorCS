@@ -11,7 +11,8 @@ library ShowPenguor
         {
             string a = "";
             int b = 2;
-            a = "Hello " + name;
+            Call();
+            a = "Hello " + Test();
             if(true || false) 
             {
                 a += "no";

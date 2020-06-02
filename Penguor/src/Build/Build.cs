@@ -62,7 +62,6 @@ namespace Penguor.Build
             CheckExit();
             Decl program = parser.Parse();
             CheckExit();
-            Debug.Log(program.ToString()!, LogLevel.Warn);
         }
 
         private void CheckExit()

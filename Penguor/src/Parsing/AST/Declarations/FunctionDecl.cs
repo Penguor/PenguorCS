@@ -20,12 +20,13 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of FunctionDecl
         /// </summary>
-        public FunctionDecl(TokenType? accessmod, TokenType[]? nonaccessmod, Expr variable, List<Expr>? parameters)
+        public FunctionDecl(TokenType? accessmod, TokenType[]? nonaccessmod, Expr variable, List<Expr>? parameters, Stmt content)
         {
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
             Variable = variable;
             Parameters = parameters;
+            Content = content;
         }
         /// <summary></summary>
         public TokenType? AccessMod { get; private set; }
@@ -35,6 +36,8 @@ namespace Penguor.Parsing.AST
         public Expr Variable { get; private set; }
         /// <summary></summary>
         public List<Expr>? Parameters { get; private set; }
+        /// <summary></summary>
+        public Stmt Content { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

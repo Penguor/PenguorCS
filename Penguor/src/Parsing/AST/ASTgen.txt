@@ -29,7 +29,7 @@ UsingDecl Expr lib
 SystemDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Stmt content
 ContainerDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Stmt content
 DatatypeDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Stmt content
-FunctionDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable List<Expr>? parameters
+FunctionDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable List<Expr>? parameters Stmt content
 LibraryDecl TokenType? accessMod TokenType[]? nonAccessMod Expr name Stmt content
 VarDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable Expr? init
 DeclStmt Stmt stmt

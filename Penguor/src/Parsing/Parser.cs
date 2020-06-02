@@ -113,7 +113,7 @@ namespace Penguor.Parsing
             Expr variable = VarExpr();
 
             Consume(LPAREN);
-            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, null);
+            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, null, BlockStmt());
             List<Expr> parameters = new List<Expr>();
             while (true)
             {
@@ -122,7 +122,7 @@ namespace Penguor.Parsing
                 Consume(RPAREN);
                 break;
             }
-            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters);
+            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, BlockStmt());
         }
 
         private Decl VarDecl(TokenType? accessMod, TokenType[]? nonAccessMods)
@@ -327,13 +327,13 @@ namespace Penguor.Parsing
             return lhs;
         }
 
-        private Expr CondOrExpr() => (lookAhead(1).type == OR) ? new AssignExpr(CondXorExpr(), Consume(OR).type, CondOrExpr()) : CondXorExpr();
-        private Expr CondXorExpr() => (lookAhead(1).type == XOR) ? new AssignExpr(CondAndExpr(), Consume(XOR).type, CondXorExpr()) : CondAndExpr();
-        private Expr CondAndExpr() => (lookAhead(1).type == AND) ? new AssignExpr(BWOrExpr(), Consume(AND).type, CondAndExpr()) : BWOrExpr();
+        private Expr CondOrExpr() => Check(OR, 1) ? new BinaryExpr(CondXorExpr(), Consume(OR).type, CondOrExpr()) : CondXorExpr();
+        private Expr CondXorExpr() => Check(XOR, 1) ? new BinaryExpr(CondAndExpr(), Consume(XOR).type, CondXorExpr()) : CondAndExpr();
+        private Expr CondAndExpr() => Check(AND, 1) ? new BinaryExpr(BWOrExpr(), Consume(AND).type, CondAndExpr()) : BWOrExpr();
 
-        private Expr BWOrExpr() => (lookAhead(1).type == BW_OR) ? new AssignExpr(BWXorExpr(), Consume(BW_OR).type, BWOrExpr()) : BWXorExpr();
-        private Expr BWXorExpr() => (lookAhead(1).type == BW_XOR) ? new AssignExpr(BWAndExpr(), Consume(BW_XOR).type, BWXorExpr()) : BWAndExpr();
-        private Expr BWAndExpr() => (lookAhead(1).type == BW_AND) ? new AssignExpr(EqualityExpr(), Consume(BW_AND).type, BWAndExpr()) : EqualityExpr();
+        private Expr BWOrExpr() => Check(BW_OR, 1) ? new BinaryExpr(BWXorExpr(), Consume(BW_OR).type, BWOrExpr()) : BWXorExpr();
+        private Expr BWXorExpr() => Check(BW_XOR, 1) ? new BinaryExpr(BWAndExpr(), Consume(BW_XOR).type, BWXorExpr()) : BWAndExpr();
+        private Expr BWAndExpr() => Check(BW_AND, 1) ? new BinaryExpr(EqualityExpr(), Consume(BW_AND).type, BWAndExpr()) : EqualityExpr();
 
         private Expr EqualityExpr()
         {
@@ -376,7 +376,7 @@ namespace Penguor.Parsing
             if (Match(TRUE)) return new BooleanExpr(true);
             if (Match(FALSE)) return new BooleanExpr(false);
             if (Match(NULL)) return new NullExpr();
-            if (Match(NUM)) return new NumExpr(Convert.ToDouble(GetPrevious().token));
+            if (Match(NUM)) return new NumExpr(Double.Parse(GetPrevious().token, System.Globalization.CultureInfo.InvariantCulture));
             if (Match(STRING)) return new StringExpr(GetPrevious().token);
             return CallExpr();
         }
@@ -403,14 +403,18 @@ namespace Penguor.Parsing
                 {
                     postfix = GetPrevious().type;
                 }
+                else
+                {
+                    callee.Add(new IdfCall(idf));
+                }
                 break;
+
             }
 
             return new CallExpr(callee, postfix);
 
             Call FunctionCall(Token name)
             {
-                Consume(LPAREN);
                 List<Expr> args = new List<Expr>();
                 if (!Match(RPAREN)) args.Add(CallExpr());
                 else return new FunctionCall(name, null);
