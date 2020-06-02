@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using Penguor.Debugging;
 using Penguor.Build;
+using Penguor.Parsing;
 using Penguor.Tools;
 
 namespace Penguor
@@ -66,24 +67,24 @@ namespace Penguor
                             }
                             break;
                         }
-                    // case "--lex": // build a program from source or Penguor project
-                    //     {
-                    //         Debug.Log("Penguor main: build started", LogLevel.Info);
-
-                    //         if (args.Length == 1)
-                    //         {
-                    //             Console.ForegroundColor = ConsoleColor.Yellow;
-                    //             Console.WriteLine("Usage: Penguor --build [script]");
-                    //             Console.ForegroundColor = ConsoleColor.White;
-                    //         }
-                    //         else if (args.Length == 2)
-                    //         {
-                    //             Lexing.Lexer l = new Lexing.Lexer();
-                    //             l.Tokenize(args[1]);
-                    //         }
-                    //         break;
-                    //     }
 #if (DEBUG)
+                    case "--lex": // build a program from source or Penguor project
+                        {
+                            Debug.Log("Penguor main: build started", LogLevel.Info);
+
+                            if (args.Length == 1)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine("Usage: Penguor --lex [script]");
+                                Console.ForegroundColor = ConsoleColor.White;
+                            }
+                            else if (args.Length == 2)
+                            {
+                                Lexing.Lexer l = new Lexing.Lexer(args[1]);
+                                List<Token> tokens = l.Tokenize();
+                            }
+                            break;
+                        }
                     case "--tools":
                         {
                             if (args.Length >= 2)
