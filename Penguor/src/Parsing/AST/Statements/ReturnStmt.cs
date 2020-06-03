@@ -13,22 +13,19 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A WhileStmt Stmt
+    /// A ReturnStmt Stmt
     /// </summary>
-    public sealed class WhileStmt : Stmt
+    public sealed class ReturnStmt : Stmt
     {
         /// <summary>
-        /// creates a new instance of WhileStmt
+        /// creates a new instance of ReturnStmt
         /// </summary>
-        public WhileStmt(Expr condition, Stmt content)
+        public ReturnStmt(Expr? value)
         {
-            Condition = condition;
-            Content = content;
+            Value = value;
         }
         /// <summary></summary>
-        public Expr Condition { get; private set; }
-        /// <summary></summary>
-        public Stmt Content { get; private set; }
+        public Expr? Value { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -47,9 +44,9 @@ namespace Penguor.Parsing.AST
     public partial interface Visitor<T>
     {
         /// <summary>
-        /// visit a WhileStmt
+        /// visit a ReturnStmt
         /// </summary>
         /// <returns></returns>
-        T Visit(WhileStmt stmt);
+        T Visit(ReturnStmt stmt);
     }
 }

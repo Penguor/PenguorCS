@@ -20,13 +20,13 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of DoStmt
         /// </summary>
-        public DoStmt(List<Stmt> statements, Expr condition)
+        public DoStmt(Stmt content, Expr condition)
         {
-            Statements = statements;
+            Content = content;
             Condition = condition;
         }
         /// <summary></summary>
-        public List<Stmt> Statements { get; private set; }
+        public Stmt Content { get; private set; }
         /// <summary></summary>
         public Expr Condition { get; private set; }
 

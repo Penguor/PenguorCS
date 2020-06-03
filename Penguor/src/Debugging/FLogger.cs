@@ -18,7 +18,7 @@ namespace Penguor.Debugging
     /// The <c>Logger</c> class writes logs
     /// to the AppData/ApplicationName/logs folder
     /// </summary>
-    internal class FLogger
+    internal class FLogger : IDisposable
     {
         // the writer for the log
         private StreamWriter writer;
@@ -108,17 +108,12 @@ namespace Penguor.Debugging
             }
         }
 
-        /// <summary>
-        /// Stops the Logger and writes down time and closing reason
-        /// </summary>
-        /// <param name="CloseReason">The reason the logger closes.</param>
-        public void EndLog(string CloseReason)
-        {
-            writer.WriteLine();
-            writer.WriteLine("Logger closing!");
+        [Obsolete("use Dispose() instead")]
+        public void EndLog(string reason) { }
 
-            writer.WriteLine("Reason: " + CloseReason); // why is the Logger ended
-            writer.WriteLine();
+        public void Dispose()
+        {
+            writer.WriteLine("\nLogger closing");
             writer.WriteLine(DateTime.Now.ToString("F", CultureInfo.CreateSpecificCulture("en-US"))); // Date at the end
 
             writer.Flush();

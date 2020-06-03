@@ -8,6 +8,8 @@
 # 
 */
 
+using System;
+
 using Penguor.Build;
 
 namespace Penguor.Debugging
@@ -194,26 +196,22 @@ namespace Penguor.Debugging
                     column = 0;
                     continue;
                 }
-                else if (source[i] == '\r')
-                {
-                    if (gotPos) break;
-                    i++;
-                    line++;
-                    column = 0;
-                    continue;
-                }
                 if (!gotPos) column++;
             }
             return $"({Builder.ActiveFile}:{line}:{column})";
         }
 
+        public static void EndLog() => fLogger.Dispose();
+
         /// <summary>
         /// Stop the logger with a reason
         /// </summary>
         /// <param name="CloseReason">Why should the logger stop</param>
+        [Obsolete]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public static void EndLog(string CloseReason)
         {
-            fLogger.EndLog(CloseReason);
+            fLogger.Dispose();
         }
     }
 }

@@ -59,6 +59,7 @@ namespace Penguor.Tools
                             Advance();
                         }
                         folder = tmp;
+                        Directory.CreateDirectory(folder);
                         using (StreamWriter writer = new StreamWriter(Path.Combine(folder, mode + ".cs")))
                         {
                             writer.Write($@"

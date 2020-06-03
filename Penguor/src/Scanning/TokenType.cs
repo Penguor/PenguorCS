@@ -20,7 +20,7 @@ namespace Penguor.Parsing
     , ABSTRACT, CONST // non-access modifiers
     , LPAREN, RPAREN // ()
     , LBRACE, RBRACE // {}
-    , LBRACK, RBRACK // []
+    , LBRACK, RBRACK, ARRAY // []
     , PLUS, MINUS // basic math operations
     , MUL, DIV, PERCENT // basic math operations
     , DPLUS, DMINUS // ++ and //

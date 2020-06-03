@@ -13,31 +13,19 @@ namespace Penguor.Parsing.AST
 {
 
     /// <summary>
-    /// A ContainerDecl Decl
+    /// A BlockDecl Decl
     /// </summary>
-    public sealed class ContainerDecl : Decl
+    public sealed class BlockDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of ContainerDecl
+        /// creates a new instance of BlockDecl
         /// </summary>
-        public ContainerDecl(TokenType? accessmod, TokenType[]? nonaccessmod, Token name, Token? parent, Decl content)
+        public BlockDecl(List<Decl> content)
         {
-            AccessMod = accessmod;
-            NonAccessMod = nonaccessmod;
-            Name = name;
-            Parent = parent;
             Content = content;
         }
         /// <summary></summary>
-        public TokenType? AccessMod { get; private set; }
-        /// <summary></summary>
-        public TokenType[]? NonAccessMod { get; private set; }
-        /// <summary></summary>
-        public Token Name { get; private set; }
-        /// <summary></summary>
-        public Token? Parent { get; private set; }
-        /// <summary></summary>
-        public Decl Content { get; private set; }
+        public List<Decl> Content { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance
@@ -56,9 +44,9 @@ namespace Penguor.Parsing.AST
     public partial interface Visitor<T>
     {
         /// <summary>
-        /// visit a ContainerDecl
+        /// visit a BlockDecl
         /// </summary>
         /// <returns></returns>
-        T Visit(ContainerDecl decl);
+        T Visit(BlockDecl decl);
     }
 }

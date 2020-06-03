@@ -38,9 +38,9 @@ namespace Penguor.Parsing
         /// <returns>a statement containing the AST of the parsed file</returns>
         public Decl Parse()
         {
-            List<Decl> declarations = new List<Decl>();
-            while (!Match(EOF)) declarations.Add(Declaration());
-            return new ProgramDecl(declarations);
+            List<Decl> statements = new List<Decl>();
+            while (!Match(EOF)) statements.Add(Declaration());
+            return new ProgramDecl(statements);
         }
 
         private Decl Declaration()
@@ -102,9 +102,9 @@ namespace Penguor.Parsing
             return new UsingDecl(call);
         }
 
-        private Decl SystemDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new SystemDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockStmt());
-        private Decl ContainerDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new ContainerDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockStmt());
-        private Decl DatatypeDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new DatatypeDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockStmt());
+        private Decl SystemDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new SystemDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
+        private Decl ContainerDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new ContainerDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
+        private Decl DatatypeDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new DatatypeDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
         private Token? GetParent() => Match(LESS) ? Consume(IDF) : (Token?)null;
 
         private Decl FunctionDecl(TokenType? accessMod, TokenType[]? nonAccessMods)
@@ -112,7 +112,7 @@ namespace Penguor.Parsing
             Expr variable = VarExpr();
 
             Consume(LPAREN);
-            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, null, BlockStmt());
+            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, null, BlockDecl());
             List<Expr> parameters = new List<Expr>();
             while (true)
             {
@@ -121,7 +121,7 @@ namespace Penguor.Parsing
                 Consume(RPAREN);
                 break;
             }
-            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, BlockStmt());
+            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, BlockDecl());
         }
 
         private Decl VarDecl(TokenType? accessMod, TokenType[]? nonAccessMods)
@@ -131,7 +131,17 @@ namespace Penguor.Parsing
             return dec;
         }
 
-        private Decl LibraryDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new LibraryDecl(accessMod, nonAccessMods, CallExpr(), BlockStmt());
+        private Decl LibraryDecl(TokenType? accessMod, TokenType[]? nonAccessMods) => new LibraryDecl(accessMod, nonAccessMods, CallExpr(), BlockDecl());
+
+        private Decl BlockDecl()
+        {
+            Consume(LBRACE);
+            List<Decl> declarations = new List<Decl>();
+            while (!Match(RBRACE)) declarations.Add(Declaration());
+
+            return new BlockDecl(declarations);
+        }
+
         private Decl DeclStmt() => new DeclStmt(Statement());
 
         private Stmt Statement()
@@ -166,10 +176,10 @@ namespace Penguor.Parsing
         private Stmt BlockStmt()
         {
             Match(LBRACE);
-            List<Decl> declarations = new List<Decl>();
-            while (!Match(RBRACE)) declarations.Add(Declaration());
+            List<Stmt> statements = new List<Stmt>();
+            while (!Match(RBRACE)) statements.Add(Statement());
 
-            return new BlockStmt(declarations);
+            return new BlockStmt(statements);
         }
 
         private Stmt IfStmt()
@@ -178,21 +188,15 @@ namespace Penguor.Parsing
             Expr condition = Expression();
             Consume(RPAREN);
 
-            Consume(LBRACE);
-            List<Stmt> statements = new List<Stmt>();
-            while (!Match(RBRACE)) statements.Add(Statement());
+            Stmt ifC = Statement();
 
             List<Stmt> elif = new List<Stmt>();
             while (Match(ELIF)) elif.Add(ElifStmt());
 
-            List<Stmt> elseC = new List<Stmt>();
-            if (Match(ELSE))
-            {
-                Consume(LBRACE);
-                while (!Match(RBRACE)) elseC.Add(Statement());
-            }
+            Stmt? elseC = null;
+            if (Match(ELSE)) elseC = Statement();
 
-            return new IfStmt(condition, statements, elif, elseC);
+            return new IfStmt(condition, ifC, elif, elseC);
         }
 
         private Stmt ElifStmt()
@@ -201,11 +205,7 @@ namespace Penguor.Parsing
             Expr condition = Expression();
             Consume(RPAREN);
 
-            Consume(LBRACE);
-            List<Stmt> statements = new List<Stmt>();
-            while (!Match(RBRACE)) statements.Add(Statement());
-
-            return new ElifStmt(condition, statements);
+            return new ElifStmt(condition, Statement());
         }
 
         private Stmt WhileStmt()
@@ -214,14 +214,7 @@ namespace Penguor.Parsing
             Expr condition = Expression();
             Consume(RPAREN);
 
-            Consume(LBRACE);
-            List<Stmt> statements = new List<Stmt>();
-            while (!Match(RBRACE))
-            {
-                statements.Add(Statement());
-            }
-
-            return new WhileStmt(condition, statements);
+            return new WhileStmt(condition, Statement());
         }
 
         private Stmt ForStmt()
@@ -232,25 +225,19 @@ namespace Penguor.Parsing
             Expr vars = CallExpr();
             Consume(RPAREN);
 
-            Consume(LBRACE);
-            List<Stmt> statements = new List<Stmt>();
-            while (!Match(RBRACE)) statements.Add(Statement());
-
-            return new ForStmt(current, vars, statements);
+            return new ForStmt(current, vars, Statement());
         }
 
         private Stmt DoStmt()
         {
-            Consume(LBRACE);
-            List<Stmt> statements = new List<Stmt>();
-            while (!Match(RBRACE)) statements.Add(Statement());
+            Stmt content = Statement();
 
             Consume(WHILE);
             Consume(LPAREN);
             Expr condition = Expression();
             Consume(RPAREN);
 
-            return new DoStmt(statements, condition);
+            return new DoStmt(content, condition);
         }
 
         private Stmt SwitchStmt()
@@ -268,10 +255,7 @@ namespace Penguor.Parsing
             } while (!Match(RBRACE) && !Check(DEFAULT));
 
             Stmt? defaultCase = null;
-            if (Match(DEFAULT))
-            {
-                do { cases.Add(CaseStmt()); } while (!Match(RBRACE));
-            }
+            if (Match(DEFAULT)) defaultCase = CaseStmt();
 
             return new SwitchStmt(condition, cases, defaultCase);
         }
@@ -398,7 +382,7 @@ namespace Penguor.Parsing
                     callee.Add(FunctionCall(idf));
                     if (Match(DOT)) continue;
                 }
-                else if (Match(DPLUS, DMINUS))
+                else if (Match(DPLUS, DMINUS, ARRAY))
                 {
                     postfix = GetPrevious().type;
                 }

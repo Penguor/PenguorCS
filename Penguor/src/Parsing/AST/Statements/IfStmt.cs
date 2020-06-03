@@ -20,21 +20,21 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of IfStmt
         /// </summary>
-        public IfStmt(Expr condition, List<Stmt> statements, List<Stmt> elif, List<Stmt> elsec)
+        public IfStmt(Expr condition, Stmt ifc, List<Stmt> elif, Stmt? elsec)
         {
             Condition = condition;
-            Statements = statements;
+            IfC = ifc;
             Elif = elif;
             ElseC = elsec;
         }
         /// <summary></summary>
         public Expr Condition { get; private set; }
         /// <summary></summary>
-        public List<Stmt> Statements { get; private set; }
+        public Stmt IfC { get; private set; }
         /// <summary></summary>
         public List<Stmt> Elif { get; private set; }
         /// <summary></summary>
-        public List<Stmt> ElseC { get; private set; }
+        public Stmt? ElseC { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

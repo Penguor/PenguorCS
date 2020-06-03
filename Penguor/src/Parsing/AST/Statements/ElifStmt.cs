@@ -20,7 +20,7 @@ namespace Penguor.Parsing.AST
         /// <summary>
         /// creates a new instance of ElifStmt
         /// </summary>
-        public ElifStmt(Expr condition, List<Stmt> content)
+        public ElifStmt(Expr condition, Stmt content)
         {
             Condition = condition;
             Content = content;
@@ -28,7 +28,7 @@ namespace Penguor.Parsing.AST
         /// <summary></summary>
         public Expr Condition { get; private set; }
         /// <summary></summary>
-        public List<Stmt> Content { get; private set; }
+        public Stmt Content { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

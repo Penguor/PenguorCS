@@ -13,25 +13,26 @@ StringExpr string value
 EOFExpr
 ; Stmt "Penguor\src\Parsing\AST\Statements"
 PPStmt TokenType dir Token[] val
-BlockStmt List<Decl> content
-IfStmt Expr condition List<Stmt> statements List<Stmt> elif List<Stmt> elseC
-ElifStmt Expr condition List<Stmt> content
-CaseStmt Expr condition List<Stmt> statements
-WhileStmt Expr condition List<Stmt> statements
-DoStmt List<Stmt> statements Expr condition
-ForStmt Expr currentVar Expr vars List<Stmt> statements
+BlockStmt List<Stmt> content
+IfStmt Expr condition Stmt ifC List<Stmt> elif Stmt? elseC
+ElifStmt Expr condition Stmt content
+WhileStmt Expr condition Stmt content
+DoStmt Stmt content Expr condition
+ForStmt Expr currentVar Expr vars Stmt content
 SwitchStmt Expr condition List<Stmt> cases Stmt? defaultCase
-CaseStmt Expr? condition List<Stmt> statements
+CaseStmt Expr? condition List<Stmt> content
+ReturnStmt Expr? value
 ExprStmt Expr expr
 ; Decl "Penguor\src\Parsing\AST\Declarations"
 ProgramDecl List<Decl> declarations
 UsingDecl Expr lib
-SystemDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Stmt content
-ContainerDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Stmt content
-DatatypeDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Stmt content
-FunctionDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable List<Expr>? parameters Stmt content
-LibraryDecl TokenType? accessMod TokenType[]? nonAccessMod Expr name Stmt content
+SystemDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Decl content
+ContainerDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Decl content
+DatatypeDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Decl content
+FunctionDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable List<Expr>? parameters Decl content
+LibraryDecl TokenType? accessMod TokenType[]? nonAccessMod Expr name Decl content
 VarDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable Expr? init
+BlockDecl List<Decl> content
 DeclStmt Stmt stmt
 ; Call "Penguor\src\Parsing\AST\Calls"
 FunctionCall Token name List<Expr>? args

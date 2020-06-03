@@ -230,7 +230,8 @@ namespace Penguor.Lexing
                         AddToken(TokenType.RBRACE);
                         break;
                     case '[':
-                        AddToken(TokenType.LBRACK);
+                        while (char.IsWhiteSpace(Peek())) Advance();
+                        AddToken(Match(']') ? TokenType.ARRAY : TokenType.LBRACK);
                         break;
                     case ']':
                         AddToken(TokenType.RBRACK);
