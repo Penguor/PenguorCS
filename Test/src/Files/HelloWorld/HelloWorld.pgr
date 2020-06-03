@@ -1,0 +1,7 @@
+public system Hello
+{
+    void execute()
+    {
+        print("Hello World");
+    }
+}

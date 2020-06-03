@@ -1,0 +1,55 @@
+// I wrote this code in a couple of minutes, it is not optimized 
+// by any means
+
+using Standard;
+
+public system Fibonacci
+{
+    public void execute()
+    {
+        print(getFibonacci(0))
+        for(int i : range(1, 10))
+        {
+            print(", " + getFibonacci(i));
+        }
+
+        printLn();
+        print(fibMoivreBinet(0))
+        for(int i : range(1, 10))
+        {
+            print(", " + fibMoivreBinet(i));
+        }
+    }
+
+    // returns all the fibonacci number at n
+    private int getFibonacci(int n)
+    {
+        if(n == 0)
+        {
+            return 0;
+        }
+        elif(n == 1)
+        {
+            return 1;
+        }
+        else
+        {
+            return getFibonacci(n - 1) + getFibonacci(n - 2);
+        }
+    }
+
+    // like above, but using a different algorithm
+    private int fibMoivreBinet(int n)
+    {
+        return (
+            (1/5) * (
+                (pow(
+                    (1 + sqrt(5)
+                )/2), n)
+                 -
+                (pow(
+                    (1 - sqrt(5)
+                )/2), n)
+            ));
+    }
+}

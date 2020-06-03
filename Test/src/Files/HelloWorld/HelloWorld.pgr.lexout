@@ -1,0 +1,17 @@
+type: PUBLIC, token: , offset: 0, length: 6
+type: SYSTEM, token: , offset: 7, length: 6
+type: IDF, token: Hello, offset: 14, length: 5
+type: LBRACE, token: , offset: 21, length: 1
+type: IDF, token: void, offset: 28, length: 4
+type: IDF, token: execute, offset: 33, length: 7
+type: LPAREN, token: , offset: 40, length: 1
+type: RPAREN, token: , offset: 41, length: 1
+type: LBRACE, token: , offset: 48, length: 1
+type: IDF, token: print, offset: 59, length: 5
+type: LPAREN, token: , offset: 64, length: 1
+type: STRING, token: Hello World, offset: 65, length: 13
+type: RPAREN, token: , offset: 78, length: 1
+type: SEMICOLON, token: , offset: 79, length: 1
+type: RBRACE, token: , offset: 86, length: 1
+type: RBRACE, token: , offset: 89, length: 1
+type: EOF, token: , offset: 89, length: 1
