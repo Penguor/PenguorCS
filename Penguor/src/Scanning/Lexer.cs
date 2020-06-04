@@ -199,7 +199,7 @@ namespace Penguor.Lexing
                         if (Match('/'))
                             while (!Match('\n')) Advance();
                         else if (Match('*'))
-                            while (!(Match('*') && !Match('/'))) Advance();
+                            while (!(Match('*') && Match('/'))) Advance();
                         else AddToken(Match('=') ? TokenType.DIV_ASSIGN : TokenType.DIV);
                         break;
                     case '%':
