@@ -146,7 +146,7 @@ namespace Penguor.Parsing
 
         private Stmt Statement()
         {
-            if (Match(HASHTAG)) return PPStmt();
+            if (Match(HASHTAG)) return CompilerStmt();
             if (Check(LBRACE)) return BlockStmt();
             if (Match(IF)) return IfStmt();
             if (Match(WHILE)) return WhileStmt();
@@ -157,7 +157,7 @@ namespace Penguor.Parsing
             return ExprStmt();
         }
 
-        private Stmt PPStmt()
+        private Stmt CompilerStmt()
         {
             Token[] val;
             Token dir = Advance();
@@ -171,6 +171,7 @@ namespace Penguor.Parsing
                 default:
                     throw new PenguorException(8, dir.offset, (dir.type == IDF || dir.type == NUM) ? dir.token : TTypePrettyString(dir.type));
             }
+            Consume(SEMICOLON);
             return new PPStmt(dir.type, val);
         }
 

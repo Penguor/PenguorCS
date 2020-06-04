@@ -1,4 +1,4 @@
-#safety 1
+#safety 1;
 
 using Math;
 using Hello;
@@ -24,6 +24,8 @@ library ShowPenguor
             }
         }
     }
+
+    /*/*nested block comments :) */*/
 
     // containers are there to store data
     container HelloData

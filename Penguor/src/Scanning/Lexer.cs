@@ -11,7 +11,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
-using System;
 using Penguor.Debugging;
 using Penguor.Parsing;
 
@@ -57,7 +56,6 @@ namespace Penguor.Lexing
             current = 0;
 
             StringBuilder stringBuilder = new StringBuilder();
-
             while (!AtEnd())
             {
                 stringBuilder.Clear();
@@ -199,7 +197,15 @@ namespace Penguor.Lexing
                         if (Match('/'))
                             while (!Match('\n')) Advance();
                         else if (Match('*'))
-                            while (!(Match('*') && Match('/'))) Advance();
+                        {
+                            int nested = 1;
+                            while (nested > 0)
+                            {
+                                if (Match('/') && Match('*')) nested++;
+                                else if (Match('*') && Match('/')) nested--;
+                                else Advance();
+                            }
+                        }
                         else AddToken(Match('=') ? TokenType.DIV_ASSIGN : TokenType.DIV);
                         break;
                     case '%':
