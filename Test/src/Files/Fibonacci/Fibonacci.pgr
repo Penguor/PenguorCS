@@ -1,6 +1,8 @@
 // I wrote this code in a couple of minutes, it is not optimized 
 // by any means
 
+#safety 2
+
 using Standard;
 
 public system Fibonacci
@@ -21,10 +23,11 @@ public system Fibonacci
         }
     }
 
-    // returns all the fibonacci number at n
+    // returns the fibonacci number at n
     private int getFibonacci(int n)
     {
-        if(n == 0)
+        
+        if(n == 1.0)
         {
             return 0;
         }
@@ -38,18 +41,18 @@ public system Fibonacci
         }
     }
 
-    // like above, but using a different algorithm
+    // like the one above, but using a different algorithm
     private int fibMoivreBinet(int n)
     {
         return (
-            (1/5) * (
+            (1 / 5) * (
                 (pow(
                     (1 + sqrt(5)
-                )/2), n)
+                ) / 2), n)
                  -
                 (pow(
                     (1 - sqrt(5)
-                )/2), n)
+                ) / 2), n)
             ));
     }
 }

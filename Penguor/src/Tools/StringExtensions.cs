@@ -12,7 +12,7 @@
 #
 */
 
-#if (DEBUG)
+
 
 namespace Penguor.Tools
 {
@@ -27,4 +27,3 @@ namespace Penguor.Tools
         }
     }
 }
-#endif

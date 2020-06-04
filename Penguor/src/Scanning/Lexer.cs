@@ -108,12 +108,6 @@ namespace Penguor.Lexing
                         case "do":
                             AddToken(TokenType.DO);
                             break;
-                        case "from":
-                            AddToken(TokenType.FROM);
-                            break;
-                        case "include":
-                            AddToken(TokenType.INCLUDE);
-                            break;
                         case "safety":
                             AddToken(TokenType.SAFETY);
                             break;

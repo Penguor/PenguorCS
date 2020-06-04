@@ -153,6 +153,7 @@ namespace Penguor.Parsing
             if (Match(FOR)) return ForStmt();
             if (Match(DO)) return DoStmt();
             if (Match(SWITCH)) return SwitchStmt();
+            if (Match(RETURN)) return ReturnStmt();
             return ExprStmt();
         }
 
@@ -280,6 +281,17 @@ namespace Penguor.Parsing
             }
 
             return new CaseStmt(condition, statements);
+        }
+
+        private Stmt ReturnStmt()
+        {
+            if (Match(SEMICOLON)) return new ReturnStmt(null);
+            else
+            {
+                Expr expr = Expression();
+                Consume(SEMICOLON);
+                return new ReturnStmt(expr);
+            }
         }
 
         private Stmt ExprStmt()
@@ -508,8 +520,7 @@ namespace Penguor.Parsing
             switch (type)
             {
                 case HASHTAG: return "#";
-                case FROM: return "from";
-                case INCLUDE: return "include";
+                case USING: return "using";
                 case SAFETY: return "safety";
                 case PUBLIC: return "public";
                 case PRIVATE: return "private";
