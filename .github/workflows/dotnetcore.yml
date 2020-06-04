@@ -16,5 +16,14 @@ jobs:
         run: dotnet build --configuration Debug
       - name: Build release
         run: dotnet build --configuration Release
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.300
       - name: Run tests
         run: dotnet test
