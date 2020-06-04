@@ -51,9 +51,9 @@ namespace Penguor.Compiler.Tests
             foreach (var t in tokens) writer.WriteLine(t.ToString());
         }
 
-        private List<String> TokensToString(ref List<Token> tokens)
+        private List<string> TokensToString(ref List<Token> tokens)
         {
-            List<String> stringTokens = new List<string>();
+            List<string> stringTokens = new List<string>();
             foreach (var t in tokens) stringTokens.Add(t.ToString());
             return stringTokens;
         }
