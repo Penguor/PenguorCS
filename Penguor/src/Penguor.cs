@@ -11,8 +11,8 @@
 using System;
 using System.Collections.Generic;
 using Penguor.Debugging;
-using Penguor.Build;
-using Penguor.Parsing;
+using Penguor.Compiler.Build;
+using Penguor.Compiler.Parsing;
 using Penguor.Tools;
 
 namespace Penguor
@@ -28,7 +28,6 @@ namespace Penguor
             {
                 // print the Penguor info
                 Console.WriteLine("Penguor\n\n (c) 2019-2020 Carl Schierig");
-                Debug.Log("Penguor info displayed", LogLevel.Info);
             }
             else
             {
@@ -52,7 +51,6 @@ namespace Penguor
                     case "-b":
                     case "--build": // build a program from source or Penguor project
                         {
-                            Debugging.Debug.Log("Penguor main: build started", LogLevel.Info);
 
                             if (args.Length == 1)
                             {
@@ -63,7 +61,7 @@ namespace Penguor
                             else if (args.Length == 2)
                             {
                                 // check for grammar argument without folder arg
-                                BuildSource(args[1]);
+                                BuildManager.SmartBuild(args[1]);
                             }
                             break;
                         }
@@ -80,8 +78,9 @@ namespace Penguor
                             }
                             else if (args.Length == 2)
                             {
-                                Lexing.Lexer l = new Lexing.Lexer(args[1]);
-                                List<Token> tokens = l.Tokenize();
+                                Builder builder = new Builder(args[1]);
+                                List<Token> tokens = builder.Lex();
+                                foreach (Token token in tokens) Debug.Log(token.ToString(), LogLevel.Debug);
                             }
                             break;
                         }
@@ -108,14 +107,6 @@ namespace Penguor
                         }
                 }
             }
-        }
-
-        // build program from  source
-        static void BuildSource(string file)
-        {
-            Debugging.Debug.Log("Penguor main: Build process started", LogLevel.Info);
-            Builder builder = new Builder();
-            builder.BuildFromSource(file);
         }
     }
 }

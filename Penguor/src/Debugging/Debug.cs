@@ -10,7 +10,7 @@
 
 using System;
 
-using Penguor.Build;
+using Penguor.Compiler.Build;
 
 namespace Penguor.Debugging
 {
@@ -69,17 +69,6 @@ namespace Penguor.Debugging
         }
 
         /// <summary>
-        /// Log multiple line of text with the given Log level
-        /// </summary>
-        /// <param name="logText">The lines to log</param>
-        /// <param name="logLevel">The loglevel</param>
-        [System.Obsolete("Currently not working")]
-        public static void Log(string[] logText, LogLevel logLevel)
-        {
-            //fLogger.Log(logText, logLevel);
-        }
-
-        /// <summary>
         /// log a PenguorCS compiler debug message
         /// </summary>
         /// <param name="message"></param>
@@ -132,9 +121,10 @@ namespace Penguor.Debugging
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        public static void CastPGR(int message, int offset, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
+        public static void CastPGR(int message, int offset, string file, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
         {
             string currentMessage = "";
+            bool printOffset = true;
             LogLevel level = LogLevel.Debug;
             switch (message)
             {
@@ -156,6 +146,7 @@ namespace Penguor.Debugging
                     break;
                 case 5:
                     currentMessage = $"[PGR-0005] Source file '{arg0}' not found";
+                    printOffset = false;
                     level = LogLevel.Error;
                     break;
                 case 6:
@@ -171,15 +162,15 @@ namespace Penguor.Debugging
                     level = LogLevel.Error;
                     break;
             }
-            currentMessage += " " + GetSourcePosition(offset);
-            Builder.ExitCode = message;
+            if (printOffset) currentMessage += " " + GetSourcePosition(offset, file);
+            //Builder.ExitCode = message;
             Log(currentMessage, level);
         }
 
-        private static string GetSourcePosition(int offset)
+        private static string GetSourcePosition(int offset, string file)
         {
             string source;
-            using (System.IO.StreamReader reader = new System.IO.StreamReader(Builder.ActiveFile))
+            using (System.IO.StreamReader reader = new System.IO.StreamReader(file))
             {
                 source = reader.ReadToEnd();
             }
@@ -198,7 +189,7 @@ namespace Penguor.Debugging
                 }
                 if (!gotPos) column++;
             }
-            return $"({Builder.ActiveFile}:{line}:{column})";
+            return $"({file}:{line}:{column})";
         }
 
         public static void EndLog() => fLogger.Dispose();

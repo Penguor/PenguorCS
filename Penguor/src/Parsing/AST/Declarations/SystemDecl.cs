@@ -9,7 +9,7 @@
 
 using System.Collections.Generic;
 
-namespace Penguor.Parsing.AST
+namespace Penguor.Compiler.Parsing.AST
 {
 
     /// <summary>
@@ -44,7 +44,7 @@ namespace Penguor.Parsing.AST
         /// </summary>
         /// <param name="visitor">the visitor which should visit this instance</param>
         /// <returns>Visit() of this instance</returns>
-        public override T Accept<T>(Visitor<T> visitor)
+        public override T Accept<T>(IVisitor<T> visitor)
         {
             return visitor.Visit(this);
         }
@@ -53,7 +53,7 @@ namespace Penguor.Parsing.AST
     /// <summary>
     /// Contains methods to visit all Decl
     /// </summary>
-    public partial interface Visitor<T>
+    public partial interface IVisitor<T>
     {
         /// <summary>
         /// visit a SystemDecl

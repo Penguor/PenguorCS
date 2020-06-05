@@ -11,8 +11,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
-using Penguor.Debugging;
-using Penguor.Parsing;
+using Penguor.Compiler.Build;
+using Penguor.Compiler.Parsing;
 
 namespace Penguor.Lexing
 {
@@ -22,8 +22,8 @@ namespace Penguor.Lexing
     public class Lexer
     {
         private List<Token> tokens = new List<Token>();
-
         string source;
+        Builder builder;
 
         int current = 0;
         int offset = 0;
@@ -32,8 +32,10 @@ namespace Penguor.Lexing
         /// create a new instance of the Lexer class
         /// </summary>
         /// <param name="filePath">the file to scan</param>
-        public Lexer(string filePath)
+        /// <param name="builder">the Builder this class is executed from</param>
+        public Lexer(string filePath, Builder builder)
         {
+            this.builder = builder;
             source = "";
             try
             {
@@ -42,7 +44,7 @@ namespace Penguor.Lexing
             }
             catch (FileNotFoundException)
             {
-                Debugging.Debug.CastPGR(5, 0, filePath);
+                builder.Exception(5, 0, filePath);
             }
         }
 
@@ -52,7 +54,6 @@ namespace Penguor.Lexing
         /// <returns>a list of tokens</returns>
         public List<Token> Tokenize()
         {
-            Debugging.Debug.Log("Starting Tokenize()", LogLevel.Info);
             current = 0;
 
             StringBuilder stringBuilder = new StringBuilder();
@@ -270,7 +271,7 @@ namespace Penguor.Lexing
                         AddToken(Match('=') ? TokenType.EQUALS : TokenType.ASSIGN);
                         break;
                     default:
-                        Debug.CastPGR(7, offset, c.ToString());
+                        builder.Exception(7, offset, c.ToString());
                         break;
                 }
             }

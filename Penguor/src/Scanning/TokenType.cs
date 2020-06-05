@@ -9,7 +9,7 @@
 */
 #pragma warning disable 1591
 
-namespace Penguor.Parsing
+namespace Penguor.Compiler.Parsing
 {
     public enum TokenType : byte
     {

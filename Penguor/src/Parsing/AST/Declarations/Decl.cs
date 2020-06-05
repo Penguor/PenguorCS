@@ -8,7 +8,7 @@
 # 
 */
 
-namespace Penguor.Parsing.AST
+namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
     /// Base class for penguor Decl
@@ -20,6 +20,6 @@ namespace Penguor.Parsing.AST
         /// </summary>
         /// <param name="visitor">the visitor which visits this instance of Decl</param>
         /// <returns></returns>
-        public abstract T Accept<T>(Visitor<T> visitor);
+        public abstract T Accept<T>(IVisitor<T> visitor);
     }
 }

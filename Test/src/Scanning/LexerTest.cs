@@ -13,8 +13,8 @@ using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
-using Penguor.Lexing;
-using Penguor.Parsing;
+using Penguor.Compiler.Build;
+using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler.Tests
 {
@@ -23,16 +23,16 @@ namespace Penguor.Compiler.Tests
         [Fact]
         public void TestHelloWorld()
         {
-            Lexer lexer = new Lexer(@"src\Files\HelloWorld\HelloWorld.pgr");
-            List<Token> tokens = lexer.Tokenize();
+            Builder builder = new Builder(@"src\Files\HelloWorld\HelloWorld.pgr");
+            List<Token> tokens = builder.Lex();
             Assert.Equal(TokensToString(ref tokens), GetTokens(@"src\Files\HelloWorld\HelloWorld.pgr.lexout"));
         }
 
         [Fact]
         public void TestFibonacci()
         {
-            Lexer lexer = new Lexer(@"src\Files\Fibonacci\Fibonacci.pgr");
-            List<Token> tokens = lexer.Tokenize();
+            Builder builder = new Builder(@"src\Files\Fibonacci\Fibonacci.pgr");
+            List<Token> tokens = builder.Lex();
             Assert.Equal(TokensToString(ref tokens), GetTokens(@"src\Files\Fibonacci\Fibonacci.pgr.lexout"));
         }
 

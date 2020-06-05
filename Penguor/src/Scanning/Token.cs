@@ -8,7 +8,7 @@
 # 
 */
 
-namespace Penguor.Parsing
+namespace Penguor.Compiler.Parsing
 {
     /// <summary>
     /// a Penguor token

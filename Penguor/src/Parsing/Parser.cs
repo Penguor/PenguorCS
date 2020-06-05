@@ -11,10 +11,11 @@
 using System;
 using System.Collections.Generic;
 using Penguor.Debugging;
-using Penguor.Parsing.AST;
-using static Penguor.Parsing.TokenType;
+using Penguor.Compiler.Parsing.AST;
+using Penguor.Compiler.Build;
+using static Penguor.Compiler.Parsing.TokenType;
 
-namespace Penguor.Parsing
+namespace Penguor.Compiler.Parsing
 {
     /// <summary>
     /// The Penguor parser
@@ -23,12 +24,16 @@ namespace Penguor.Parsing
     {
         private List<Token> tokens;
         private int current = 0;
+
+        private Builder builder;
+
         /// <summary>
         /// create a new parser with the tokens that should be parsed
         /// </summary>
         /// <param name="tokens">The tokens to parse</param>
-        public Parser(List<Token> tokens)
+        public Parser(List<Token> tokens, Builder builder)
         {
+            this.builder = builder;
             this.tokens = tokens;
         }
 
