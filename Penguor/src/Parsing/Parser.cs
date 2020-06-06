@@ -31,6 +31,7 @@ namespace Penguor.Compiler.Parsing
         /// create a new parser with the tokens that should be parsed
         /// </summary>
         /// <param name="tokens">The tokens to parse</param>
+        /// <param name="builder">the builder which executed the parser</param>
         public Parser(List<Token> tokens, Builder builder)
         {
             this.builder = builder;

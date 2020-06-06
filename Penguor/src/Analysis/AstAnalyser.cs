@@ -10,181 +10,244 @@
 
 using Penguor.Compiler.Parsing.AST;
 
+using static Penguor.Compiler.Parsing.TokenType;
+
+#pragma warning disable 1591
+
 namespace Penguor.Compiler.Analysis
 {
-    public class AstAnalyser : IVisitor<string>
+    public class AstAnalyser : IDeclVisitor<object>, IStmtVisitor<object>, IExprVisitor<object>, ICallVisitor<object>
     {
-        public string Visit(FunctionCall call)
+
+        public object Visit(FunctionCall call)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(IdfCall call)
+        public object Visit(IdfCall call)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(BlockDecl decl)
+        public object Visit(BlockDecl decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(ContainerDecl decl)
+        public object Visit(ContainerDecl decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(DatatypeDecl decl)
+        public object Visit(DatatypeDecl decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(DeclStmt decl)
+        public object Visit(DeclStmt decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(FunctionDecl decl)
+        public object Visit(FunctionDecl decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(LibraryDecl decl)
+        public object Visit(LibraryDecl decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(ProgramDecl decl)
+        public object Visit(ProgramDecl decl)
+        {
+            foreach (var declaration in decl.Declarations) declaration.Accept(this);
+            throw new System.NotImplementedException();
+        }
+
+        public object Visit(SystemDecl decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(SystemDecl decl)
+        public object Visit(UsingDecl decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(UsingDecl decl)
+        public object Visit(VarDecl decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(VarDecl decl)
+        public object Visit(AssignExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(AssignExpr expr)
+        public object Visit(BinaryExpr expr)
+        {
+            switch (expr.Op)
+            {
+                case PLUS:
+                    if (expr.Lhs.GetType() == typeof(NumExpr) && expr.Rhs.GetType() == typeof(NumExpr))
+                    {
+                        NumExpr lhs = (NumExpr)expr.Lhs;
+                        NumExpr rhs = (NumExpr)expr.Rhs;
+
+                        return new NumExpr(lhs.Value + rhs.Value);
+                    }
+                    break;
+                case MINUS:
+                    if (expr.Lhs.GetType() == typeof(NumExpr) && expr.Rhs.GetType() == typeof(NumExpr))
+                    {
+                        NumExpr lhs = (NumExpr)expr.Lhs;
+                        NumExpr rhs = (NumExpr)expr.Rhs;
+
+                        return new NumExpr(lhs.Value - rhs.Value);
+                    }
+                    break;
+                case MUL:
+                    if (expr.Lhs.GetType() == typeof(NumExpr) && expr.Rhs.GetType() == typeof(NumExpr))
+                    {
+                        NumExpr lhs = (NumExpr)expr.Lhs;
+                        NumExpr rhs = (NumExpr)expr.Rhs;
+
+                        return new NumExpr(lhs.Value * rhs.Value);
+                    }
+                    break;
+                case DIV:
+                    if (expr.Lhs.GetType() == typeof(NumExpr) && expr.Rhs.GetType() == typeof(NumExpr))
+                    {
+                        NumExpr lhs = (NumExpr)expr.Lhs;
+                        NumExpr rhs = (NumExpr)expr.Rhs;
+
+                        return new NumExpr(lhs.Value / rhs.Value);
+                    }
+                    break;
+                case AND:
+                    if (expr.Lhs.GetType() == typeof(BooleanExpr))
+                    {
+                        bool lhs = ((BooleanExpr)expr.Lhs).Value;
+                        bool rhs = ((BooleanExpr)expr.Rhs).Value;
+                        return (lhs && rhs);
+                    }
+                    break;
+                case OR:
+                    if (expr.Lhs.GetType() == typeof(BooleanExpr))
+                    {
+                        bool lhs = ((BooleanExpr)expr.Lhs).Value;
+                        bool rhs = ((BooleanExpr)expr.Rhs).Value;
+                        return (lhs || rhs);
+                    }
+                    break;
+                default:
+                    return expr;
+            }
+            throw new System.ArgumentException();
+        }
+
+        public object Visit(BooleanExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(BinaryExpr expr)
+        public object Visit(CallExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(BooleanExpr expr)
+        public object Visit(EOFExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(CallExpr expr)
+        public object Visit(GroupingExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(EOFExpr expr)
+        public object Visit(IdentifierExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(GroupingExpr expr)
+        public object Visit(NullExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(IdentifierExpr expr)
+        public object Visit(NumExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(NullExpr expr)
+        public object Visit(StringExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(NumExpr expr)
+        public object Visit(UnaryExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(StringExpr expr)
+        public object Visit(VarExpr expr)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(UnaryExpr expr)
+        public object Visit(BlockStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(VarExpr expr)
+        public object Visit(CaseStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(BlockStmt stmt)
+        public object Visit(DoStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(CaseStmt stmt)
+        public object Visit(ElifStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(DoStmt stmt)
+        public object Visit(ExprStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(ElifStmt stmt)
+        public object Visit(ForStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(ExprStmt stmt)
+        public object Visit(IfStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(ForStmt stmt)
+        public object Visit(PPStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(IfStmt stmt)
+        public object Visit(ReturnStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(PPStmt stmt)
+        public object Visit(SwitchStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public string Visit(ReturnStmt stmt)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public string Visit(SwitchStmt stmt)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public string Visit(WhileStmt stmt)
+        public object Visit(WhileStmt stmt)
         {
             throw new System.NotImplementedException();
         }

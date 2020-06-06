@@ -84,7 +84,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// </summary>
         /// <param name=""visitor"">the visitor which visits this instance of {mode}</param>
         /// <returns></returns>
-        public abstract T Accept<T>(IVisitor<T> visitor);
+        public abstract T Accept<T>(I{mode.ToUppercase()}Visitor<T> visitor);
     }}
 }}
 ");
@@ -186,7 +186,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// </summary>
         /// <param name=""visitor"">the visitor which should visit this instance</param>
         /// <returns>Visit() of this instance</returns>
-        public override T Accept<T>(IVisitor<T> visitor)
+        public override T Accept<T>(I{mode!.ToUppercase()}Visitor<T> visitor)
         {{
             return visitor.Visit(this);
         }}
@@ -195,7 +195,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// Contains methods to visit all {mode}
     /// </summary>
-    public partial interface IVisitor<T>
+    public partial interface I{mode!.ToUppercase()}Visitor<T>
     {{
         /// <summary>
         /// visit a {name.ToUppercase()}

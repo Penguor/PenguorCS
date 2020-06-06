@@ -20,6 +20,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// </summary>
         /// <param name="visitor">the visitor which visits this instance of Decl</param>
         /// <returns></returns>
-        public abstract T Accept<T>(IVisitor<T> visitor);
+        public abstract T Accept<T>(IDeclVisitor<T> visitor);
     }
 }

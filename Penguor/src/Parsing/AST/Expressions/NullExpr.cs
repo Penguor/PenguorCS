@@ -29,7 +29,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// </summary>
         /// <param name="visitor">the visitor which should visit this instance</param>
         /// <returns>Visit() of this instance</returns>
-        public override T Accept<T>(IVisitor<T> visitor)
+        public override T Accept<T>(IExprVisitor<T> visitor)
         {
             return visitor.Visit(this);
         }
@@ -38,7 +38,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// Contains methods to visit all Expr
     /// </summary>
-    public partial interface IVisitor<T>
+    public partial interface IExprVisitor<T>
     {
         /// <summary>
         /// visit a NullExpr
