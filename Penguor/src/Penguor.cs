@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using Penguor.Debugging;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Parsing;
+using Penguor.Compiler.Parsing.AST;
 using Penguor.Tools;
 
 namespace Penguor
@@ -61,7 +62,16 @@ namespace Penguor
                             else if (args.Length == 2)
                             {
                                 // check for grammar argument without folder arg
-                                BuildManager.SmartBuild(args[1]);
+                                BuildManager.SmartBuild(args[1], "");
+                            }
+                            else if (args.Length == 4)
+                            {
+                                switch (args[2])
+                                {
+                                    case "--transpile":
+                                        BuildManager.SmartBuild(args[1], args[3], true);
+                                        break;
+                                }
                             }
                             break;
                         }

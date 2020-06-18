@@ -117,6 +117,7 @@ namespace Penguor.Debugging
         /// </summary>
         /// <param name="message"></param>
         /// <param name="offset">the offset where the error occurred</param>
+        /// <param name="file">the file where the error occurred</param>
         /// <param name="arg0"></param>
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>

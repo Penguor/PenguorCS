@@ -49,6 +49,7 @@ namespace Penguor.Compiler.Parsing
             this.length = length;
         }
 
+
         /// <summary>
         /// 
         /// </summary>

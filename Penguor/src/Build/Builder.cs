@@ -14,6 +14,7 @@ using Penguor.Debugging;
 using Penguor.Lexing;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
+using Penguor.Compiler.Transpiling;
 
 using IOFile = System.IO.File;
 
@@ -27,7 +28,21 @@ namespace Penguor.Compiler.Build
     {
         private int exitCode = 0;
         List<Token>? tokens;
+        Decl? program;
 
+        /// <summary>
+        /// has the lexer run?
+        /// </summary>
+        public bool lexerFinished = false;
+        /// <summary>
+        /// has the parser run?
+        /// </summary>
+        public bool parserFinished = false;
+
+        /// <summary>
+        /// the source file this builder builds
+        /// </summary>
+        /// <value></value>
         public string File { get; }
 
         /// <summary>
@@ -35,6 +50,10 @@ namespace Penguor.Compiler.Build
         /// </summary>
         public int ExitCode { get { return exitCode; } }
 
+        /// <summary>
+        /// create a new instance of the Builder class
+        /// </summary>
+        /// <param name="file">the source file this builder is using</param>
         public Builder(string file)
         {
             if (IOFile.Exists(file)) File = file;
@@ -54,6 +73,10 @@ namespace Penguor.Compiler.Build
             return ExitCode;
         }
 
+        /// <summary>
+        /// Split up the source file into tokens
+        /// </summary>
+        /// <returns>a list of tokens created from the source file</returns>
         public List<Token> Lex()
         {
             Lexer lexer = new Lexer(File, this);
@@ -61,12 +84,16 @@ namespace Penguor.Compiler.Build
             return tokens;
         }
 
+        /// <summary>
+        /// parses the Tokens produced by Lex()
+        /// </summary>
+        /// <returns>the ASt of the parsed program</returns>
         public Decl Parse()
         {
+            if (!lexerFinished) Lex();
             if (tokens == null) throw new PenguorCSException(1);
             Parser parser = new Parser(tokens, this);
 
-            Decl program = null!;
             try
             {
                 program = parser.Parse();
@@ -79,6 +106,29 @@ namespace Penguor.Compiler.Build
             return program;
         }
 
+        public void Transpile(TranspileLanguage lang, string output)
+        {
+            if (!parserFinished) Parse();
+            if (program == null) throw new PenguorCSException(1);
+
+            switch (lang)
+            {
+                case TranspileLanguage.CSHARP:
+                    CSharptTranspiler transpiler = new CSharptTranspiler((ProgramDecl)program);
+                    transpiler.Transpile(output);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="offset"></param>
+        /// <param name="arg0"></param>
+        /// <param name="arg1"></param>
+        /// <param name="arg2"></param>
+        /// <param name="arg3"></param>
         public void Exception(int msg, int offset, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
         {
             Debug.CastPGR(msg, offset, File, arg0, arg1, arg2, arg3);

@@ -20,7 +20,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of FunctionCall
         /// </summary>
-        public FunctionCall(Token name, List<Expr>? args)
+        public FunctionCall(Token name, List<Expr> args)
         {
             Name = name;
             Args = args;
@@ -28,7 +28,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary></summary>
         public Token Name { get; private set; }
         /// <summary></summary>
-        public List<Expr>? Args { get; private set; }
+        public List<Expr> Args { get; private set; }
 
         /// <summary>
         /// returns Visit() of this instance

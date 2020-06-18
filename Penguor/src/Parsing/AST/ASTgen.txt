@@ -5,7 +5,7 @@ UnaryExpr TokenType? op Expr rhs
 CallExpr List<Call> callee TokenType? postfix
 BooleanExpr bool value
 NullExpr
-GroupingExpr
+GroupingExpr Expr content
 VarExpr Expr type Token name
 IdentifierExpr object value
 NumExpr double value
@@ -26,14 +26,14 @@ ExprStmt Expr expr
 ; Decl "Penguor\src\Parsing\AST\Declarations"
 ProgramDecl List<Decl> declarations
 UsingDecl Expr lib
-SystemDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Decl content
-ContainerDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Decl content
-DatatypeDecl TokenType? accessMod TokenType[]? nonAccessMod Token name Token? parent Decl content
-FunctionDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable List<Expr>? parameters Decl content
-LibraryDecl TokenType? accessMod TokenType[]? nonAccessMod Expr name Decl content
-VarDecl TokenType? accessMod TokenType[]? nonAccessMod Expr variable Expr? init
+SystemDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
+ContainerDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
+DatatypeDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
+FunctionDecl TokenType? accessMod TokenType[] nonAccessMod Expr variable List<Expr> parameters Decl content
+LibraryDecl TokenType? accessMod TokenType[] nonAccessMod Expr name Decl content
+VarDecl TokenType? accessMod TokenType[] nonAccessMod Expr variable Expr? init
 BlockDecl List<Decl> content
 DeclStmt Stmt stmt
 ; Call "Penguor\src\Parsing\AST\Calls"
-FunctionCall Token name List<Expr>? args
+FunctionCall Token name List<Expr> args
 IdfCall Token name
