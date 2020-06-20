@@ -14,7 +14,7 @@ using System.IO;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Parsing;
 
-namespace Penguor.Lexing
+namespace Penguor.Compiler.Lexing
 {
     /// <summary>
     /// This class contains everything to scan Penguor files and return a token list
@@ -39,8 +39,7 @@ namespace Penguor.Lexing
             source = "";
             try
             {
-                using StreamReader reader = new StreamReader(filePath);
-                source = reader.ReadToEnd();
+                source = File.ReadAllText(filePath);
             }
             catch (FileNotFoundException)
             {
@@ -69,6 +68,7 @@ namespace Penguor.Lexing
                     stringBuilder.Append(Advance());
                     while (char.IsLetterOrDigit(Peek()) || Peek() == '_') stringBuilder.Append(Advance());
                     string idf = stringBuilder.ToString();
+
                     switch (idf)
                     {
                         case "null":
@@ -148,6 +148,9 @@ namespace Penguor.Lexing
                             break;
                         case "default":
                             AddToken(TokenType.DEFAULT);
+                            break;
+                        case "return":
+                            AddToken(TokenType.RETURN);
                             break;
                         default:
                             AddToken(TokenType.IDF, idf);

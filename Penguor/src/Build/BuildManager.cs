@@ -11,6 +11,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using Stopwatch = System.Diagnostics.Stopwatch;
 using Penguor.Debugging;
 using Penguor.Compiler.Transpiling;
 
@@ -94,6 +95,31 @@ namespace Penguor.Compiler.Build
             Builder builder = new Builder(file);
             builder.Build();
             builder.Transpile(TranspileLanguage.CSHARP, output);
+        }
+
+        public static void Benchmark(string file)
+        {
+            Stopwatch totalWatch = Stopwatch.StartNew();
+            Builder builder = new Builder(file);
+
+            Stopwatch watch = Stopwatch.StartNew();
+            builder.Lex();
+            watch.Stop();
+            var lexTime = watch.Elapsed;
+
+            watch.Restart();
+            builder.Parse();
+            watch.Stop();
+            totalWatch.Stop();
+            var parseTime = watch.Elapsed;
+            var totalTime = totalWatch.Elapsed;
+
+            Debug.Log("Results", LogLevel.Info);
+            Debug.Log("-------", LogLevel.Info);
+            Debug.Log($"file: {file}", LogLevel.Info);
+            Debug.Log($"lexing time: {lexTime.Minutes}m  {lexTime.Seconds}s {lexTime.Milliseconds}ms", LogLevel.Info);
+            Debug.Log($"parsing time: {parseTime.Minutes}m  {parseTime.Seconds}s {parseTime.Milliseconds}ms", LogLevel.Info);
+            Debug.Log($"total time: {totalTime.Minutes}m  {totalTime.Seconds}s {totalTime.Milliseconds}ms", LogLevel.Info);
         }
     }
 }

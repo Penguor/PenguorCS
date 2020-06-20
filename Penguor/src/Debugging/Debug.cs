@@ -37,7 +37,11 @@ namespace Penguor.Debugging
         /// <summary>
         /// Error Level
         /// </summary>
-        Error
+        Error,
+        /// <summary>
+        /// Used for logging without prefix
+        /// </summary>
+        None
     }
 
     /// <summary>
@@ -61,11 +65,7 @@ namespace Penguor.Debugging
         /// <param name="logLevel">The loglevel</param>
         public static void Log(string logText, LogLevel logLevel)
         {
-            if (logLevel != LogLevel.Info)
-            {
-                cLogger.Log(logText, logLevel);
-            }
-            //fLogger.Log(logText, logLevel);
+            cLogger.Log(logText, logLevel);
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace Penguor.Debugging
                     level = LogLevel.Error;
                     break;
                 case 8:
-                    currentMessage = $"[PGR-0008] Unknown preprocessor statement '{arg0}'";
+                    currentMessage = $"[PGR-0008] Unknown compiler statement '{arg0}'";
                     level = LogLevel.Error;
                     break;
             }

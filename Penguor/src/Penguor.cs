@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using Penguor.Debugging;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Parsing;
-using Penguor.Compiler.Parsing.AST;
 using Penguor.Tools;
 
 namespace Penguor
@@ -76,45 +75,50 @@ namespace Penguor
                             break;
                         }
 #if (DEBUG)
-                    case "--lex": // build a program from source or Penguor project
+                    case "--benchmark":
+                        if (args.Length == 1)
                         {
-                            Debug.Log("Penguor main: build started", LogLevel.Info);
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("Usage: Penguor --benchmark [script]");
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
+                        else if (args.Length == 2)
+                        {
+                            BuildManager.Benchmark(args[1]);
 
-                            if (args.Length == 1)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("Usage: Penguor --lex [script]");
-                                Console.ForegroundColor = ConsoleColor.White;
-                            }
-                            else if (args.Length == 2)
-                            {
-                                Builder builder = new Builder(args[1]);
-                                List<Token> tokens = builder.Lex();
-                                foreach (Token token in tokens) Debug.Log(token.ToString(), LogLevel.Debug);
-                            }
-                            break;
                         }
-                    case "--tools":
+                        break;
+                    case "--lex":
+                        if (args.Length == 1)
                         {
-                            if (args.Length >= 2)
-                            {
-                                ASTPartGenerator generator = new ASTPartGenerator();
-                                generator.Generate(args[1]);
-                            }
-                            else
-                            {
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine("Usage: Penguor --tools <inputFile>");
-                                Console.ForegroundColor = ConsoleColor.White;
-                            }
-                            break;
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("Usage: Penguor --lex [script]");
+                            Console.ForegroundColor = ConsoleColor.White;
                         }
+                        else if (args.Length == 2)
+                        {
+                            Builder builder = new Builder(args[1]);
+                            List<Token> tokens = builder.Lex();
+                            foreach (Token token in tokens) Debug.Log(token.ToString(), LogLevel.Debug);
+                        }
+                        break;
+                    case "--tools":
+                        if (args.Length >= 2)
+                        {
+                            ASTPartGenerator generator = new ASTPartGenerator();
+                            generator.Generate(args[1]);
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("Usage: Penguor --tools <inputFile>");
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
+                        break;
 #endif
                     default:
-                        {
-                            Debug.CastPGRCS(6, args[0]);
-                            goto case "-h";
-                        }
+                        Debug.CastPGRCS(6, args[0]);
+                        goto case "-h";
                 }
             }
         }

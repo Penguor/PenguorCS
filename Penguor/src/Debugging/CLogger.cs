@@ -38,6 +38,8 @@ namespace Penguor.Debugging
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.Write("[Error] ");
                     break;
+                case LogLevel.None:
+                    break;
             }
             Console.WriteLine(logText); // the text that gets be logged
             Console.ForegroundColor = FGColor;

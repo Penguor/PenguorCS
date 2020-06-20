@@ -173,10 +173,12 @@ namespace Penguor.Compiler.Parsing
                 case SAFETY:
                     val = new Token[1];
                     val[0] = Consume(NUM);
-                    if (Convert.ToInt32(val[0].token) < 0 || Convert.ToInt32(val[0].token) > 2) throw new PenguorException(1, val[0].offset);
+                    if (Convert.ToInt32(val[0].token) < 0 || Convert.ToInt32(val[0].token) > 2) builder.Exception(1, val[0].offset);
                     break;
                 default:
-                    throw new PenguorException(8, dir.offset, (dir.type == IDF || dir.type == NUM) ? dir.token : TTypePrettyString(dir.type));
+                    val = new Token[0];
+                    builder.Exception(8, dir.offset, (dir.type == IDF || dir.type == NUM) ? dir.token : TTypePrettyString(dir.type));
+                    break;
             }
             Consume(SEMICOLON);
             return new PPStmt(dir.type, val);

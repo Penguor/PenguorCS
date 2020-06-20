@@ -11,7 +11,7 @@
 using System;
 using System.Collections.Generic;
 using Penguor.Debugging;
-using Penguor.Lexing;
+using Penguor.Compiler.Lexing;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Transpiling;
