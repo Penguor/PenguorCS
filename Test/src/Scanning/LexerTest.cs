@@ -44,10 +44,10 @@ namespace Penguor.Compiler.Tests
             return tokens;
         }
 
-        private void WriteTokens(ref List<Token> tokens, string folder, string file)
+        private void WriteTokens(ref List<Token> tokens, string file)
         {
-            Directory.CreateDirectory(folder);
-            using StreamWriter writer = new StreamWriter(Path.Combine(folder, file));
+            Directory.CreateDirectory(Path.GetDirectoryName(file));
+            using StreamWriter writer = new StreamWriter(file);
             foreach (var t in tokens) writer.WriteLine(t.ToString());
         }
 
