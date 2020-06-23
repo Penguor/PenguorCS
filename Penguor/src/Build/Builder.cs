@@ -106,6 +106,11 @@ namespace Penguor.Compiler.Build
             return program;
         }
 
+        /// <summary>
+        /// transpiles a file to another language
+        /// </summary>
+        /// <param name="lang">the language to transpile to</param>
+        /// <param name="output">where to write the output file to</param>
         public void Transpile(TranspileLanguage lang, string output)
         {
             if (!parserFinished) Parse();

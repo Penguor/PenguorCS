@@ -26,6 +26,8 @@ namespace Penguor.Compiler.Build
         /// automatically chooses whether to build a project or a file.
         /// </summary>
         /// <param name="file">the file/project to build</param>
+        /// <param name="output">where to put output files</param>
+        /// <param name="transpile">should the program be transpiled?</param>
         public static void SmartBuild(string file, string output, bool transpile = false)
         {
             if (!File.Exists(file)) throw new PenguorException(5, 0);
@@ -49,7 +51,7 @@ namespace Penguor.Compiler.Build
         /// <param name="project">the project file in the project root directory</param>
         public static void BuildProject(string project)
         {
-            string[] files = Directory.GetFiles(Path.GetDirectoryName(project), "*.pgr", SearchOption.AllDirectories);
+            string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories);
             foreach (string file in files)
             {
                 Thread buildThread = new Thread(() => BuildFile(file));
@@ -71,10 +73,12 @@ namespace Penguor.Compiler.Build
         /// build a Penguor project
         /// </summary>
         /// <param name="project">the project file in the project root directory</param>
+        /// <param name="output">where to write the output file to</param>
         public static void TranspileProject(string project, string output)
         {
             Uri? basePath = new Uri(Path.GetDirectoryName(project)!);
-            string[] files = Directory.GetFiles(Path.GetDirectoryName(project), "*.pgr", SearchOption.AllDirectories);
+
+            string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories); //!  no null argument check
             foreach (string file in files)
             {
                 Uri relativeOut = basePath.MakeRelativeUri(new Uri(file));
@@ -85,9 +89,10 @@ namespace Penguor.Compiler.Build
         }
 
         /// <summary>
-        /// 
+        ///  Transpile a Penguor file to C#
         /// </summary>
         /// <param name="file"></param>
+        /// <param name="output"></param>
         public static void TranspileFile(string file, string output)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(output)!);
@@ -97,6 +102,10 @@ namespace Penguor.Compiler.Build
             builder.Transpile(TranspileLanguage.CSHARP, output);
         }
 
+        /// <summary>
+        /// builds a Penguor file and logs the time the individual steps take
+        /// </summary>
+        /// <param name="file">the file to build</param>
         public static void Benchmark(string file)
         {
             Stopwatch totalWatch = Stopwatch.StartNew();
