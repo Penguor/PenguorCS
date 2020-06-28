@@ -33,6 +33,7 @@ namespace Penguor.Compiler.Tests
         {
             Builder builder = new Builder(@"src\Files\Fibonacci\Fibonacci.pgr");
             List<Token> tokens = builder.Lex();
+            WriteTokens(ref tokens, @"src\Files\Fibonacci\Fibonacci.pgr.lexout");
             Assert.Equal(TokensToString(ref tokens), GetTokens(@"src\Files\Fibonacci\Fibonacci.pgr.lexout"));
         }
 

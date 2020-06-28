@@ -96,7 +96,7 @@ type: EQUALS, token: , offset: 590, length: 2
 type: NUM, token: 1.0, offset: 593, length: 3
 type: RPAREN, token: , offset: 596, length: 1
 type: LBRACE, token: , offset: 607, length: 1
-type: IDF, token: return, offset: 622, length: 6
+type: RETURN, token: , offset: 622, length: 6
 type: NUM, token: 0, offset: 629, length: 1
 type: SEMICOLON, token: , offset: 630, length: 1
 type: RBRACE, token: , offset: 641, length: 1
@@ -107,13 +107,13 @@ type: EQUALS, token: , offset: 659, length: 2
 type: NUM, token: 1, offset: 662, length: 1
 type: RPAREN, token: , offset: 663, length: 1
 type: LBRACE, token: , offset: 674, length: 1
-type: IDF, token: return, offset: 689, length: 6
+type: RETURN, token: , offset: 689, length: 6
 type: NUM, token: 1, offset: 696, length: 1
 type: SEMICOLON, token: , offset: 697, length: 1
 type: RBRACE, token: , offset: 708, length: 1
 type: ELSE, token: , offset: 719, length: 4
 type: LBRACE, token: , offset: 733, length: 1
-type: IDF, token: return, offset: 748, length: 6
+type: RETURN, token: , offset: 748, length: 6
 type: IDF, token: getFibonacci, offset: 755, length: 12
 type: LPAREN, token: , offset: 767, length: 1
 type: IDF, token: n, offset: 768, length: 1
@@ -138,7 +138,7 @@ type: IDF, token: int, offset: 910, length: 3
 type: IDF, token: n, offset: 914, length: 1
 type: RPAREN, token: , offset: 915, length: 1
 type: LBRACE, token: , offset: 922, length: 1
-type: IDF, token: return, offset: 933, length: 6
+type: RETURN, token: , offset: 933, length: 6
 type: LPAREN, token: , offset: 940, length: 1
 type: LPAREN, token: , offset: 955, length: 1
 type: NUM, token: 1, offset: 956, length: 1
