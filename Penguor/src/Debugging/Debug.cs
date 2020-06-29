@@ -49,12 +49,10 @@ namespace Penguor.Debugging
     /// </summary>
     internal static class Debug
     {
-        private static FLogger fLogger;
         private static CLogger cLogger;
 
         static Debug()
         {
-            //fLogger = new FLogger("Penguor");
             cLogger = new CLogger();
         }
 
@@ -191,19 +189,6 @@ namespace Penguor.Debugging
                 if (!gotPos) column++;
             }
             return $"({file}:{line}:{column})";
-        }
-
-        public static void EndLog() => fLogger.Dispose();
-
-        /// <summary>
-        /// Stop the logger with a reason
-        /// </summary>
-        /// <param name="CloseReason">Why should the logger stop</param>
-        [Obsolete]
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        public static void EndLog(string CloseReason)
-        {
-            fLogger.Dispose();
         }
     }
 }
