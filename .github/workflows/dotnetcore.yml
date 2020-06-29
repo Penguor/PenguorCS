@@ -25,7 +25,5 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 3.1.300
-      - name: Build
-        run: dotnet build
       - name: Run tests
         run: dotnet test
