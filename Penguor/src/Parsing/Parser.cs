@@ -98,7 +98,7 @@ namespace Penguor.Compiler.Parsing
                 if (Check(IDF) && lookAhead(1).type == IDF && lookAhead(2).type == LPAREN)
                     return FunctionDecl(accessMod, nonAccessMods);
                 else if (Check(IDF) && lookAhead(1).type == IDF) return VarDecl(accessMod, nonAccessMods);
-                throw new PenguorException(1, GetCurrent().offset);
+                throw new PenguorException(1, GetCurrent().offset, builder.File);
             }
         }
 

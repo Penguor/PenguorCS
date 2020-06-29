@@ -25,22 +25,31 @@ namespace Penguor.Compiler.Build
         /// <summary>
         /// automatically chooses whether to build a project or a file.
         /// </summary>
-        /// <param name="file">the file/project to build</param>
+        /// <param name="path">the file/project to build</param>
         /// <param name="output">where to put output files</param>
         /// <param name="transpile">should the program be transpiled?</param>
-        public static void SmartBuild(string file, string output, bool transpile = false)
+        public static void SmartBuild(string path, string output, bool transpile = false)
         {
-            if (!File.Exists(file)) throw new PenguorException(5, 0);
+            if (File.GetAttributes(path).HasFlag(FileAttributes.Directory))
+            {
+                if (path == "" || path == null) throw new PenguorCSException(1);
+                string[] files = Directory.GetFiles(path, "*.pgrp", SearchOption.AllDirectories);
+                if (files.Length > 1) throw new PenguorCSException(1);
+                else if (files.Length < 1) throw new PenguorCSException(1);
+                else BuildProject(files[0]);
+                return;
+            }
+            if (!File.Exists(path)) throw new PenguorException(5, 0, path, path);
 
             if (!transpile)
             {
-                if (Path.GetExtension(file) == ".pgr") BuildFile(file);
-                else if (Path.GetExtension(file) == ".pgrp") BuildProject(file);
+                if (Path.GetExtension(path) == ".pgr") BuildFile(path);
+                else if (Path.GetExtension(path) == ".pgrp") BuildProject(path);
             }
             else
             {
-                if (Path.GetExtension(file) == ".pgr") TranspileFile(file, output);
-                else if (Path.GetExtension(file) == ".pgrp") TranspileProject(file, output);
+                if (Path.GetExtension(path) == ".pgr") TranspileFile(path, output);
+                else if (Path.GetExtension(path) == ".pgrp") TranspileProject(path, output);
 
             }
         }
