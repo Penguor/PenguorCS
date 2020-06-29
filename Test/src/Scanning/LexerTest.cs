@@ -25,7 +25,6 @@ namespace Penguor.Compiler.Tests
         {
             Builder builder = new Builder(@"src/Files/HelloWorld/HelloWorld.pgr");
             List<Token> tokens = builder.Lex();
-            WriteTokens(ref tokens, @"src/Files/HelloWorld/HelloWorld.pgr.lexout");
             Assert.Equal(TokensToString(ref tokens), GetTokens(@"src/Files/HelloWorld/HelloWorld.pgr.lexout"));
         }
 
@@ -51,10 +50,6 @@ namespace Penguor.Compiler.Tests
             using StreamWriter writer = new StreamWriter(file);
             foreach (var t in tokens) writer.WriteLine(t.ToString());
             writer.Close();
-
-            StreamReader reader = new StreamReader(file);
-            string tmp = reader.ReadToEnd();
-            Console.WriteLine(tmp);
         }
 
         private List<string> TokensToString(ref List<Token> tokens)
