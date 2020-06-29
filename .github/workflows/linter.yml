@@ -17,7 +17,7 @@ name: Lint Code Base
 on:
   push:
     branches-ignore:
-      - 'master'
+      - "master"
 
 ###############
 # Set the Job #
@@ -46,4 +46,5 @@ jobs:
         uses: docker://github/super-linter:v2.2.0
         env:
           VALIDATE_ALL_CODEBASE: true
+          VALIDATE_JSON: false
           DEFAULT_BRANCH: main
