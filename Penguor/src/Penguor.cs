@@ -74,7 +74,6 @@ namespace Penguor
                             }
                             break;
                         }
-#if (DEBUG)
                     case "--benchmark":
                         if (args.Length == 1)
                         {
@@ -88,6 +87,7 @@ namespace Penguor
 
                         }
                         break;
+#if (DEBUG)
                     case "--lex":
                         if (args.Length == 1)
                         {

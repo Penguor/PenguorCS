@@ -54,7 +54,7 @@ namespace Penguor.Debugging
 
         static Debug()
         {
-            fLogger = new FLogger("Penguor");
+            //fLogger = new FLogger("Penguor");
             cLogger = new CLogger();
         }
 

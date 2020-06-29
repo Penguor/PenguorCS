@@ -57,7 +57,7 @@ namespace Penguor.Compiler.Build
         public Builder(string file)
         {
             if (IOFile.Exists(file)) File = file;
-            else throw new PenguorException(5, 0, file);
+            else throw new PenguorException(5, 0, file, file);
         }
 
         /// <summary>
