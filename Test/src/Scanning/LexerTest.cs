@@ -33,14 +33,19 @@ namespace Penguor.Compiler.Tests
         {
             Builder builder = new Builder(@"src/Files/Fibonacci/Fibonacci.pgr");
             List<Token> tokens = builder.Lex();
+
             Assert.Equal(TokensToString(ref tokens), GetTokens(@"src/Files/Fibonacci/Fibonacci.pgr.lexout"));
         }
 
         private List<string> GetTokens(string file)
         {
             using StreamReader reader = new StreamReader(file);
-            List<String> tokens = new List<string>();
+            List<string> tokens = new List<string>();
             while (!reader.EndOfStream) tokens.Add(reader.ReadLine());
+
+            Console.WriteLine($"\nGetTokens of \"{file}\":\n");
+            foreach (var s in tokens) Console.WriteLine(s);
+
             return tokens;
         }
 
@@ -55,6 +60,8 @@ namespace Penguor.Compiler.Tests
         {
             List<string> stringTokens = new List<string>();
             foreach (var t in tokens) stringTokens.Add(t.ToString());
+            Console.WriteLine();
+            foreach (var s in tokens) Console.WriteLine(s);
             return stringTokens;
         }
     }
