@@ -1,7 +1,4 @@
-// I wrote this code in a couple of minutes, it is not optimized 
-// by any means
-
-#safety 2
+#safety 2;
 
 using Standard;
 
@@ -9,14 +6,15 @@ public system Fibonacci
 {
     public void execute()
     {
-        print(getFibonacci(0))
+        print(getFibonacci(0));
         for(int i : range(1, 10))
         {
             print(", " + getFibonacci(i));
         }
 
         printLn();
-        print(fibMoivreBinet(0))
+        print(fibMoivreBinet(0));
+
         for(int i : range(1, 10))
         {
             print(", " + fibMoivreBinet(i));
@@ -48,11 +46,11 @@ public system Fibonacci
             (1 / 5) * (
                 (pow(
                     (1 + sqrt(5)
-                ) / 2), n)
+                ) / 2, n))
                  -
                 (pow(
                     (1 - sqrt(5)
-                ) / 2), n)
+                ) / 2, n))
             ));
     }
 }
