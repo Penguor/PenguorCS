@@ -23,29 +23,23 @@ namespace Penguor.Debugging
         // the writer for the log
         private StreamWriter writer;
 
-        /// <value>Gets the filepath of the log</value>
-        public string LogPath { get; }
+        public string LogFile { get; }
 
-        /// <param name="applicationName">the name of the application, currently used to choose AppData folder</param>
-        public FLogger(string applicationName)
+        /// <param name="file">the name of the application, currently used to choose AppData folder</param>
+        public FLogger(string file)
         {
-            // set the path for the logs folder
-            LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), applicationName, "logs");
-
-            // create logs directory if non-existent
-            if (!Directory.Exists(LogPath)) Directory.CreateDirectory(LogPath);
+            LogFile = file;
 
             // Initialize new StreamWriter
-            writer = new StreamWriter(Path.Combine(LogPath, DateTime.Now.ToString("dd.MM.yy_HH-mm") + ".log"));
+            writer = new StreamWriter(file);
 
             // first textblock for common information
-            writer.WriteLine(applicationName);
-            for (int i = 0; i < applicationName.Length; i++) writer.Write("-");
+            writer.WriteLine(file);
+            for (int i = 0; i < file.Length; i++) writer.Write("-");
             writer.WriteLine();
-            writer.WriteLine(DateTime.Now.ToString("F", CultureInfo.CreateSpecificCulture("en-US")));
+            writer.WriteLine(DateTime.Now.ToString("F", CultureInfo.InvariantCulture));
             writer.WriteLine();
             writer.Flush();
-            writer.AutoFlush = true; // makes sure file data gets automatically flushed
         }
 
         /// <summary>
@@ -62,9 +56,7 @@ namespace Penguor.Debugging
             switch (logLevel)
             {
                 case LogLevel.Debug:
-#if(DEBUG)
                     writer.Write("[Debug] ");
-#endif
                     break;
                 case LogLevel.Info:
                     writer.Write("[Info] ");
@@ -77,6 +69,7 @@ namespace Penguor.Debugging
                     break;
             }
             writer.WriteLine(logText); // the text that gets be logged
+            writer.Flush();
         }
 
         /// <summary>

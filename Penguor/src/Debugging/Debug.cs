@@ -50,6 +50,7 @@ namespace Penguor.Debugging
     internal static class Debug
     {
         private static CLogger cLogger;
+        private static FLogger? fLogger;
 
         static Debug()
         {
@@ -189,6 +190,11 @@ namespace Penguor.Debugging
                 if (!gotPos) column++;
             }
             return $"({file}:{line}:{column})";
+        }
+
+        public static void EnableFileLogger(string file)
+        {
+            fLogger = new FLogger(file);
         }
     }
 }

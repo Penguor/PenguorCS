@@ -6,37 +6,26 @@ public system Fibonacci
 {
     public void execute()
     {
-        print(getFibonacci(0));
+        print(getFibonacci(0))
         for(int i : range(1, 10))
-        {
-            print(", " + getFibonacci(i));
-        }
+            print(", " + getFibonacci(i))
 
-        printLn();
-        print(fibMoivreBinet(0));
+        printLn()
+        print(fibMoivreBinet(0))
 
         for(int i : range(1, 10))
-        {
-            print(", " + fibMoivreBinet(i));
-        }
+            print(", " + fibMoivreBinet(i))
     }
 
     // returns the fibonacci number at n
     private int getFibonacci(int n)
     {
-        
-        if(n == 1.0)
-        {
-            return 0;
-        }
+        if(n == 0)
+            return 0
         elif(n == 1)
-        {
-            return 1;
-        }
+            return 1
         else
-        {
-            return getFibonacci(n - 1) + getFibonacci(n - 2);
-        }
+            return getFibonacci(n - 1) + getFibonacci(n - 2)
     }
 
     // like the one above, but using a different algorithm
@@ -51,6 +40,6 @@ public system Fibonacci
                 (pow(
                     (1 - sqrt(5)
                 ) / 2, n))
-            ));
+            ))
     }
 }

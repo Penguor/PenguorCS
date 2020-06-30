@@ -45,9 +45,9 @@ namespace Penguor.Compiler.Parsing
         /// <returns>a statement containing the AST of the parsed file</returns>
         public Decl Parse()
         {
-            List<Decl> statements = new List<Decl>();
-            while (!Match(EOF)) statements.Add(Declaration());
-            return new ProgramDecl(statements);
+            List<Decl> declarations = new List<Decl>();
+            while (!Match(EOF)) declarations.Add(Declaration());
+            return new ProgramDecl(declarations);
         }
 
         private Decl Declaration()
@@ -295,7 +295,7 @@ namespace Penguor.Compiler.Parsing
 
         private Stmt ReturnStmt()
         {
-            if (GetEnding()) return new ReturnStmt(null);
+            if (TryGetEnding()) return new ReturnStmt(null);
             else
             {
                 Expr expr = Expression();
@@ -306,7 +306,6 @@ namespace Penguor.Compiler.Parsing
 
         private Stmt ExprStmt()
         {
-
             Expr expression = Expression();
             GetEnding();
 
@@ -413,7 +412,6 @@ namespace Penguor.Compiler.Parsing
                     callee.Add(new IdfCall(idf));
                 }
                 break;
-
             }
 
             return new CallExpr(callee, postfix);
@@ -486,7 +484,7 @@ namespace Penguor.Compiler.Parsing
         {
             int endings = 0;
             if (matchEnding)
-                while (LookAhead(endings).type == ENDING) endings++; 
+                while (LookAhead(endings).type == ENDING) endings++;
             if (LookAhead(n + endings).type == type)
             {
                 for (int i = 0; i < endings; i++)
@@ -548,6 +546,16 @@ namespace Penguor.Compiler.Parsing
             }
             builder.Exception(6, Advance().offset, "';' or newline");
             return false; //! improve this mess
+        }
+
+        private bool TryGetEnding()
+        {
+            if (Check(SEMICOLON, 0, false) || Check(ENDING, 0, false))
+            {
+                Advance();
+                return true;
+            }
+            return false;
         }
 
         private string TTypePrettyString(TokenType type) => type switch
