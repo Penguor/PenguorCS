@@ -84,9 +84,9 @@ namespace Penguor.Compiler.Parsing
                 if (Match(CONTAINER)) return ContainerDecl(null, new TokenType[0]);
                 if (Match(DATATYPE)) return DatatypeDecl(null, new TokenType[0]);
                 if (Match(LIBRARY)) return LibraryDecl(null, new TokenType[0]);
-                if (Check(IDF) && lookAhead(1).type == IDF && lookAhead(2).type == LPAREN)
+                if (Check(IDF) && LookAhead(1).type == IDF && LookAhead(2).type == LPAREN)
                     return FunctionDecl(null, new TokenType[0]);
-                else if (Check(IDF) && lookAhead(1).type == IDF) return VarDecl(null, new TokenType[0]);
+                else if (Check(IDF) && LookAhead(1).type == IDF) return VarDecl(null, new TokenType[0]);
                 return DeclStmt();
             }
             else
@@ -95,9 +95,9 @@ namespace Penguor.Compiler.Parsing
                 if (Match(CONTAINER)) return ContainerDecl(accessMod, nonAccessMods);
                 if (Match(DATATYPE)) return DatatypeDecl(accessMod, nonAccessMods);
                 if (Match(LIBRARY)) return LibraryDecl(accessMod, nonAccessMods);
-                if (Check(IDF) && lookAhead(1).type == IDF && lookAhead(2).type == LPAREN)
+                if (Check(IDF) && LookAhead(1).type == IDF && LookAhead(2).type == LPAREN)
                     return FunctionDecl(accessMod, nonAccessMods);
-                else if (Check(IDF) && lookAhead(1).type == IDF) return VarDecl(accessMod, nonAccessMods);
+                else if (Check(IDF) && LookAhead(1).type == IDF) return VarDecl(accessMod, nonAccessMods);
                 throw new PenguorException(1, GetCurrent().offset, builder.File);
             }
         }
@@ -484,9 +484,16 @@ namespace Penguor.Compiler.Parsing
         /// <returns></returns>
         private bool Check(TokenType type, int n = 0, bool matchEnding = true)
         {
+            int endings = 0;
             if (matchEnding)
-                while (GetCurrent().type == ENDING) Advance();
-            return lookAhead(n).type == type;
+                while (LookAhead(endings).type == ENDING) endings++; 
+            if (LookAhead(n + endings).type == type)
+            {
+                for (int i = 0; i < endings; i++)
+                    Advance();
+                return true;
+            }
+            return false;
         }
 
         // TODO: improve xml documentation 
@@ -505,22 +512,22 @@ namespace Penguor.Compiler.Parsing
         /// <c>GetNext() </c> returns the previous token.
         /// </summary>
         /// <returns>the previous item in <c>tokens</c></returns>
-        private Token GetPrevious() => lookAhead(-1);
+        private Token GetPrevious() => LookAhead(-1);
         /// <summary>
         /// <c>GetNext() </c> returns the current token without advancing.
         /// </summary>
         /// <returns>the current item in <c>tokens</c></returns>
-        private Token GetCurrent() => lookAhead(0);
+        private Token GetCurrent() => LookAhead(0);
         /// <summary>
         /// <c>GetNext() </c> returns the next token without advancing.
         /// </summary>
         /// <returns>the next item in <c>tokens</c></returns>
-        private Token GetNext() => lookAhead(1);
+        private Token GetNext() => LookAhead(1);
         /// <summary>
         /// <c>GetNext() </c> returns the next token without advancing.
         /// </summary>
         /// <returns>the nth-next item in <c>tokens</c></returns>
-        private Token lookAhead(int n) => tokens[current + n];
+        private Token LookAhead(int n) => tokens[current + n];
 
         /// <summary>
         /// <c>AtEnd() </c> checks if the parser has reached the end of the file.
@@ -534,7 +541,7 @@ namespace Penguor.Compiler.Parsing
 
         private bool GetEnding()
         {
-            if (Check(SEMICOLON) || Check(ENDING, 0, false))
+            if (Check(SEMICOLON, 0, false) || Check(ENDING, 0, false))
             {
                 Advance();
                 return true;

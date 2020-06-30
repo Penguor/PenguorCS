@@ -1,7 +1,8 @@
-#safety 1;
+#safety 1
 
-using Math;
-using Hello;
+using Math
+using Hello
+
 
 library ShowPenguor
 {
@@ -9,18 +10,17 @@ library ShowPenguor
     {
         public void execute(string t)
         {
-            string a = "";
-            int b = 2;
-            Call();
-            a = "Hello " + Test();
+            string a = ""; int b = 2
+            Call()
+            a = "Hello " + Test()
             if(true || false) 
             {
-                a += "no";
+                a += "no"
             } 
             elif(b & 1)
             {
-                b |= .2;
-                a += "why?";
+                b |= .2
+                a += "why?"
             }
         }
     }
@@ -30,12 +30,12 @@ library ShowPenguor
     // containers are there to store data
     container HelloData
     {
-        string n1;
-        string n2; 
-        string n3; 
+        string n1
+        string n2
+        string n3
 
-        n1 = a;
-        n2 = "Frank";
-        n3 = "Anna";
+        n1 = a
+        n2 = "Frank"
+        n3 = "Anna"
     }
 }
