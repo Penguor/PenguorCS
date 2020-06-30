@@ -77,7 +77,17 @@ namespace Penguor.Compiler.Transpiling
 
         public string Visit(DatatypeDecl decl)
         {
-            throw new System.NotImplementedException();
+            StringBuilder builder = new StringBuilder();
+
+            builder.Append($"{ConvertAccessMods(decl.AccessMod)} ");
+            foreach (var naMod in decl.NonAccessMod) builder.Append($"{ConvertAccessMods(naMod)} ");
+
+            builder.Append($"struct {decl.Name.token} ");
+            if (decl.Parent != null) builder.Append($": {decl.Parent.Value.token} ");
+
+            builder.Append(decl.Content.Accept(this));
+
+            return builder.ToString();
         }
 
         public string Visit(DeclStmt decl) => decl.Stmt.Accept(this);
@@ -127,8 +137,6 @@ namespace Penguor.Compiler.Transpiling
             StringBuilder builder = new StringBuilder();
             builder.Append($"{ConvertAccessMods(decl.AccessMod)} ");
 
-            //!            if (Array.BinarySearch(decl.NonAccessMod, DYNAMIC) == -1) builder.Append("static ");
-            /* else */
             foreach (var naMod in decl.NonAccessMod) builder.Append($"{ConvertAccessMods(naMod)} ");
 
             builder.Append($"class {decl.Name.token} ");
@@ -230,15 +238,9 @@ namespace Penguor.Compiler.Transpiling
             return builder.ToString();
         }
 
-        public string Visit(EOFExpr expr)
-        {
-            throw new System.NotImplementedException();
-        }
+        public string Visit(EOFExpr expr) => "";
 
-        public string Visit(GroupingExpr expr)
-        {
-            throw new System.NotImplementedException();
-        }
+        public string Visit(GroupingExpr expr) => $" ({expr.Content.Accept(this)}) ";
 
         public string Visit(NullExpr expr) => " null ";
 
@@ -246,10 +248,16 @@ namespace Penguor.Compiler.Transpiling
 
         public string Visit(StringExpr expr) => $"\"{expr.Value}\"";
 
-        public string Visit(UnaryExpr expr)
+        public string Visit(UnaryExpr expr) => expr.Op switch
         {
-            throw new System.NotImplementedException();
-        }
+            EXCL_MARK => "!",
+            PLUS => "+",
+            MINUS => "-",
+            BW_NOT => "~",
+            DPLUS => "++",
+            DMINUS => "--",
+            _ => throw new PenguorCSException(1)
+        } + expr.Rhs.Accept(this);
 
         public string Visit(VarExpr expr) => $"{expr.Type.Accept(this)} {expr.Name.token}";
 
@@ -268,10 +276,7 @@ namespace Penguor.Compiler.Transpiling
             throw new System.NotImplementedException();
         }
 
-        public string Visit(DoStmt stmt)
-        {
-            throw new System.NotImplementedException();
-        }
+        public string Visit(DoStmt stmt) => $"do {stmt.Content.Accept(this)} while({stmt.Condition.Accept(this)});";
 
         public string Visit(ElifStmt stmt) => $"else if({stmt.Condition.Accept(this)}) {stmt.Content.Accept(this)}";
         public string Visit(ExprStmt stmt) => $"{stmt.Expr.Accept(this)};\n";
