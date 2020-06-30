@@ -59,7 +59,7 @@ namespace Penguor.Compiler.Lexing
             while (!AtEnd())
             {
                 stringBuilder.Clear();
-                while (char.IsWhiteSpace(Peek())) Advance();
+                while (char.IsWhiteSpace(Peek()) && Peek() != '\n') Advance();
 
                 offset = current;
 
@@ -251,6 +251,9 @@ namespace Penguor.Compiler.Lexing
                         break;
                     case ';':
                         AddToken(TokenType.SEMICOLON);
+                        break;
+                    case '\n':
+                        AddToken(TokenType.ENDING);
                         break;
                     case '<':
                         AddToken(Match('=') ? TokenType.LESS_EQUALS : Match('<') ? (Match('=') ? TokenType.BS_LEFT_ASSIGN : TokenType.BS_LEFT) : TokenType.LESS);

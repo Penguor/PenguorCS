@@ -48,6 +48,7 @@ namespace Penguor.Compiler.Parsing
         , FOR, WHILE, DO
         , SWITCH, CASE, DEFAULT
         , RETURN
+        , ENDING
         , EOF
     }
 }

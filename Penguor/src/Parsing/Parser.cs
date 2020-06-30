@@ -105,7 +105,7 @@ namespace Penguor.Compiler.Parsing
         private Decl UsingDecl()
         {
             Expr call = CallExpr();
-            Consume(SEMICOLON);
+            GetEnding();
             return new UsingDecl(call);
         }
 
@@ -134,7 +134,7 @@ namespace Penguor.Compiler.Parsing
         private Decl VarDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
             Decl dec = new VarDecl(accessMod, nonAccessMods, VarExpr(), Match(ASSIGN) ? Expression() : null);
-            Consume(SEMICOLON);
+            GetEnding();
             return dec;
         }
 
@@ -180,6 +180,7 @@ namespace Penguor.Compiler.Parsing
                     builder.Exception(8, dir.offset, (dir.type == IDF || dir.type == NUM) ? dir.token : TTypePrettyString(dir.type));
                     break;
             }
+            GetEnding();
             return new CompilerStmt(dir.type, val);
         }
 
@@ -294,11 +295,11 @@ namespace Penguor.Compiler.Parsing
 
         private Stmt ReturnStmt()
         {
-            if (Match(SEMICOLON)) return new ReturnStmt(null);
+            if (GetEnding()) return new ReturnStmt(null);
             else
             {
                 Expr expr = Expression();
-                Consume(SEMICOLON);
+                GetEnding();
                 return new ReturnStmt(expr);
             }
         }
@@ -307,7 +308,7 @@ namespace Penguor.Compiler.Parsing
         {
 
             Expr expression = Expression();
-            Consume(SEMICOLON);
+            GetEnding();
 
             return new ExprStmt(expression);
         }
@@ -479,8 +480,14 @@ namespace Penguor.Compiler.Parsing
         /// </summary>
         /// <param name="type">the type to compare the current token with</param>
         /// <param name="n">look up using lookAhead</param>
+        /// <param name="matchEnding">should Endings be consumed</param>
         /// <returns></returns>
-        private bool Check(TokenType type, int n = 0) => lookAhead(n).type == type;
+        private bool Check(TokenType type, int n = 0, bool matchEnding = true)
+        {
+            if (matchEnding)
+                while (GetCurrent().type == ENDING) Advance();
+            return lookAhead(n).type == type;
+        }
 
         // TODO: improve xml documentation 
         /// <summary>
@@ -525,87 +532,97 @@ namespace Penguor.Compiler.Parsing
             else return false;
         }
 
-        private string TTypePrettyString(TokenType type)
+        private bool GetEnding()
         {
-            switch (type)
+            if (Check(SEMICOLON) || Check(ENDING, 0, false))
             {
-                case HASHTAG: return "#";
-                case USING: return "using";
-                case SAFETY: return "safety";
-                case PUBLIC: return "public";
-                case PRIVATE: return "private";
-                case PROTECTED: return "protected";
-                case RESTRICTED: return "restricted";
-                case STATIC: return "static";
-                case DYNAMIC: return "dynamic";
-                case ABSTRACT: return "abstract";
-                case CONST: return "const";
-                case LPAREN: return "(";
-                case RPAREN: return ")";
-                case LBRACE: return "{";
-                case RBRACE: return "}";
-                case LBRACK: return "[";
-                case RBRACK: return "]";
-                case PLUS: return "+";
-                case MINUS: return "-";
-                case MUL: return "*";
-                case DIV: return "/";
-                case PERCENT: return "%";
-                case DPLUS: return "++";
-                case DMINUS: return "--";
-                case GREATER: return ">";
-                case LESS: return "<";
-                case GREATER_EQUALS: return ">=";
-                case LESS_EQUALS: return "<=";
-                case EQUALS: return "==";
-                case NEQUALS: return "!=";
-                case AND: return "&&";
-                case OR: return "||";
-                case XOR: return "^^";
-                case BW_AND: return "&";
-                case BW_OR: return "|";
-                case BW_XOR: return "^";
-                case BW_NOT: return "~";
-                case BS_LEFT: return "<<";
-                case BS_RIGHT: return ">>";
-                case ASSIGN: return "=";
-                case ADD_ASSIGN: return "+=";
-                case SUB_ASSIGN: return "-=";
-                case MUL_ASSIGN: return "*=";
-                case DIV_ASSIGN: return "/=";
-                case PERCENT_ASSIGN: return "%=";
-                case BW_AND_ASSIGN: return "&=";
-                case BW_OR_ASSIGN: return "|=";
-                case BW_XOR_ASSIGN: return "^=";
-                case BS_LEFT_ASSIGN: return "<<=";
-                case BS_RIGHT_ASSIGN: return ">>=";
-                case NULL: return "null";
-                case COLON: return ":";
-                case SEMICOLON: return ";";
-                case DOT: return ".";
-                case COMMA: return ",";
-                case EXCL_MARK: return "!";
-                case NUM: return "number";
-                case STRING: return "string";
-                case IDF: return "identifier";
-                case TRUE: return "true";
-                case FALSE: return "false";
-                case CONTAINER: return "container";
-                case SYSTEM: return "system";
-                case DATATYPE: return "datatype";
-                case LIBRARY: return "library";
-                case IF: return "if";
-                case ELIF: return "elif";
-                case ELSE: return "else";
-                case FOR: return "for";
-                case WHILE: return "while";
-                case DO: return "do";
-                case SWITCH: return "switch";
-                case CASE: return "case";
-                case DEFAULT: return "default";
-                case EOF: return "end of file";
-                default: throw new ArgumentException();
+                Advance();
+                return true;
             }
+            builder.Exception(6, Advance().offset, "';' or newline");
+            return false; //! improve this mess
         }
+
+        private string TTypePrettyString(TokenType type) => type switch
+        {
+            HASHTAG => "#",
+            USING => "using",
+            SAFETY => "safety",
+            PUBLIC => "public",
+            PRIVATE => "private",
+            PROTECTED => "protected",
+            RESTRICTED => "restricted",
+            STATIC => "static",
+            DYNAMIC => "dynamic",
+            ABSTRACT => "abstract",
+            CONST => "const",
+            LPAREN => "(",
+            RPAREN => ")",
+            LBRACE => "{",
+            RBRACE => "}",
+            LBRACK => "[",
+            RBRACK => "]",
+            PLUS => "+",
+            MINUS => "-",
+            MUL => "*",
+            DIV => "/",
+            PERCENT => "%",
+            DPLUS => "++",
+            DMINUS => "--",
+            GREATER => ">",
+            LESS => "<",
+            GREATER_EQUALS => ">=",
+            LESS_EQUALS => "<=",
+            EQUALS => "==",
+            NEQUALS => "!=",
+            AND => "&&",
+            OR => "||",
+            XOR => "^^",
+            BW_AND => "&",
+            BW_OR => "|",
+            BW_XOR => "^",
+            BW_NOT => "~",
+            BS_LEFT => "<<",
+            BS_RIGHT => ">>",
+            ASSIGN => "=",
+            ADD_ASSIGN => "+=",
+            SUB_ASSIGN => "-=",
+            MUL_ASSIGN => "*=",
+            DIV_ASSIGN => "/=",
+            PERCENT_ASSIGN => "%=",
+            BW_AND_ASSIGN => "&=",
+            BW_OR_ASSIGN => "|=",
+            BW_XOR_ASSIGN => "^=",
+            BS_LEFT_ASSIGN => "<<=",
+            BS_RIGHT_ASSIGN => ">>=",
+            NULL => "null",
+            COLON => ":",
+            SEMICOLON => ";",
+            ENDING => "newline",
+            DOT => ".",
+            COMMA => ",",
+            EXCL_MARK => "!",
+            NUM => "number",
+            STRING => "string",
+            IDF => "identifier",
+            TRUE => "true",
+            FALSE => "false",
+            CONTAINER => "container",
+            SYSTEM => "system",
+            DATATYPE => "datatype",
+            LIBRARY => "library",
+            IF => "if",
+            ELIF => "elif",
+            ELSE => "else",
+            FOR => "for",
+            WHILE => "while",
+            DO => "do",
+            SWITCH => "switch",
+            CASE => "case",
+            DEFAULT => "default",
+            EOF => "end of file",
+            RETURN => "return",
+            _ => throw new ArgumentException()
+        };
     }
 }
