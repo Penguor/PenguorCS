@@ -81,6 +81,7 @@ namespace Penguor.Compiler.Build
         {
             Lexer lexer = new Lexer(File, this);
             tokens = lexer.Tokenize();
+            lexerFinished = true;
             return tokens;
         }
 
@@ -103,6 +104,7 @@ namespace Penguor.Compiler.Build
                 if (ExitCode != 0) Environment.Exit(ExitCode);
                 else Environment.Exit(1);
             }
+            parserFinished = true;
             return program;
         }
 
