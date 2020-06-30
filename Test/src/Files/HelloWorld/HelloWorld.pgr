@@ -2,6 +2,6 @@ public system Hello
 {
     void execute()
     {
-        print("Hello World");
+        print("Hello World")
     }
 }
