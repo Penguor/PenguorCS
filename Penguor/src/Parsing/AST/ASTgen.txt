@@ -7,7 +7,6 @@ BooleanExpr bool value
 NullExpr
 GroupingExpr Expr content
 VarExpr Expr type Token name
-IdentifierExpr object value
 NumExpr double value
 StringExpr string value
 EOFExpr

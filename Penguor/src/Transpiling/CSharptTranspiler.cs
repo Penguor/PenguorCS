@@ -240,15 +240,7 @@ namespace Penguor.Compiler.Transpiling
             throw new System.NotImplementedException();
         }
 
-        public string Visit(IdentifierExpr expr)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public string Visit(NullExpr expr)
-        {
-            throw new System.NotImplementedException();
-        }
+        public string Visit(NullExpr expr) => " null ";
 
         public string Visit(NumExpr expr) => expr.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
 

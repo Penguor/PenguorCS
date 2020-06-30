@@ -252,11 +252,6 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(GroupingExpr expr) => new GroupingExpr(expr.Content.Accept(this));
 
-        public Expr Visit(IdentifierExpr expr)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public Expr Visit(NullExpr expr) => expr;
 
         public Expr Visit(NumExpr expr) => expr;
