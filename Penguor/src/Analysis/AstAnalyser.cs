@@ -116,7 +116,7 @@ namespace Penguor.Compiler.Analysis
             throw new System.NotImplementedException();
         }
 
-        public object Visit(PPStmt stmt)
+        public object Visit(CompilerStmt stmt)
         {
             throw new System.NotImplementedException();
         }

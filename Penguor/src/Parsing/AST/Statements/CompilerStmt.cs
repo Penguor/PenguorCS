@@ -13,14 +13,14 @@ namespace Penguor.Compiler.Parsing.AST
 {
 
     /// <summary>
-    /// A PPStmt Stmt
+    /// A CompilerStmt Stmt
     /// </summary>
-    public sealed class PPStmt : Stmt
+    public sealed class CompilerStmt : Stmt
     {
         /// <summary>
-        /// creates a new instance of PPStmt
+        /// creates a new instance of CompilerStmt
         /// </summary>
-        public PPStmt(TokenType dir, Token[] val)
+        public CompilerStmt(TokenType dir, Token[] val)
         {
             Dir = dir;
             Val = val;
@@ -47,9 +47,9 @@ namespace Penguor.Compiler.Parsing.AST
     public partial interface IStmtVisitor<T>
     {
         /// <summary>
-        /// visit a PPStmt
+        /// visit a CompilerStmt
         /// </summary>
         /// <returns></returns>
-        T Visit(PPStmt stmt);
+        T Visit(CompilerStmt stmt);
     }
 }

@@ -180,8 +180,7 @@ namespace Penguor.Compiler.Parsing
                     builder.Exception(8, dir.offset, (dir.type == IDF || dir.type == NUM) ? dir.token : TTypePrettyString(dir.type));
                     break;
             }
-            Consume(SEMICOLON);
-            return new PPStmt(dir.type, val);
+            return new CompilerStmt(dir.type, val);
         }
 
         private Stmt BlockStmt()

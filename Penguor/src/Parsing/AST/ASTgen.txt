@@ -12,7 +12,7 @@ NumExpr double value
 StringExpr string value
 EOFExpr
 ; Stmt "Penguor\src\Parsing\AST\Statements"
-PPStmt TokenType dir Token[] val
+CompilerStmt TokenType dir Token[] val
 BlockStmt List<Stmt> content
 IfStmt Expr condition Stmt ifC List<Stmt> elif Stmt? elseC
 ElifStmt Expr condition Stmt content

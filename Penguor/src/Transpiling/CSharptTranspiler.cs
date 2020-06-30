@@ -295,7 +295,7 @@ namespace Penguor.Compiler.Transpiling
             return builder.ToString();
         }
 
-        public string Visit(PPStmt stmt) => "\n";
+        public string Visit(CompilerStmt stmt) => "\n";
 
         public string Visit(ReturnStmt stmt)
         {

@@ -9,14 +9,10 @@
 */
 
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.IO;
 
-using Penguor.Debugging;
 using Penguor.Compiler.Build;
-using Penguor.Compiler.Parsing;
 using Penguor.Tools;
 
 namespace Penguor
@@ -50,7 +46,6 @@ namespace Penguor
 
             rootCommand.AddCommand(toolsCommand);
 #endif
-
 
             return rootCommand.InvokeAsync(args).Result;
 
