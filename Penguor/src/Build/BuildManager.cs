@@ -12,7 +12,7 @@ using System;
 using System.IO;
 using System.Threading;
 using Stopwatch = System.Diagnostics.Stopwatch;
-using Penguor.Debugging;
+using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Transpiling;
 
 namespace Penguor.Compiler.Build

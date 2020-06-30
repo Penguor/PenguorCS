@@ -14,7 +14,7 @@
 
 
 
-namespace Penguor.Tools
+namespace Penguor.Compiler.Tools
 {
     internal static class StringExtensions
     {

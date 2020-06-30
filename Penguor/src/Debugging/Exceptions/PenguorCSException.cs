@@ -1,6 +1,6 @@
 using System;
 
-namespace Penguor.Debugging
+namespace Penguor.Compiler.Debugging
 {
     /// <summary>
     /// cast a new exception to do with the Penguor Compiler

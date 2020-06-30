@@ -12,7 +12,7 @@ using System;
 
 using Penguor.Compiler.Build;
 
-namespace Penguor.Debugging
+namespace Penguor.Compiler.Debugging
 {
     /// <summary>
     /// The different logging levels

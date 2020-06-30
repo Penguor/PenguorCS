@@ -13,7 +13,7 @@ using System;
 using System.IO;
 using System.Text;
 using Penguor.Compiler.Parsing;
-using Penguor.Debugging;
+using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Parsing.AST;
 
 using static Penguor.Compiler.Parsing.TokenType;

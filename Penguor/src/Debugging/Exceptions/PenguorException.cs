@@ -1,7 +1,7 @@
 using System;
 using Penguor.Compiler.Build;
 
-namespace Penguor.Debugging
+namespace Penguor.Compiler.Debugging
 {
     /// <summary>
     /// cast a new exception to do with a source code error

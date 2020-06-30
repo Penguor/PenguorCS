@@ -10,7 +10,7 @@
 
 using System;
 using System.Collections.Generic;
-using Penguor.Debugging;
+using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Build;
 using static Penguor.Compiler.Parsing.TokenType;

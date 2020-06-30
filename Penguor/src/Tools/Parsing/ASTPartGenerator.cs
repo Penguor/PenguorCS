@@ -11,7 +11,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
-namespace Penguor.Tools
+namespace Penguor.Compiler.Tools
 {
     //! improve code, currently terrible
     internal class ASTPartGenerator

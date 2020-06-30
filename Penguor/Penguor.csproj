@@ -10,7 +10,7 @@
 
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>Penguor</RootNamespace>
+    <RootNamespace>Penguor.Compiler</RootNamespace>
     <AssemblyName>Penguor</AssemblyName>
   </PropertyGroup>
 

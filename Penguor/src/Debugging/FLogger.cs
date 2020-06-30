@@ -12,7 +12,7 @@ using System;
 using System.Globalization;
 using System.IO;
 
-namespace Penguor.Debugging
+namespace Penguor.Compiler.Debugging
 {
     /// <summary>
     /// The <c>Logger</c> class writes logs

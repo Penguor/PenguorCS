@@ -10,7 +10,7 @@
 
 using System;
 
-namespace Penguor.Debugging
+namespace Penguor.Compiler.Debugging
 {
     internal class CLogger
     {

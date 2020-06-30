@@ -14,7 +14,8 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 
 using Penguor.Compiler.Build;
-using Penguor.Tools;
+using Penguor.Compiler.Debugging;
+using Penguor.Compiler.Tools;
 
 namespace Penguor
 {
@@ -49,7 +50,7 @@ namespace Penguor
             };
             ASTGenTool.Handler = CommandHandler.Create<string, string>((string file, string log) =>
             {
-                Debugging.Debug.EnableFileLogger(log);
+                Debug.EnableFileLogger(log);
                 new ASTPartGenerator().Generate(file);
             });
             toolsCommand.AddCommand(ASTGenTool);
@@ -61,7 +62,7 @@ namespace Penguor
 
             static void Build(string input, bool benchmark, string transpile, string log)
             {
-                if (log != null) Debugging.Debug.EnableFileLogger(log);
+                if (log != null) Debug.EnableFileLogger(log);
                 if (input == null) input = Environment.CurrentDirectory;
                 Console.WriteLine(transpile);
                 if (benchmark) BuildManager.Benchmark(input);
