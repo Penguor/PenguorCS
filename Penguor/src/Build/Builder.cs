@@ -90,12 +90,12 @@ namespace Penguor.Compiler.Build
                 e.Log(File);
                 Exit(1);
             }
-            catch (PenguorCSException e)
+            catch (PenguorCSException)
             {
                 Exit(1);
             }
             lexerFinished = true;
-            return tokens;
+            return tokens!;
         }
 
         /// <summary>
