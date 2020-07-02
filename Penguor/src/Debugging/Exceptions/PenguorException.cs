@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.Threading.Tasks;
+
 using Penguor.Compiler.Build;
 
 namespace Penguor.Compiler.Debugging
@@ -8,17 +11,50 @@ namespace Penguor.Compiler.Debugging
     /// </summary>
     public class PenguorException : Exception
     {
-        /// <summary></summary>
-        /// <param name="msg">the number of the PGR error message</param>
-        /// <param name="offset">the offset where the error occurred in the source file</param>
-        /// <param name="file">the Penguor src file where the error occurred</param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
-        /// <param name="arg2"></param>
-        /// <param name="arg3"></param>
-        public PenguorException(int msg, int offset, string file, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
+        private string? sourceFile;
+
+        public uint Msg { get; }
+        public int Offset { get; }
+
+        protected string arg0, arg1, arg2, arg3;
+
+        /// <exception cref="FileNotFoundException"></exception>
+        public string? SourceFile
         {
-            Debug.CastPGR(msg, offset, file, arg0, arg1, arg2, arg3);
+            get { return sourceFile; }
+            set
+            {
+                if (File.Exists(value)) sourceFile = value;
+                else throw new FileNotFoundException(null, value);
+            }
+        }
+
+        public PenguorException(uint msg, int offset, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
+        {
+            Msg = msg;
+            Offset = offset;
+
+            this.arg0 = arg0;
+            this.arg1 = arg1;
+            this.arg2 = arg2;
+            this.arg3 = arg3;
+        }
+
+        /// <summary>
+        /// Log the exception
+        /// </summary>
+        public virtual void Log()
+        {
+            Debug.CastPGR(Msg, Offset, sourceFile ?? throw new ArgumentNullException(), arg0, arg1, arg2, arg3);
+        }
+
+        /// <summary>
+        /// Log the exception
+        /// </summary>
+        public virtual void Log(string file)
+        {
+            SourceFile = file;
+            Debug.CastPGR(Msg, Offset, sourceFile ?? throw new ArgumentNullException(), arg0, arg1, arg2, arg3);
         }
     }
 }

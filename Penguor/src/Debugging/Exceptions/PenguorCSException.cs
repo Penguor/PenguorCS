@@ -1,3 +1,13 @@
+/*
+#
+# PenguorCS Compiler
+# ------------------
+#
+# (c) Carl Schierig 2019-2020
+# 
+# 
+*/
+
 using System;
 
 namespace Penguor.Compiler.Debugging
@@ -11,9 +21,9 @@ namespace Penguor.Compiler.Debugging
         /// 
         /// </summary>
         /// <param name="msg">the number of the PGRCS error message</param>
-        public PenguorCSException(int msg)
+        public PenguorCSException(uint msg, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
         {
-            Debug.CastPGRCS(msg);
+            Debug.CastPGRCS(msg, arg0, arg1, arg2, arg3);
         }
     }
 }

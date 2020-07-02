@@ -9,8 +9,8 @@
 */
 
 using System;
+using System.Collections.Generic;
 
-using Penguor.Compiler.Build;
 
 namespace Penguor.Compiler.Debugging
 {
@@ -52,6 +52,31 @@ namespace Penguor.Compiler.Debugging
         private static CLogger cLogger;
         private static FLogger? fLogger;
 
+        private static Dictionary<uint, (LogLevel, string)> pgrcsMessages = new Dictionary<uint, (LogLevel, string)>
+        {
+            {1, (LogLevel.Error, "An unexpected error occurred")},
+            {2, (LogLevel.Warn, "Warning")},
+            {3, (LogLevel.Debug, "Debug")},
+            {4, (LogLevel.Info, "Info")},
+            {5, (LogLevel.Error, "The compiler is out of memory")},
+            {6, (LogLevel.Error, "Source file '{0}' not found")},
+            {7, (LogLevel.Error, "Parser.tokens is null")},
+            {8, (LogLevel.Error, "trying to access active file, but there is none")},
+        };
+
+        private static Dictionary<uint, (LogLevel, string)> pgrMessages = new Dictionary<uint, (LogLevel, string)>
+        {
+            {1, (LogLevel.Error, "An unexpected error occurred")},
+            {2, (LogLevel.Warn, "Warning")},
+            {3, (LogLevel.Debug, "Debug")},
+            {4, (LogLevel.Info, "Info")},
+            //! 5 is missing
+            {6, (LogLevel.Error, "Expecting '{0}'")},
+            {7, (LogLevel.Error, "Unexpected character '{0}'")},
+            {8, (LogLevel.Error, "Unknown compiler statement '{0}'")},
+            {9, (LogLevel.Error, "Unexpected end of file")}
+        };
+
         static Debug()
         {
             cLogger = new CLogger();
@@ -65,6 +90,7 @@ namespace Penguor.Compiler.Debugging
         public static void Log(string logText, LogLevel logLevel)
         {
             cLogger.Log(logText, logLevel);
+            if (fLogger != null) fLogger.Log(logText, logLevel);
         }
 
         /// <summary>
@@ -75,96 +101,30 @@ namespace Penguor.Compiler.Debugging
         /// <param name="arg1"></param>
         /// <param name="arg2"></param>
         /// <param name="arg3"></param>
-        public static void CastPGRCS(int message, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
+        public static void CastPGRCS(uint message, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
         {
-            switch (message)
-            {
-                case 1:
-                    Log("[PGRCS-0001] An unexpected error occurred.", LogLevel.Error);
-                    break;
-                case 2:
-                    Log("[PGRCS-0002] warning.", LogLevel.Warn);
-                    break;
-                case 3:
-                    Log("[PGRCS-0003] debug.", LogLevel.Error);
-                    break;
-                case 4:
-                    Log("[PGRCS-0004] info.", LogLevel.Error);
-                    break;
-                case 5:
-                    Log("[PGRCS-0005] Out of memory.", LogLevel.Error);
-                    break;
-                case 6:
-                    Log($"[PGRCS-0006] Invalid argument \"{arg0}\"", LogLevel.Error);
-                    break;
-                case 7:
-                    Log($"[PGRCS-0007] \"{arg0}\" expected.", LogLevel.Error);
-                    break;
-                case 8:
-                    Log($"[PGRCS-0008] Parser.tokens equals null", LogLevel.Error);
-                    break;
-                case 9:
-                    Log($"[PGRCS-0009] trying to access active file, but there is none", LogLevel.Error);
-                    break;
-                default:
-                    throw new System.ArgumentOutOfRangeException("message", message, "This PGRCS message doesn't exist");
-            }
+            (LogLevel level, string debugMessage) = pgrcsMessages.GetValueOrDefault(
+                message,
+                (LogLevel.Error, "this error is not supposed to exist. Please create an issue at https://github.com/Penguor/PenguorCS"));
+            string completeMessage = $"[PGRCS-{String.Format("{0:D4}", message)}] {String.Format(debugMessage, arg0, arg1, arg2, arg3)}";
+            Log(completeMessage, level);
         }
 
         /// <summary>
         /// log a Penguor language debug message
         /// </summary>
-        /// <param name="message"></param>
         /// <param name="offset">the offset where the error occurred</param>
         /// <param name="file">the file where the error occurred</param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
-        /// <param name="arg2"></param>
-        /// <param name="arg3"></param>
-        public static void CastPGR(int message, int offset, string file, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
+        public static void CastPGR(uint message, int offset, string? file, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
         {
-            string currentMessage = "";
-            bool printOffset = true;
-            LogLevel level = LogLevel.Debug;
-            switch (message)
-            {
-                case 1:
-                    currentMessage = "[PGR-0001] An unexpected error occurred";
-                    level = LogLevel.Error;
-                    break;
-                case 2:
-                    currentMessage = "[PGR-0002] warning";
-                    level = LogLevel.Warn;
-                    break;
-                case 3:
-                    currentMessage = "[PGR-0003] debug";
-                    level = LogLevel.Debug;
-                    break;
-                case 4:
-                    currentMessage = "[PGR-0004] info";
-                    level = LogLevel.Info;
-                    break;
-                case 5:
-                    currentMessage = $"[PGR-0005] Source file '{arg0}' not found";
-                    printOffset = false;
-                    level = LogLevel.Error;
-                    break;
-                case 6:
-                    currentMessage = $"[PGR-0006] Expecting \"{arg0}\"";
-                    level = LogLevel.Error;
-                    break;
-                case 7:
-                    currentMessage = $"[PGR-0007] Unexpected char '{arg0}'";
-                    level = LogLevel.Error;
-                    break;
-                case 8:
-                    currentMessage = $"[PGR-0008] Unknown compiler statement '{arg0}'";
-                    level = LogLevel.Error;
-                    break;
-            }
-            if (printOffset) currentMessage += " " + GetSourcePosition(offset, file);
-            //Builder.ExitCode = message;
-            Log(currentMessage, level);
+            (LogLevel level, string debugMessage) = pgrMessages.GetValueOrDefault(
+                message,
+                (LogLevel.Error, "this error is not supposed to exist. Please create an issue at https://github.com/Penguor/PenguorCS"));
+
+            // Format the message to contain error arguments
+            string completeMessage =
+                $"[PGR-{String.Format("{0:D4}", message)}] {String.Format(debugMessage, arg0, arg1, arg2, arg3)} {(file == null ? "" : GetSourcePosition(offset, file))}";
+            Log(completeMessage, level);
         }
 
         private static string GetSourcePosition(int offset, string file)

@@ -13,6 +13,7 @@ using System.Text;
 using System.IO;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Parsing;
+using Penguor.Compiler.Debugging;
 
 namespace Penguor.Compiler.Lexing
 {
@@ -43,7 +44,7 @@ namespace Penguor.Compiler.Lexing
             }
             catch (FileNotFoundException)
             {
-                builder.Exception(5, 0, filePath);
+                throw new PenguorCSException(6, filePath);
             }
         }
 
@@ -277,7 +278,8 @@ namespace Penguor.Compiler.Lexing
                         AddToken(Match('=') ? TokenType.EQUALS : TokenType.ASSIGN);
                         break;
                     default:
-                        builder.Exception(7, offset, c.ToString());
+
+                        builder.Exceptions.Add(new LexingException(7, offset, c.ToString()));
                         break;
                 }
             }
@@ -291,6 +293,7 @@ namespace Penguor.Compiler.Lexing
         private char Advance()
         {
             current++;
+            if (current > source.Length) throw new LexingException(9, current, "");
             return source[current - 1];
         }
 

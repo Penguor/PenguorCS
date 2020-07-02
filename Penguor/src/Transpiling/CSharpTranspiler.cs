@@ -22,11 +22,11 @@ using static Penguor.Compiler.Parsing.TokenType;
 
 namespace Penguor.Compiler.Transpiling
 {
-    public class CSharptTranspiler : IDeclVisitor<string>, IStmtVisitor<string>, IExprVisitor<string>, ICallVisitor<string>
+    public class CSharpTranspiler : IDeclVisitor<string>, IStmtVisitor<string>, IExprVisitor<string>, ICallVisitor<string>
     {
         private ProgramDecl program;
 
-        public CSharptTranspiler(ProgramDecl program)
+        public CSharpTranspiler(ProgramDecl program)
         {
             this.program = program;
         }

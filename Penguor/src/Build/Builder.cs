@@ -26,7 +26,6 @@ namespace Penguor.Compiler.Build
     /// </summary>
     public class Builder
     {
-        private int exitCode = 0;
         List<Token>? tokens;
         Decl? program;
 
@@ -48,7 +47,7 @@ namespace Penguor.Compiler.Build
         /// <summary>
         /// The code the program exits with. If it isn't 0, an error has occurred
         /// </summary>
-        public int ExitCode { get { return exitCode; } }
+        public int ExitCode { get; private set; }
 
         /// <summary>
         /// create a new instance of the Builder class
@@ -56,8 +55,13 @@ namespace Penguor.Compiler.Build
         /// <param name="file">the source file this builder is using</param>
         public Builder(string file)
         {
-            if (IOFile.Exists(file)) File = file;
-            else throw new PenguorException(5, 0, file, file);
+            Exceptions = new List<PenguorException>();
+            if (!IOFile.Exists(file))
+            {
+                Debug.CastPGRCS(6, file);
+                Exit(1);
+            }
+            File = file;
         }
 
         /// <summary>
@@ -66,10 +70,7 @@ namespace Penguor.Compiler.Build
         public int Build()
         {
             Lex();
-            CheckExit();
             Parse();
-            CheckExit();
-
             return ExitCode;
         }
 
@@ -80,7 +81,19 @@ namespace Penguor.Compiler.Build
         public List<Token> Lex()
         {
             Lexer lexer = new Lexer(File, this);
-            tokens = lexer.Tokenize();
+            try
+            {
+                tokens = lexer.Tokenize();
+            }
+            catch (LexingException e)
+            {
+                e.Log(File);
+                Exit(1);
+            }
+            catch (PenguorCSException e)
+            {
+                Exit(1);
+            }
             lexerFinished = true;
             return tokens;
         }
@@ -98,14 +111,15 @@ namespace Penguor.Compiler.Build
             try
             {
                 program = parser.Parse();
+                SubmitAllExceptions();
             }
-            catch (PenguorException)
+            catch (ParsingException e)
             {
-                if (ExitCode != 0) Environment.Exit(ExitCode);
-                else Environment.Exit(1);
+                e.Log(File);
+                Exit(1);
             }
             parserFinished = true;
-            return program;
+            return program ?? throw new NullReferenceException();
         }
 
         /// <summary>
@@ -121,29 +135,37 @@ namespace Penguor.Compiler.Build
             switch (lang)
             {
                 case TranspileLanguage.CSHARP:
-                    CSharptTranspiler transpiler = new CSharptTranspiler((ProgramDecl)program);
+                    CSharpTranspiler transpiler = new CSharpTranspiler((ProgramDecl)program);
                     transpiler.Transpile(output);
                     break;
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="msg"></param>
-        /// <param name="offset"></param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
-        /// <param name="arg2"></param>
-        /// <param name="arg3"></param>
-        public void Exception(int msg, int offset, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
+        // Below this is the code for handling errors in the Penguor source code
+
+        public List<PenguorException> Exceptions { get; protected set; }
+
+        public void SubmitException()
         {
-            Debug.CastPGR(msg, offset, File, arg0, arg1, arg2, arg3);
+            if (!(Exceptions.Count > 0)) return;
+            PenguorException p = Exceptions[0];
+            Exceptions.RemoveAt(0);
+            p.Log(File);
         }
 
-        private void CheckExit()
+        public void SubmitAllExceptions()
         {
-            if (ExitCode > 0) System.Environment.Exit(ExitCode);
+            foreach (var e in Exceptions)
+                e.Log(File);
+            Exceptions.Clear();
+        }
+
+        public void Exit(int exitCode = 0)
+        {
+            SubmitAllExceptions();
+            ExitCode = exitCode;
+
+            Environment.Exit(exitCode);
         }
     }
 }

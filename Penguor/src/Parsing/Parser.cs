@@ -10,6 +10,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Build;
@@ -98,7 +100,7 @@ namespace Penguor.Compiler.Parsing
                 if (Check(IDF) && LookAhead(1).type == IDF && LookAhead(2).type == LPAREN)
                     return FunctionDecl(accessMod, nonAccessMods);
                 else if (Check(IDF) && LookAhead(1).type == IDF) return VarDecl(accessMod, nonAccessMods);
-                throw new PenguorException(1, GetCurrent().offset, builder.File);
+                else return Error(DeclStmt, 1, GetCurrent(), SYSTEM, CONTAINER, DATATYPE, LIBRARY, IDF);
             }
         }
 
@@ -173,11 +175,11 @@ namespace Penguor.Compiler.Parsing
                 case SAFETY:
                     val = new Token[1];
                     val[0] = Consume(NUM);
-                    if (Convert.ToInt32(val[0].token) < 0 || Convert.ToInt32(val[0].token) > 2) builder.Exception(1, val[0].offset);
+                    if (Convert.ToInt32(val[0].token) < 0 || Convert.ToInt32(val[0].token) > 2) Error(1, val[0], NUM);
                     break;
                 default:
                     val = new Token[0];
-                    builder.Exception(8, dir.offset, (dir.type == IDF || dir.type == NUM) ? dir.token : TTypePrettyString(dir.type));
+                    Error(8, dir, SAFETY);
                     break;
             }
             GetEnding();
@@ -468,7 +470,7 @@ namespace Penguor.Compiler.Parsing
         private Token Consume(TokenType type)
         {
             if (Check(type)) return Advance();
-            builder.Exception(6, GetCurrent().offset, TTypePrettyString(type));
+            Error(6, GetCurrent(), type);
             var tmp = Advance();
             return new Token(type, "", tmp.offset, tmp.length);
         }
@@ -544,8 +546,8 @@ namespace Penguor.Compiler.Parsing
                 Advance();
                 return true;
             }
-            builder.Exception(6, Advance().offset, "';' or newline");
-            return false; //! improve this mess
+            Error(6, GetCurrent(), SEMICOLON, ENDING);
+            return false;
         }
 
         private bool TryGetEnding()
@@ -558,86 +560,20 @@ namespace Penguor.Compiler.Parsing
             return false;
         }
 
-        private string TTypePrettyString(TokenType type) => type switch
+        // Report compile errors to the builder
+
+        private void Error(uint msg, Token actual, params TokenType[] expected) => builder.Exceptions.Add(new ParsingException(msg, actual, expected));
+
+        private T Error<T>(T recover, uint msg, Token actual, params TokenType[] expected)
         {
-            HASHTAG => "#",
-            USING => "using",
-            SAFETY => "safety",
-            PUBLIC => "public",
-            PRIVATE => "private",
-            PROTECTED => "protected",
-            RESTRICTED => "restricted",
-            STATIC => "static",
-            DYNAMIC => "dynamic",
-            ABSTRACT => "abstract",
-            CONST => "const",
-            LPAREN => "(",
-            RPAREN => ")",
-            LBRACE => "{",
-            RBRACE => "}",
-            LBRACK => "[",
-            RBRACK => "]",
-            PLUS => "+",
-            MINUS => "-",
-            MUL => "*",
-            DIV => "/",
-            PERCENT => "%",
-            DPLUS => "++",
-            DMINUS => "--",
-            GREATER => ">",
-            LESS => "<",
-            GREATER_EQUALS => ">=",
-            LESS_EQUALS => "<=",
-            EQUALS => "==",
-            NEQUALS => "!=",
-            AND => "&&",
-            OR => "||",
-            XOR => "^^",
-            BW_AND => "&",
-            BW_OR => "|",
-            BW_XOR => "^",
-            BW_NOT => "~",
-            BS_LEFT => "<<",
-            BS_RIGHT => ">>",
-            ASSIGN => "=",
-            ADD_ASSIGN => "+=",
-            SUB_ASSIGN => "-=",
-            MUL_ASSIGN => "*=",
-            DIV_ASSIGN => "/=",
-            PERCENT_ASSIGN => "%=",
-            BW_AND_ASSIGN => "&=",
-            BW_OR_ASSIGN => "|=",
-            BW_XOR_ASSIGN => "^=",
-            BS_LEFT_ASSIGN => "<<=",
-            BS_RIGHT_ASSIGN => ">>=",
-            NULL => "null",
-            COLON => ":",
-            SEMICOLON => ";",
-            ENDING => "newline",
-            DOT => ".",
-            COMMA => ",",
-            EXCL_MARK => "!",
-            NUM => "number",
-            STRING => "string",
-            IDF => "identifier",
-            TRUE => "true",
-            FALSE => "false",
-            CONTAINER => "container",
-            SYSTEM => "system",
-            DATATYPE => "datatype",
-            LIBRARY => "library",
-            IF => "if",
-            ELIF => "elif",
-            ELSE => "else",
-            FOR => "for",
-            WHILE => "while",
-            DO => "do",
-            SWITCH => "switch",
-            CASE => "case",
-            DEFAULT => "default",
-            EOF => "end of file",
-            RETURN => "return",
-            _ => throw new ArgumentException()
-        };
+            builder.Exceptions.Add(new ParsingException(msg, actual, expected));
+            return recover;
+        }
+
+        private T Error<T>(Func<T> recover, uint msg, Token actual, params TokenType[] expected)
+        {
+            builder.Exceptions.Add(new ParsingException(msg, actual, expected));
+            return recover();
+        }
     }
 }
