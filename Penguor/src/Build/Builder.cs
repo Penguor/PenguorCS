@@ -10,10 +10,13 @@
 
 using System;
 using System.Collections.Generic;
+
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Lexing;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
+using Penguor.Compiler.Analysis;
+using Penguor.Compiler.IR;
 using Penguor.Compiler.Transpiling;
 
 using IOFile = System.IO.File;
@@ -71,6 +74,7 @@ namespace Penguor.Compiler.Build
         {
             Lex();
             Parse();
+            Analyse();
             return ExitCode;
         }
 
@@ -84,6 +88,7 @@ namespace Penguor.Compiler.Build
             try
             {
                 tokens = lexer.Tokenize();
+                SubmitAllExceptions();
             }
             catch (LexingException e)
             {
@@ -120,6 +125,16 @@ namespace Penguor.Compiler.Build
             }
             parserFinished = true;
             return program ?? throw new NullReferenceException();
+        }
+
+        public void Analyse()
+        {
+            if (!lexerFinished) Lex();
+            if (!parserFinished) Parse();
+
+            SemanticAnalyser analyser = new SemanticAnalyser((ProgramDecl)program!);
+
+            Decl analysed = analyser.Analyse();
         }
 
         /// <summary>

@@ -140,7 +140,15 @@ namespace Penguor.Compiler.Parsing
             return dec;
         }
 
-        private Decl LibraryDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new LibraryDecl(accessMod, nonAccessMods, CallExpr(), BlockDecl());
+        private Decl LibraryDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        {
+            List<Token> name = new List<Token>();
+            name.Add(Consume(IDF));
+            while (Match(DOT)) name.Add(Consume(IDF));
+
+            return new LibraryDecl(accessMod, nonAccessMods, name, BlockDecl());
+
+        }
 
         private Decl BlockDecl()
         {
@@ -387,7 +395,7 @@ namespace Penguor.Compiler.Parsing
             return CallExpr();
         }
 
-        private Expr CallExpr()
+        private CallExpr CallExpr()
         {
             List<Call> callee = new List<Call>();
             TokenType? postfix = null;
@@ -418,7 +426,7 @@ namespace Penguor.Compiler.Parsing
 
             return new CallExpr(callee, postfix);
 
-            Call FunctionCall(Token name)
+            FunctionCall FunctionCall(Token name)
             {
                 List<Expr> args = new List<Expr>();
                 if (!Match(RPAREN)) args.Add(Expression());

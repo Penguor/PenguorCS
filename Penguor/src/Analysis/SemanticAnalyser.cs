@@ -8,7 +8,10 @@
 # 
 */
 
+using System.Collections.Generic;
+
 using Penguor.Compiler.Parsing.AST;
+using Penguor.Compiler.IR;
 
 using static Penguor.Compiler.Parsing.TokenType;
 
@@ -16,13 +19,16 @@ using static Penguor.Compiler.Parsing.TokenType;
 
 namespace Penguor.Compiler.Analysis
 {
-    public class AstAnalyser : IDeclVisitor<Decl>, IStmtVisitor<object>, IExprVisitor<Expr>, ICallVisitor<object>
+    public class SemanticAnalyser : IDeclVisitor<Decl>, IStmtVisitor<object>, IExprVisitor<Expr>, ICallVisitor<object>
     {
         private ProgramDecl program;
 
-        public AstAnalyser(ProgramDecl program)
+        private Stack<string> state;
+
+        public SemanticAnalyser(ProgramDecl program)
         {
             this.program = program;
+            state = new Stack<string>();
         }
 
         public Decl Analyse()
@@ -284,7 +290,8 @@ namespace Penguor.Compiler.Analysis
 
         public object Visit(IdfCall call)
         {
-            throw new System.NotImplementedException();
+            state.Push(call.Name.token);
+            return call.Name;
         }
     }
 }

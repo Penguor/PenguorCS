@@ -8,9 +8,19 @@ Penguor is an in-development data-oriented language. Currently, it is in a very 
 
 Work-in-progress documentation can soon be found [here](https://penguor.readthedocs.io/).
 
-## Roadmap
+## Example
 
-The roadmap can be found [here](https://github.com/Penguor/PenguorDocs/Roadmap.md).
+The following code will show a "Hello World" program written in Penguor:
+
+```
+public system Hello
+{
+    void execute()
+    {
+        print("Hello World")
+    }
+}
+```
 
 ## Contribute
 

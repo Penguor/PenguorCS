@@ -119,8 +119,8 @@ namespace Penguor.Compiler.Transpiling
 
         public string Visit(LibraryDecl decl)
         {
-            StringBuilder builder = new StringBuilder();
-            builder.Append($"namespace {decl.Name.Accept(this)}");
+            StringBuilder builder = new StringBuilder("namespace ");
+            builder.Append(String.Join('.', decl.Name));
             builder.Append(decl.Content.Accept(this));
             return builder.ToString();
         }

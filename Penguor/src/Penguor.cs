@@ -50,7 +50,7 @@ namespace Penguor
             };
             ASTGenTool.Handler = CommandHandler.Create<string, string>((string file, string log) =>
             {
-                Debug.EnableFileLogger(log);
+                if(log != null) Debug.EnableFileLogger(log);
                 new ASTPartGenerator().Generate(file);
             });
             toolsCommand.AddCommand(ASTGenTool);

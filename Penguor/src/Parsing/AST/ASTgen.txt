@@ -29,7 +29,7 @@ SystemDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? paren
 ContainerDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
 DatatypeDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
 FunctionDecl TokenType? accessMod TokenType[] nonAccessMod Expr variable List<Expr> parameters Decl content
-LibraryDecl TokenType? accessMod TokenType[] nonAccessMod Expr name Decl content
+LibraryDecl TokenType? accessMod TokenType[] nonAccessMod List<Token> name Decl content
 VarDecl TokenType? accessMod TokenType[] nonAccessMod Expr variable Expr? init
 BlockDecl List<Decl> content
 DeclStmt Stmt stmt

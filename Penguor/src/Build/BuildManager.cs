@@ -128,8 +128,13 @@ namespace Penguor.Compiler.Build
             watch.Restart();
             builder.Parse();
             watch.Stop();
-            totalWatch.Stop();
             var parseTime = watch.Elapsed;
+
+            watch.Restart();
+            builder.Analyse();
+            watch.Stop();
+            var analyseTime = watch.Elapsed;
+            totalWatch.Stop();
             var totalTime = totalWatch.Elapsed;
 
             Debug.Log("Results", LogLevel.Info);
@@ -137,6 +142,7 @@ namespace Penguor.Compiler.Build
             Debug.Log($"file: {file}", LogLevel.Info);
             Debug.Log($"lexing time: {lexTime.Minutes}m  {lexTime.Seconds}s {lexTime.Milliseconds}ms", LogLevel.Info);
             Debug.Log($"parsing time: {parseTime.Minutes}m  {parseTime.Seconds}s {parseTime.Milliseconds}ms", LogLevel.Info);
+            Debug.Log($"analysation time: {analyseTime.Minutes}m  {analyseTime.Seconds}s {analyseTime.Milliseconds}ms", LogLevel.Info);
             Debug.Log($"total time: {totalTime.Minutes}m  {totalTime.Seconds}s {totalTime.Milliseconds}ms", LogLevel.Info);
         }
     }
