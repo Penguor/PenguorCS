@@ -11,7 +11,6 @@
 using System;
 using System.Collections.Generic;
 
-
 namespace Penguor.Compiler.Debugging
 {
     /// <summary>
@@ -49,10 +48,10 @@ namespace Penguor.Compiler.Debugging
     /// </summary>
     internal static class Debug
     {
-        private static CLogger cLogger;
+        private static readonly CLogger cLogger;
         private static FLogger? fLogger;
 
-        private static Dictionary<uint, (LogLevel, string)> pgrcsMessages = new Dictionary<uint, (LogLevel, string)>
+        private static readonly Dictionary<uint, (LogLevel, string)> pgrcsMessages = new Dictionary<uint, (LogLevel, string)>
         {
             {1, (LogLevel.Error, "An unexpected error occurred")},
             {2, (LogLevel.Warn, "Warning")},
@@ -64,7 +63,7 @@ namespace Penguor.Compiler.Debugging
             {8, (LogLevel.Error, "trying to access active file, but there is none")},
         };
 
-        private static Dictionary<uint, (LogLevel, string)> pgrMessages = new Dictionary<uint, (LogLevel, string)>
+        private static readonly Dictionary<uint, (LogLevel, string)> pgrMessages = new Dictionary<uint, (LogLevel, string)>
         {
             {1, (LogLevel.Error, "An unexpected error occurred")},
             {2, (LogLevel.Warn, "Warning")},
@@ -90,7 +89,7 @@ namespace Penguor.Compiler.Debugging
         public static void Log(string logText, LogLevel logLevel)
         {
             cLogger.Log(logText, logLevel);
-            if (fLogger != null) fLogger.Log(logText, logLevel);
+            fLogger?.Log(logText, logLevel);
         }
 
         /// <summary>

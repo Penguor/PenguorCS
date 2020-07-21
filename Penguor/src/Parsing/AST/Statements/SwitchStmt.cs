@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A SwitchStmt Stmt
     /// </summary>
@@ -27,11 +26,11 @@ namespace Penguor.Compiler.Parsing.AST
             DefaultCase = defaultcase;
         }
         /// <summary></summary>
-        public Expr Condition { get; private set; }
+        public Expr Condition { get; }
         /// <summary></summary>
-        public List<Stmt> Cases { get; private set; }
+        public List<Stmt> Cases { get; }
         /// <summary></summary>
-        public Stmt? DefaultCase { get; private set; }
+        public Stmt? DefaultCase { get; }
 
         /// <summary>
         /// returns Visit() of this instance

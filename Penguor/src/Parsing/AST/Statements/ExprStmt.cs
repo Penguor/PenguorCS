@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A ExprStmt Stmt
     /// </summary>
@@ -25,7 +24,7 @@ namespace Penguor.Compiler.Parsing.AST
             Expr = expr;
         }
         /// <summary></summary>
-        public Expr Expr { get; private set; }
+        public Expr Expr { get; }
 
         /// <summary>
         /// returns Visit() of this instance

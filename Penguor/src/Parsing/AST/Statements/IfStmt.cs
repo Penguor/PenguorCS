@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A IfStmt Stmt
     /// </summary>
@@ -28,13 +27,13 @@ namespace Penguor.Compiler.Parsing.AST
             ElseC = elsec;
         }
         /// <summary></summary>
-        public Expr Condition { get; private set; }
+        public Expr Condition { get; }
         /// <summary></summary>
-        public Stmt IfC { get; private set; }
+        public Stmt IfC { get; }
         /// <summary></summary>
-        public List<Stmt> Elif { get; private set; }
+        public List<Stmt> Elif { get; }
         /// <summary></summary>
-        public Stmt? ElseC { get; private set; }
+        public Stmt? ElseC { get; }
 
         /// <summary>
         /// returns Visit() of this instance

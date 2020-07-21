@@ -12,9 +12,8 @@ using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler.IR
 {
-    public class IRLibrary : IRStruct
+    public class IRLibrary : IRDecl
     {
-
         public TokenType? AccessMod { get; }
         public TokenType[] NonAccessMod { get; }
         public IRLibrary(State name, TokenType? accessMod, TokenType[] nonAccessMod) : base(name)

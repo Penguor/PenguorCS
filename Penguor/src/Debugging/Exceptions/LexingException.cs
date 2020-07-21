@@ -20,7 +20,7 @@ namespace Penguor.Compiler.Debugging
     public class LexingException : PenguorException
     {
         public string Found { get; }
-        
+
         /// <summary>
         /// create a new LexingException
         /// </summary>

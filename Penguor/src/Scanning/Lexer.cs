@@ -22,12 +22,12 @@ namespace Penguor.Compiler.Lexing
     /// </summary>
     public class Lexer
     {
-        private List<Token> tokens = new List<Token>();
-        string source;
-        Builder builder;
+        private readonly List<Token> tokens = new List<Token>();
+        private readonly string source;
+        private readonly Builder builder;
 
-        int current = 0;
-        int offset = 0;
+        private int current = 0;
+        private int offset = 0;
 
         /// <summary>
         /// create a new instance of the Lexer class
@@ -183,7 +183,7 @@ namespace Penguor.Compiler.Lexing
                     continue;
                 }
 
-                char c = '\0';
+                char c;
                 if (!AtEnd()) c = Advance();
                 else break;
 
@@ -200,7 +200,9 @@ namespace Penguor.Compiler.Lexing
                         break;
                     case '/':
                         if (Match('/'))
+                        {
                             while (!Match('\n')) Advance();
+                        }
                         else if (Match('*'))
                         {
                             int nested = 1;
@@ -211,7 +213,11 @@ namespace Penguor.Compiler.Lexing
                                 else Advance();
                             }
                         }
-                        else AddToken(Match('=') ? TokenType.DIV_ASSIGN : TokenType.DIV);
+                        else
+                        {
+                            AddToken(Match('=') ? TokenType.DIV_ASSIGN : TokenType.DIV);
+                        }
+
                         break;
                     case '%':
                         AddToken(Match('=') ? TokenType.PERCENT_ASSIGN : TokenType.PERCENT);
@@ -300,7 +306,7 @@ namespace Penguor.Compiler.Lexing
         private bool Match(char expected)
         {
             if (AtEnd()) return false;
-            if ((Peek() != expected)) return false;
+            if (Peek() != expected) return false;
 
             current++;
             return true;

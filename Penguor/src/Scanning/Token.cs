@@ -35,7 +35,7 @@ namespace Penguor.Compiler.Parsing
         public readonly int length;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="type"></param>
         /// <param name="token"></param>
@@ -133,13 +133,9 @@ namespace Penguor.Compiler.Parsing
             _ => throw new System.ArgumentException()
         };
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>returns a string of the token with line number and type</returns>
         public override string ToString()
         {
-            return ($"type: {type.ToString()}, token: {token}, offset: {offset}, length: {length}");
+            return $"type: {type}, token: {token}, offset: {offset}, length: {length}";
         }
     }
 }

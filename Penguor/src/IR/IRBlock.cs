@@ -12,7 +12,7 @@ using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler.IR
 {
-    public class IRBlock : IRStruct
+    public class IRBlock : IRDecl
     {
         public IRBlock(State name) : base(name)
         {

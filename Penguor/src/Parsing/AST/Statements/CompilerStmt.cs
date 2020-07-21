@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A CompilerStmt Stmt
     /// </summary>
@@ -26,9 +25,9 @@ namespace Penguor.Compiler.Parsing.AST
             Val = val;
         }
         /// <summary></summary>
-        public TokenType Dir { get; private set; }
+        public TokenType Dir { get; }
         /// <summary></summary>
-        public Token[] Val { get; private set; }
+        public Token[] Val { get; }
 
         /// <summary>
         /// returns Visit() of this instance

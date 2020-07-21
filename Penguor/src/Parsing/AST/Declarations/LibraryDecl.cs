@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A LibraryDecl Decl
     /// </summary>
@@ -28,13 +27,13 @@ namespace Penguor.Compiler.Parsing.AST
             Content = content;
         }
         /// <summary></summary>
-        public TokenType? AccessMod { get; private set; }
+        public TokenType? AccessMod { get; }
         /// <summary></summary>
-        public TokenType[] NonAccessMod { get; private set; }
+        public TokenType[] NonAccessMod { get; }
         /// <summary></summary>
-        public List<Token> Name { get; private set; }
+        public List<Token> Name { get; }
         /// <summary></summary>
-        public Decl Content { get; private set; }
+        public Decl Content { get; }
 
         /// <summary>
         /// returns Visit() of this instance

@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A VarDecl Decl
     /// </summary>
@@ -28,13 +27,13 @@ namespace Penguor.Compiler.Parsing.AST
             Init = init;
         }
         /// <summary></summary>
-        public TokenType? AccessMod { get; private set; }
+        public TokenType? AccessMod { get; }
         /// <summary></summary>
-        public TokenType[] NonAccessMod { get; private set; }
+        public TokenType[] NonAccessMod { get; }
         /// <summary></summary>
-        public Expr Variable { get; private set; }
+        public Expr Variable { get; }
         /// <summary></summary>
-        public Expr? Init { get; private set; }
+        public Expr? Init { get; }
 
         /// <summary>
         /// returns Visit() of this instance

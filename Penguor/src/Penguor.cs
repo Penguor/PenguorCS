@@ -22,9 +22,9 @@ namespace Penguor
     /// <summary>
     /// The main class and input handler for Penguor
     /// </summary>
-    public class Penguor
+    public static class Penguor
     {
-        static async Task<int> Main(params string[] args)
+        private static async Task<int> Main(params string[] args)
         {
             var rootCommand = new RootCommand("The Penguor Compiler written in C#");
 
@@ -38,7 +38,6 @@ namespace Penguor
             buildCommand.Handler = CommandHandler.Create<string, bool, string, string>(Build);
             rootCommand.AddCommand(buildCommand);
 
-
             // with debug builds, the tools command provides access to several developer tools
 #if (DEBUG)
             var toolsCommand = new Command("tools", "tools for Penguor Compiler development");
@@ -50,7 +49,7 @@ namespace Penguor
             };
             ASTGenTool.Handler = CommandHandler.Create<string, string>((string file, string log) =>
             {
-                if(log != null) Debug.EnableFileLogger(log);
+                if (log != null) Debug.EnableFileLogger(log);
                 new ASTPartGenerator().Generate(file);
             });
             toolsCommand.AddCommand(ASTGenTool);
@@ -58,7 +57,7 @@ namespace Penguor
             rootCommand.AddCommand(toolsCommand);
 #endif
 
-            return await rootCommand.InvokeAsync(args);
+            return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
 
             static void Build(string input, bool benchmark, string transpile, string log)
             {
@@ -66,7 +65,7 @@ namespace Penguor
                 if (input == null) input = Environment.CurrentDirectory;
                 Console.WriteLine(transpile);
                 if (benchmark) BuildManager.Benchmark(input);
-                else BuildManager.SmartBuild(input, transpile == null ? "" : transpile, transpile != null);
+                else BuildManager.SmartBuild(input, transpile ?? "", transpile != null);
             }
         }
     }

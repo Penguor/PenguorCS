@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A CallExpr Expr
     /// </summary>
@@ -26,9 +25,9 @@ namespace Penguor.Compiler.Parsing.AST
             Postfix = postfix;
         }
         /// <summary></summary>
-        public List<Call> Callee { get; private set; }
+        public List<Call> Callee { get; }
         /// <summary></summary>
-        public TokenType? Postfix { get; private set; }
+        public TokenType? Postfix { get; }
 
         /// <summary>
         /// returns Visit() of this instance

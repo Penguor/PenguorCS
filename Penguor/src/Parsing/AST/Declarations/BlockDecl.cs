@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A BlockDecl Decl
     /// </summary>
@@ -25,7 +24,7 @@ namespace Penguor.Compiler.Parsing.AST
             Content = content;
         }
         /// <summary></summary>
-        public List<Decl> Content { get; private set; }
+        public List<Decl> Content { get; }
 
         /// <summary>
         /// returns Visit() of this instance

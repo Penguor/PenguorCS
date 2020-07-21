@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A GroupingExpr Expr
     /// </summary>
@@ -25,7 +24,7 @@ namespace Penguor.Compiler.Parsing.AST
             Content = content;
         }
         /// <summary></summary>
-        public Expr Content { get; private set; }
+        public Expr Content { get; }
 
         /// <summary>
         /// returns Visit() of this instance

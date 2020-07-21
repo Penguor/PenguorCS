@@ -21,9 +21,9 @@ namespace Penguor.Compiler.Analysis
 {
     public class SemanticAnalyser : IDeclVisitor<Decl>, IStmtVisitor<object>, IExprVisitor<Expr>, ICallVisitor<object>
     {
-        private ProgramDecl program;
+        private readonly ProgramDecl program;
 
-        private Stack<string> state;
+        private readonly Stack<string> state;
 
         public SemanticAnalyser(ProgramDecl program)
         {
@@ -163,7 +163,7 @@ namespace Penguor.Compiler.Analysis
                     else if (lhs.GetType() == typeof(BooleanExpr))
                     {
                         bool a = ((BooleanExpr)lhs).Value;
-                        if (a == false) return new BooleanExpr(false);
+                        if (!a) return new BooleanExpr(false);
                     }
                     break;
                 case OR:
@@ -176,7 +176,7 @@ namespace Penguor.Compiler.Analysis
                     else if (lhs.GetType() == typeof(BooleanExpr))
                     {
                         bool a = ((BooleanExpr)lhs).Value;
-                        if (a == true) return new BooleanExpr(true);
+                        if (a) return new BooleanExpr(true);
                     }
                     break;
                 case XOR:
@@ -268,14 +268,11 @@ namespace Penguor.Compiler.Analysis
         {
             Expr rhs = expr.Rhs.Accept(this);
 
-            switch (expr.Op)
+            return expr.Op switch
             {
-                case null:
-                    return (expr.Rhs.Accept(this));
-                    // case EXCL_MARK:
-                    //     if (typeof(rhs).IsIn)
-            }
-            return new UnaryExpr(expr.Op, rhs);
+                null => expr.Rhs.Accept(this),
+                _ => new UnaryExpr(expr.Op, rhs),
+            };
         }
 
         public Expr Visit(VarExpr expr)

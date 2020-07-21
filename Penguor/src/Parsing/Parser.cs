@@ -24,11 +24,10 @@ namespace Penguor.Compiler.Parsing
     /// </summary>
     public class Parser
     {
-        private List<Token> tokens;
+        private readonly List<Token> tokens;
         private int current = 0;
 
-        private Builder builder;
-
+        private readonly Builder builder;
 
         /// <summary>
         /// create a new parser with the tokens that should be parsed
@@ -43,7 +42,7 @@ namespace Penguor.Compiler.Parsing
 
         /// <summary>
         /// start the Parsing process
-        /// </summary> 
+        /// </summary>
         /// <returns>a statement containing the AST of the parsed file</returns>
         public Decl Parse()
         {
@@ -142,12 +141,13 @@ namespace Penguor.Compiler.Parsing
 
         private Decl LibraryDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            List<Token> name = new List<Token>();
-            name.Add(Consume(IDF));
+            List<Token> name = new List<Token>
+            {
+                Consume(IDF)
+            };
             while (Match(DOT)) name.Add(Consume(IDF));
 
             return new LibraryDecl(accessMod, nonAccessMods, name, BlockDecl());
-
         }
 
         private Decl BlockDecl()
@@ -290,7 +290,10 @@ namespace Penguor.Compiler.Parsing
                 condition = VarExpr();
                 Consume(RPAREN);
             }
-            else condition = null;
+            else
+            {
+                condition = null;
+            }
 
             Consume(COLON);
 
@@ -305,7 +308,10 @@ namespace Penguor.Compiler.Parsing
 
         private Stmt ReturnStmt()
         {
-            if (TryGetEnding()) return new ReturnStmt(null);
+            if (TryGetEnding())
+            {
+                return new ReturnStmt(null);
+            }
             else
             {
                 Expr expr = Expression();
@@ -336,7 +342,10 @@ namespace Penguor.Compiler.Parsing
                       BS_RIGHT_ASSIGN,
                       BW_AND_ASSIGN,
                       BW_OR_ASSIGN,
-                      BW_XOR_ASSIGN)) return new AssignExpr(lhs, GetPrevious().type, CondOrExpr());
+                      BW_XOR_ASSIGN))
+            {
+                return new AssignExpr(lhs, GetPrevious().type, CondOrExpr());
+            }
 
             return lhs;
         }
@@ -431,10 +440,9 @@ namespace Penguor.Compiler.Parsing
                 List<Expr> args = new List<Expr>();
                 if (!Match(RPAREN)) args.Add(Expression());
                 else return new FunctionCall(name, new List<Expr>());
-                while (true)
+                while (Match(COMMA))
                 {
-                    if (Match(COMMA)) args.Add(Expression());
-                    else break;
+                    args.Add(Expression());
                 }
                 Consume(RPAREN);
                 return new FunctionCall(name, args);
@@ -513,7 +521,7 @@ namespace Penguor.Compiler.Parsing
         {
             if (!AtEnd()) current++;
             else return GetCurrent();
-            return (GetPrevious());
+            return GetPrevious();
         }
 
         /// <summary>
@@ -543,8 +551,7 @@ namespace Penguor.Compiler.Parsing
         /// <returns>true if the parser has reached the end of the file, otherwise false</returns>
         private bool AtEnd()
         {
-            if (GetCurrent().type == EOF) return true;
-            else return false;
+            return GetCurrent().type == EOF;
         }
 
         private bool GetEnding()

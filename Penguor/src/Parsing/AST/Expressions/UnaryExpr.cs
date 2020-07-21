@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A UnaryExpr Expr
     /// </summary>
@@ -26,9 +25,9 @@ namespace Penguor.Compiler.Parsing.AST
             Rhs = rhs;
         }
         /// <summary></summary>
-        public TokenType? Op { get; private set; }
+        public TokenType? Op { get; }
         /// <summary></summary>
-        public Expr Rhs { get; private set; }
+        public Expr Rhs { get; }
 
         /// <summary>
         /// returns Visit() of this instance

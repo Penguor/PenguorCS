@@ -20,21 +20,20 @@ using System.Xml;
 
 namespace Penguor.Compiler.Tests
 {
-
     public class ParserTest
     {
         [Fact]
         public void TestHelloWorld()
         {
-            Builder builder = new Builder(@"src/Files/HelloWorld/HelloWorld.pgr");
+            Builder builder = new Builder("src/Files/HelloWorld/HelloWorld.pgr");
             Decl program = builder.Parse();
-            WriteDecl(ref program, @"src/Files/HelloWorld/HelloWorld.pgr.parseout");
+            WriteDecl(ref program, "src/Files/HelloWorld/HelloWorld.pgr.parseout");
         }
 
         [Fact]
         public void TestFibonacci()
         {
-            Builder builder = new Builder(@"src/Files/Fibonacci/Fibonacci.pgr");
+            Builder builder = new Builder("src/Files/Fibonacci/Fibonacci.pgr");
             Decl program = builder.Parse();
         }
 

@@ -30,9 +30,9 @@ namespace Penguor.Compiler.Build
         /// <param name="transpile">should the program be transpiled?</param>
         public static void SmartBuild(string path, string output, bool transpile = false)
         {
-            if (File.GetAttributes(path).HasFlag(FileAttributes.Directory))
+            if ((File.GetAttributes(path) & FileAttributes.Directory) != 0)
             {
-                if (path == "" || path == null) throw new PenguorCSException(1);
+                if (path.Length == 0 || path == null) throw new PenguorCSException(1);
                 string[] files = Directory.GetFiles(path, "*.pgrp", SearchOption.AllDirectories);
                 if (files.Length > 1) throw new PenguorCSException(1);
                 else if (files.Length < 1) throw new PenguorCSException(1);
@@ -50,7 +50,6 @@ namespace Penguor.Compiler.Build
             {
                 if (Path.GetExtension(path) == ".pgr") TranspileFile(path, output);
                 else if (Path.GetExtension(path) == ".pgrp") TranspileProject(path, output);
-
             }
         }
 
@@ -69,7 +68,7 @@ namespace Penguor.Compiler.Build
         }
 
         /// <summary>
-        /// 
+        /// build a single file from source
         /// </summary>
         /// <param name="file"></param>
         public static void BuildFile(string file)
@@ -142,7 +141,7 @@ namespace Penguor.Compiler.Build
             Debug.Log($"file: {file}", LogLevel.Info);
             Debug.Log($"lexing time: {lexTime.Minutes}m  {lexTime.Seconds}s {lexTime.Milliseconds}ms", LogLevel.Info);
             Debug.Log($"parsing time: {parseTime.Minutes}m  {parseTime.Seconds}s {parseTime.Milliseconds}ms", LogLevel.Info);
-            Debug.Log($"analysation time: {analyseTime.Minutes}m  {analyseTime.Seconds}s {analyseTime.Milliseconds}ms", LogLevel.Info);
+            Debug.Log($"analysing time: {analyseTime.Minutes}m  {analyseTime.Seconds}s {analyseTime.Milliseconds}ms", LogLevel.Info);
             Debug.Log($"total time: {totalTime.Minutes}m  {totalTime.Seconds}s {totalTime.Milliseconds}ms", LogLevel.Info);
         }
     }

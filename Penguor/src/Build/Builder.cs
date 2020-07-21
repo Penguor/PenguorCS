@@ -23,14 +23,13 @@ using IOFile = System.IO.File;
 
 namespace Penguor.Compiler.Build
 {
-
     /// <summary>
     /// This class handles the management for building a Penguor source file
     /// </summary>
     public class Builder
     {
-        List<Token>? tokens;
-        Decl? program;
+        private List<Token>? tokens;
+        private Decl? program;
 
         /// <summary>
         /// has the lexer run?
@@ -127,6 +126,9 @@ namespace Penguor.Compiler.Build
             return program ?? throw new NullReferenceException();
         }
 
+        /// <summary>
+        /// perform semantic analysis on the abstract syntax tree
+        /// </summary>
         public void Analyse()
         {
             if (!lexerFinished) Lex();
@@ -158,16 +160,26 @@ namespace Penguor.Compiler.Build
 
         // Below this is the code for handling errors in the Penguor source code
 
+        /// <summary>
+        /// contains all caught exceptions
+        /// </summary>
+        /// <value></value>
         public List<PenguorException> Exceptions { get; protected set; }
 
+        /// <summary>
+        /// submit a single exception
+        /// </summary>
         public void SubmitException()
         {
-            if (!(Exceptions.Count > 0)) return;
+            if (Exceptions.Count == 0) return;
             PenguorException p = Exceptions[0];
             Exceptions.RemoveAt(0);
             p.Log(File);
         }
 
+        /// <summary>
+        /// submit all exceptions
+        /// </summary>
         public void SubmitAllExceptions()
         {
             foreach (var e in Exceptions)
@@ -175,6 +187,10 @@ namespace Penguor.Compiler.Build
             Exceptions.Clear();
         }
 
+        /// <summary>
+        /// exit the program after submitting all exceptions
+        /// </summary>
+        /// <param name="exitCode"></param>
         public void Exit(int exitCode = 0)
         {
             SubmitAllExceptions();

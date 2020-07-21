@@ -24,7 +24,7 @@ namespace Penguor.Compiler.Transpiling
 {
     public class CSharpTranspiler : IDeclVisitor<string>, IStmtVisitor<string>, IExprVisitor<string>, ICallVisitor<string>
     {
-        private ProgramDecl program;
+        private readonly ProgramDecl program;
 
         public CSharpTranspiler(ProgramDecl program)
         {
@@ -41,7 +41,7 @@ namespace Penguor.Compiler.Transpiling
         {
             StringBuilder builder = new StringBuilder($"{call.Name.token}(");
 
-            foreach (var arg in call.Args) builder.Append($"{arg.Accept(this)},");
+            foreach (var arg in call.Args) builder.Append(arg.Accept(this)).Append(',');
             if (call.Args.Count > 0) builder.Length--;
 
             builder.Append(")");
@@ -64,11 +64,11 @@ namespace Penguor.Compiler.Transpiling
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.Append($"{ConvertAccessMods(decl.AccessMod)} ");
-            foreach (var naMod in decl.NonAccessMod) builder.Append($"{ConvertAccessMods(naMod)} ");
+            builder.Append(ConvertAccessMods(decl.AccessMod)).Append(' ');
+            foreach (var naMod in decl.NonAccessMod) builder.Append(ConvertAccessMods(naMod)).Append(' ');
 
-            builder.Append($"struct {decl.Name.token} ");
-            if (decl.Parent != null) builder.Append($": {decl.Parent.Value.token} ");
+            builder.Append("struct ").Append(decl.Name.token).Append(' ');
+            if (decl.Parent != null) builder.Append(": ").Append(decl.Parent.Value.token).Append(' ');
 
             builder.Append(decl.Content.Accept(this));
 
@@ -79,11 +79,11 @@ namespace Penguor.Compiler.Transpiling
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.Append($"{ConvertAccessMods(decl.AccessMod)} ");
-            foreach (var naMod in decl.NonAccessMod) builder.Append($"{ConvertAccessMods(naMod)} ");
+            builder.Append(ConvertAccessMods(decl.AccessMod)).Append(' ');
+            foreach (var naMod in decl.NonAccessMod) builder.Append(ConvertAccessMods(naMod)).Append(' ');
 
-            builder.Append($"struct {decl.Name.token} ");
-            if (decl.Parent != null) builder.Append($": {decl.Parent.Value.token} ");
+            builder.Append("struct ").Append(decl.Name.token).Append(' ');
+            if (decl.Parent != null) builder.Append(": ").Append(decl.Parent.Value.token).Append(' ');
 
             builder.Append(decl.Content.Accept(this));
 
@@ -96,7 +96,7 @@ namespace Penguor.Compiler.Transpiling
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.Append($"{ConvertAccessMods(decl.AccessMod)} ");
+            builder.Append(ConvertAccessMods(decl.AccessMod)).Append(' ');
 
             if (decl.Variable.Accept(this).EndsWith("execute"))
             {
@@ -104,11 +104,11 @@ namespace Penguor.Compiler.Transpiling
             }
             else
             {
-                foreach (var naMod in decl.NonAccessMod) builder.Append($"{ConvertAccessMods(naMod)} ");
-                builder.Append($" {decl.Variable.Accept(this)}(");
+                foreach (var naMod in decl.NonAccessMod) builder.Append(ConvertAccessMods(naMod)).Append(' ');
+                builder.Append(' ').Append(decl.Variable.Accept(this)).Append('(');
             }
 
-            foreach (var p in decl.Parameters!) builder.Append($"{p.Accept(this)},");
+            foreach (var p in decl.Parameters!) builder.Append(p.Accept(this)).Append(',');
             if (decl.Parameters.Count > 0) builder.Length--;
             builder.Append(")");
 
@@ -135,12 +135,12 @@ namespace Penguor.Compiler.Transpiling
         public string Visit(SystemDecl decl)
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append($"{ConvertAccessMods(decl.AccessMod)} ");
+            builder.Append(ConvertAccessMods(decl.AccessMod)).Append(' ');
 
-            foreach (var naMod in decl.NonAccessMod) builder.Append($"{ConvertAccessMods(naMod)} ");
+            foreach (var naMod in decl.NonAccessMod) builder.Append(ConvertAccessMods(naMod)).Append(' ');
 
-            builder.Append($"class {decl.Name.token} ");
-            if (decl.Parent != null) builder.Append($": {decl.Parent.Value.token} ");
+            builder.Append("class ").Append(decl.Name.token).Append(' ');
+            if (decl.Parent != null) builder.Append(": ").Append(decl.Parent.Value.token).Append(' ');
 
             builder.Append(decl.Content.Accept(this));
 
@@ -152,11 +152,11 @@ namespace Penguor.Compiler.Transpiling
         public string Visit(VarDecl decl)
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append($"{ConvertAccessMods(decl.AccessMod)} ");
-            foreach (var type in decl.NonAccessMod) builder.Append($"{ConvertAccessMods(type)} ");
-            builder.Append($"{decl.Variable.Accept(this)} ");
+            builder.Append(ConvertAccessMods(decl.AccessMod)).Append(' ');
+            foreach (var type in decl.NonAccessMod) builder.Append(ConvertAccessMods(type)).Append(' ');
+            builder.Append(decl.Variable.Accept(this)).Append(' ');
 
-            if (decl.Init != null) builder.Append($"= {decl.Init.Accept(this)};\n");
+            if (decl.Init != null) builder.Append("= ").Append(decl.Init.Accept(this)).Append(";\n");
             else builder.Append(";\n");
 
             return builder.ToString();
@@ -182,7 +182,7 @@ namespace Penguor.Compiler.Transpiling
                 _ => throw new PenguorCSException(1),
             });
 
-            builder.Append($" {expr.Value.Accept(this)} ");
+            builder.Append(' ').Append(expr.Value.Accept(this)).Append(' ');
 
             return builder.ToString();
         }
@@ -216,7 +216,7 @@ namespace Penguor.Compiler.Transpiling
                 _ => throw new PenguorCSException(1),
             });
 
-            builder.Append($" {expr.Rhs.Accept(this)} ");
+            builder.Append(' ').Append(expr.Rhs.Accept(this)).Append(' ');
 
             return builder.ToString();
         }
@@ -230,7 +230,7 @@ namespace Penguor.Compiler.Transpiling
         public string Visit(CallExpr expr)
         {
             StringBuilder builder = new StringBuilder();
-            foreach (var callee in expr.Callee) builder.Append($"{callee.Accept(this)}.");
+            foreach (var callee in expr.Callee) builder.Append(callee.Accept(this)).Append('.');
             builder.Length--;
 
             if (expr.Postfix != null) builder.Append(expr.Postfix);
@@ -286,8 +286,8 @@ namespace Penguor.Compiler.Transpiling
         {
             StringBuilder builder = new StringBuilder($"if({stmt.Condition.Accept(this)}) {stmt.IfC.Accept(this)}");
 
-            foreach (Stmt c in stmt.Elif) builder.Append($" {c.Accept(this)} ");
-            if (stmt.ElseC != null) builder.Append($" else {stmt.ElseC.Accept(this)}");
+            foreach (Stmt c in stmt.Elif) builder.Append(' ').Append(c.Accept(this)).Append(' ');
+            if (stmt.ElseC != null) builder.Append(" else ").Append(stmt.ElseC.Accept(this));
 
             return builder.ToString();
         }
@@ -310,28 +310,20 @@ namespace Penguor.Compiler.Transpiling
         private string ConvertAccessMods(TokenType? type)
         {
             if (type == null) return "";
-            switch (type)
+            return type switch
             {
-                case TokenType.PUBLIC:
-                    return "public";
-                case TokenType.PRIVATE:
-                    return "private";
-                case TokenType.PROTECTED:
-                    return "protected";
-                case TokenType.RESTRICTED:
-                    return "internal";
-                case STATIC:
-                    return "static";
-                case DYNAMIC:
-                    return "";
-                case ABSTRACT:
-                    return "abstract";
-                case CONST:
-                    return "const";
-                case HASHTAG: // default value in arrays etc.
-                    return "";
-                default: throw new System.ArgumentException("invalid type", "type");
-            }
+                PUBLIC => "public",
+                PRIVATE => "private",
+                PROTECTED => "protected",
+                RESTRICTED => "internal",
+                STATIC => "static",
+                DYNAMIC => "",
+                ABSTRACT => "abstract",
+                CONST => "const",
+                // default value in arrays etc.
+                HASHTAG => "",
+                _ => throw new System.ArgumentException("invalid type", nameof(type)),
+            };
         }
     }
 }

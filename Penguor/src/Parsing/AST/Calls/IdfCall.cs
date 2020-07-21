@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A IdfCall Call
     /// </summary>
@@ -25,7 +24,7 @@ namespace Penguor.Compiler.Parsing.AST
             Name = name;
         }
         /// <summary></summary>
-        public Token Name { get; private set; }
+        public Token Name { get; }
 
         /// <summary>
         /// returns Visit() of this instance

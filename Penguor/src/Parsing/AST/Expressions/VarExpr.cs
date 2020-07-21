@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A VarExpr Expr
     /// </summary>
@@ -26,9 +25,9 @@ namespace Penguor.Compiler.Parsing.AST
             Name = name;
         }
         /// <summary></summary>
-        public Expr Type { get; private set; }
+        public Expr Type { get; }
         /// <summary></summary>
-        public Token Name { get; private set; }
+        public Token Name { get; }
 
         /// <summary>
         /// returns Visit() of this instance

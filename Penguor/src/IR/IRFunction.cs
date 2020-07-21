@@ -12,7 +12,7 @@ using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler.IR
 {
-    public class IRFunction : IRStruct
+    public class IRFunction : IRDecl
     {
         public TokenType? AccessMod { get; }
         public TokenType[] NonAccessMod { get; }

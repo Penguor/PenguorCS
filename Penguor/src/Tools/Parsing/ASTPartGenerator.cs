@@ -16,16 +16,15 @@ namespace Penguor.Compiler.Tools
     //! improve code, currently terrible
     internal class ASTPartGenerator
     {
-        StreamReader? reader;
+        private StreamReader? reader;
 
-        char current;
+        private char current;
 
         public void Generate(string file)
         {
             reader = new StreamReader(file);
             string? mode = null;
             string? folder = null;
-            string? line = null;
             while (!reader.EndOfStream)
             {
                 Advance();
@@ -35,11 +34,10 @@ namespace Penguor.Compiler.Tools
                     Advance();
                 }
 
-                string tmp = "";
-                string name = "";
-                int c = 0;
-                List<string> types = new List<string>();
-                List<string> names = new List<string>();
+                List<string> types;
+                List<string> names;
+
+                string tmp;
                 switch (mode)
                 {
                     case "groupHead":
@@ -69,7 +67,7 @@ namespace Penguor.Compiler.Tools
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2019-{DateTime.Now.Year.ToString()}
+# (c) Carl Schierig 2019-{DateTime.Now.Year}
 # 
 */
 
@@ -92,13 +90,13 @@ namespace Penguor.Compiler.Parsing.AST
                         }
                         break;
                     default:
-                        c = 0;
+                        int c = 0;
                         tmp = "";
-                        name = "";
+                        string name = "";
                         types = new List<string>();
                         names = new List<string>();
                         while (char.IsWhiteSpace(current)) Advance();
-                        line = current + reader.ReadLine();
+                        string? line = current + reader.ReadLine();
                         do
                         {
                             name += line[c];
@@ -135,7 +133,7 @@ namespace Penguor.Compiler.Parsing.AST
 # PenguorCS Compiler
 # ------------------
 #
-# (c) Carl Schierig 2019-{DateTime.Now.Year.ToString()}
+# (c) Carl Schierig 2019-{DateTime.Now.Year}
 # 
 */
 
@@ -143,7 +141,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {{
-
     /// <summary>
     /// A {name.ToUppercase()} {mode}
     /// </summary>
@@ -176,8 +173,8 @@ namespace Penguor.Compiler.Parsing.AST
 
                             for (int i = 0; i < types.Count; i++)
                             {
-                                writer.WriteLine($"        /// <summary></summary>");
-                                writer.WriteLine($"        public {types[i]} {names[i].ToUppercase()} {{ get; private set; }}");
+                                writer.WriteLine("        /// <summary></summary>");
+                                writer.WriteLine($"        public {types[i]} {names[i].ToUppercase()} {{ get; }}");
                             }
 
                             writer.Write(
@@ -212,21 +209,23 @@ namespace Penguor.Compiler.Parsing.AST
             }
         }
 
-        bool Match(char chr)
+        private bool Match(char chr)
         {
             if (current == chr)
             {
                 Advance();
                 return true;
             }
-            else return false;
+            else
+            {
+                return false;
+            }
         }
 
-        void Advance()
+        private void Advance()
         {
             if (reader != null) current = (char)reader.Read();
             else throw new System.NullReferenceException();
         }
     }
-
 }

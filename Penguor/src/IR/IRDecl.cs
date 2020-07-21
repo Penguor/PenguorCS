@@ -15,19 +15,19 @@ using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler.IR
 {
-    public class IRStruct
+    public class IRDecl
     {
-        public List<IRStruct> Structures { get; set; }
+        public List<IRDecl> Structures { get; set; }
 
         public State Name { get; }
 
-        public IRStruct(State name)
+        public IRDecl(State name)
         {
             Name = name;
-            Structures = new List<IRStruct>();
+            Structures = new List<IRDecl>();
         }
 
-        public IRStruct ValidateCall()
+        public IRDecl ValidateCall()
         {
             throw new NotImplementedException();
         }

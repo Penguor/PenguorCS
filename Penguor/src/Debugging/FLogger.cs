@@ -21,7 +21,7 @@ namespace Penguor.Compiler.Debugging
     internal class FLogger : IDisposable
     {
         // the writer for the log
-        private StreamWriter writer;
+        private readonly StreamWriter writer;
 
         public string LogFile { get; }
 
@@ -100,9 +100,6 @@ namespace Penguor.Compiler.Debugging
                 writer.WriteLine(textPart); // the text that gets be logged
             }
         }
-
-        [Obsolete("use Dispose() instead")]
-        public void EndLog(string reason) { }
 
         public void Dispose()
         {

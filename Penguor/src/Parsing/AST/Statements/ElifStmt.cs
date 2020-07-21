@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A ElifStmt Stmt
     /// </summary>
@@ -26,9 +25,9 @@ namespace Penguor.Compiler.Parsing.AST
             Content = content;
         }
         /// <summary></summary>
-        public Expr Condition { get; private set; }
+        public Expr Condition { get; }
         /// <summary></summary>
-        public Stmt Content { get; private set; }
+        public Stmt Content { get; }
 
         /// <summary>
         /// returns Visit() of this instance

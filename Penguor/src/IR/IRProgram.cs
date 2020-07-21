@@ -15,7 +15,7 @@ using Penguor.Compiler.Parsing.AST;
 
 namespace Penguor.Compiler.IR
 {
-    public class IRProgram : IRStruct
+    public class IRProgram : IRDecl
     {
         public ProgramDecl Program { get; }
 

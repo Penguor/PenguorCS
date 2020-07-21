@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A ProgramDecl Decl
     /// </summary>
@@ -25,7 +24,7 @@ namespace Penguor.Compiler.Parsing.AST
             Declarations = declarations;
         }
         /// <summary></summary>
-        public List<Decl> Declarations { get; private set; }
+        public List<Decl> Declarations { get; }
 
         /// <summary>
         /// returns Visit() of this instance

@@ -22,19 +22,19 @@ namespace Penguor.Compiler.Tests
         [Fact]
         public void TestHelloWorld()
         {
-            Builder builder = new Builder(@"src/Files/HelloWorld/HelloWorld.pgr");
+            Builder builder = new Builder("src/Files/HelloWorld/HelloWorld.pgr");
             List<Token> tokens = builder.Lex();
             // WriteTokens(ref tokens, @"src/Files/HelloWorld/HelloWorld.pgr.lexout");
-            Assert.Equal(TokensToString(ref tokens), GetTokens(@"src/Files/HelloWorld/HelloWorld.pgr.lexout"));
+            Assert.Equal(TokensToString(ref tokens), GetTokens("src/Files/HelloWorld/HelloWorld.pgr.lexout"));
         }
 
         [Fact]
         public void TestFibonacci()
         {
-            Builder builder = new Builder(@"src/Files/Fibonacci/Fibonacci.pgr");
+            Builder builder = new Builder("src/Files/Fibonacci/Fibonacci.pgr");
             List<Token> tokens = builder.Lex();
             // WriteTokens(ref tokens, @"src/Files/Fibonacci/Fibonacci.pgr.lexout");
-            Assert.Equal(TokensToString(ref tokens), GetTokens(@"src/Files/Fibonacci/Fibonacci.pgr.lexout"));
+            Assert.Equal(TokensToString(ref tokens), GetTokens("src/Files/Fibonacci/Fibonacci.pgr.lexout"));
         }
 
         private List<string> GetTokens(string file)

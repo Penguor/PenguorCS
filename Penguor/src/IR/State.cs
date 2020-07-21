@@ -8,9 +8,7 @@
 # 
 */
 
-
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -47,12 +45,15 @@ namespace Penguor.Compiler.IR
         {
             List<string> frames = new List<string>(call.Callee.Count);
             foreach (var i in call.Callee)
+            {
                 frames.Add(i switch
                 {
                     IdfCall a => a.Name.token,
                     FunctionCall a => a.Name.token,
                     _ => throw new ArgumentException()
                 });
+            }
+
             return new State(frames.ToArray());
         }
 

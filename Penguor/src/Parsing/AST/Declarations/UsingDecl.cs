@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
-
     /// <summary>
     /// A UsingDecl Decl
     /// </summary>
@@ -25,7 +24,7 @@ namespace Penguor.Compiler.Parsing.AST
             Lib = lib;
         }
         /// <summary></summary>
-        public Expr Lib { get; private set; }
+        public Expr Lib { get; }
 
         /// <summary>
         /// returns Visit() of this instance
