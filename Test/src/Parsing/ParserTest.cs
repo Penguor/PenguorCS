@@ -45,7 +45,7 @@ namespace Penguor.Compiler.Tests
             throw new System.NotImplementedException();
         }
 
-        public void WriteDecl(ref Decl decl, string file)
+        private void WriteDecl(ref Decl decl, string file)
         {
             // XmlSerializer serializer = new XmlSerializer(typeof(Decl));
             // using Stream stream = new FileStream(file, FileMode.Create);

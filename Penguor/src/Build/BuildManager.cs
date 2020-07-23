@@ -86,8 +86,7 @@ namespace Penguor.Compiler.Build
         {
             Uri? basePath = new Uri(Path.GetDirectoryName(project)!);
 
-            string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories); //!  no null argument check
-            foreach (string file in files)
+            foreach (string file in Directory.GetFiles(Path.GetDirectoryName(project), "*.pgr", SearchOption.AllDirectories))
             {
                 Uri relativeOut = basePath.MakeRelativeUri(new Uri(file));
                 string outputFile = Uri.UnescapeDataString(relativeOut.OriginalString);
@@ -130,7 +129,7 @@ namespace Penguor.Compiler.Build
             var parseTime = watch.Elapsed;
 
             watch.Restart();
-            builder.Analyse();
+            //builder.Analyse();
             watch.Stop();
             var analyseTime = watch.Elapsed;
             totalWatch.Stop();

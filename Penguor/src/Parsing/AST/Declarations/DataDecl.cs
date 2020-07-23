@@ -7,19 +7,21 @@
 # 
 */
 
+#pragma warning disable 1591
+
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A ContainerDecl Decl
+    /// A DataDecl Decl
     /// </summary>
-    public sealed class ContainerDecl : Decl
+    public sealed class DataDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of ContainerDecl
+        /// creates a new instance of DataDecl
         /// </summary>
-        public ContainerDecl(TokenType? accessmod, TokenType[] nonaccessmod, Token name, Token? parent, Decl content)
+        public DataDecl(TokenType? accessmod, TokenType[] nonaccessmod, Token name, Token? parent, Decl content)
         {
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
@@ -27,15 +29,10 @@ namespace Penguor.Compiler.Parsing.AST
             Parent = parent;
             Content = content;
         }
-        /// <summary></summary>
         public TokenType? AccessMod { get; }
-        /// <summary></summary>
         public TokenType[] NonAccessMod { get; }
-        /// <summary></summary>
         public Token Name { get; }
-        /// <summary></summary>
         public Token? Parent { get; }
-        /// <summary></summary>
         public Decl Content { get; }
 
         /// <summary>
@@ -55,9 +52,9 @@ namespace Penguor.Compiler.Parsing.AST
     public partial interface IDeclVisitor<T>
     {
         /// <summary>
-        /// visit a ContainerDecl
+        /// visit a DataDecl
         /// </summary>
         /// <returns></returns>
-        T Visit(ContainerDecl decl);
+        T Visit(DataDecl decl);
     }
 }

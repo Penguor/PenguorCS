@@ -71,6 +71,8 @@ namespace Penguor.Compiler.Tools
 # 
 */
 
+#pragma warning disable 1591
+
 namespace Penguor.Compiler.Parsing.AST
 {{
     /// <summary>
@@ -137,6 +139,8 @@ namespace Penguor.Compiler.Parsing.AST
 # 
 */
 
+#pragma warning disable 1591
+
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
@@ -173,7 +177,6 @@ namespace Penguor.Compiler.Parsing.AST
 
                             for (int i = 0; i < types.Count; i++)
                             {
-                                writer.WriteLine("        /// <summary></summary>");
                                 writer.WriteLine($"        public {types[i]} {names[i].ToUppercase()} {{ get; }}");
                             }
 

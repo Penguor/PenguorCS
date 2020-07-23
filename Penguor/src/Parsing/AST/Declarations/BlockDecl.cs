@@ -7,6 +7,8 @@
 # 
 */
 
+#pragma warning disable 1591
+
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
@@ -23,7 +25,6 @@ namespace Penguor.Compiler.Parsing.AST
         {
             Content = content;
         }
-        /// <summary></summary>
         public List<Decl> Content { get; }
 
         /// <summary>

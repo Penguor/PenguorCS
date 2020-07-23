@@ -8,6 +8,8 @@
 # 
 */
 
+using static Penguor.Compiler.Parsing.TokenType;
+
 namespace Penguor.Compiler.Parsing
 {
     /// <summary>
@@ -35,7 +37,7 @@ namespace Penguor.Compiler.Parsing
         public readonly int length;
 
         /// <summary>
-        ///
+        /// create a new Token with the given values
         /// </summary>
         /// <param name="type"></param>
         /// <param name="token"></param>
@@ -49,91 +51,102 @@ namespace Penguor.Compiler.Parsing
             this.length = length;
         }
 
-        public string TokenTypeToString() => TokenTypeToString(type);
+        /// <summary>
+        /// returns the TokenType as string
+        /// </summary>
+        public override string ToString() => ToString(type);
 
-        public static string TokenTypeToString(TokenType type) => type switch
+        /// <summary>
+        /// returns <c>type</c> as string
+        /// </summary>
+        /// <param name="type">the type which should be turned into a string</param>
+
+        public static string ToString(TokenType type) => type switch
         {
-            TokenType.HASHTAG => "#",
-            TokenType.USING => "using",
-            TokenType.SAFETY => "safety",
-            TokenType.PUBLIC => "public",
-            TokenType.PRIVATE => "private",
-            TokenType.PROTECTED => "protected",
-            TokenType.RESTRICTED => "restricted",
-            TokenType.STATIC => "static",
-            TokenType.DYNAMIC => "dynamic",
-            TokenType.ABSTRACT => "abstract",
-            TokenType.CONST => "const",
-            TokenType.LPAREN => "(",
-            TokenType.RPAREN => ")",
-            TokenType.LBRACE => "{",
-            TokenType.RBRACE => "}",
-            TokenType.LBRACK => "[",
-            TokenType.RBRACK => "]",
-            TokenType.PLUS => "+",
-            TokenType.MINUS => "-",
-            TokenType.MUL => "*",
-            TokenType.DIV => "/",
-            TokenType.PERCENT => "%",
-            TokenType.DPLUS => "++",
-            TokenType.DMINUS => "--",
-            TokenType.GREATER => ">",
-            TokenType.LESS => "<",
-            TokenType.GREATER_EQUALS => ">=",
-            TokenType.LESS_EQUALS => "<=",
-            TokenType.EQUALS => "==",
-            TokenType.NEQUALS => "!=",
-            TokenType.AND => "&&",
-            TokenType.OR => "||",
-            TokenType.XOR => "^^",
-            TokenType.BW_AND => "&",
-            TokenType.BW_OR => "|",
-            TokenType.BW_XOR => "^",
-            TokenType.BW_NOT => "~",
-            TokenType.BS_LEFT => "<<",
-            TokenType.BS_RIGHT => ">>",
-            TokenType.ASSIGN => "=",
-            TokenType.ADD_ASSIGN => "+=",
-            TokenType.SUB_ASSIGN => "-=",
-            TokenType.MUL_ASSIGN => "*=",
-            TokenType.DIV_ASSIGN => "/=",
-            TokenType.PERCENT_ASSIGN => "%=",
-            TokenType.BW_AND_ASSIGN => "&=",
-            TokenType.BW_OR_ASSIGN => "|=",
-            TokenType.BW_XOR_ASSIGN => "^=",
-            TokenType.BS_LEFT_ASSIGN => "<<=",
-            TokenType.BS_RIGHT_ASSIGN => ">>=",
-            TokenType.NULL => "null",
-            TokenType.COLON => ":",
-            TokenType.SEMICOLON => ";",
-            TokenType.ENDING => "newline",
-            TokenType.DOT => ".",
-            TokenType.COMMA => ",",
-            TokenType.EXCL_MARK => "!",
-            TokenType.NUM => "number",
-            TokenType.STRING => "string",
-            TokenType.IDF => "identifier",
-            TokenType.TRUE => "true",
-            TokenType.FALSE => "false",
-            TokenType.CONTAINER => "container",
-            TokenType.SYSTEM => "system",
-            TokenType.DATATYPE => "datatype",
-            TokenType.LIBRARY => "library",
-            TokenType.IF => "if",
-            TokenType.ELIF => "elif",
-            TokenType.ELSE => "else",
-            TokenType.FOR => "for",
-            TokenType.WHILE => "while",
-            TokenType.DO => "do",
-            TokenType.SWITCH => "switch",
-            TokenType.CASE => "case",
-            TokenType.DEFAULT => "default",
-            TokenType.EOF => "end of file",
-            TokenType.RETURN => "return",
+            HASHTAG => "#",
+            USING => "using",
+            SAFETY => "safety",
+            PUBLIC => "public",
+            PRIVATE => "private",
+            PROTECTED => "protected",
+            RESTRICTED => "restricted",
+            STATIC => "static",
+            DYNAMIC => "dynamic",
+            ABSTRACT => "abstract",
+            CONST => "const",
+            LPAREN => "(",
+            RPAREN => ")",
+            LBRACE => "{",
+            RBRACE => "}",
+            LBRACK => "[",
+            RBRACK => "]",
+            PLUS => "+",
+            MINUS => "-",
+            MUL => "*",
+            DIV => "/",
+            PERCENT => "%",
+            DPLUS => "++",
+            DMINUS => "--",
+            GREATER => ">",
+            LESS => "<",
+            GREATER_EQUALS => ">=",
+            LESS_EQUALS => "<=",
+            EQUALS => "==",
+            NEQUALS => "!=",
+            AND => "&&",
+            OR => "||",
+            XOR => "^^",
+            BW_AND => "&",
+            BW_OR => "|",
+            BW_XOR => "^",
+            BW_NOT => "~",
+            BS_LEFT => "<<",
+            BS_RIGHT => ">>",
+            ASSIGN => "=",
+            ADD_ASSIGN => "+=",
+            SUB_ASSIGN => "-=",
+            MUL_ASSIGN => "*=",
+            DIV_ASSIGN => "/=",
+            PERCENT_ASSIGN => "%=",
+            BW_AND_ASSIGN => "&=",
+            BW_OR_ASSIGN => "|=",
+            BW_XOR_ASSIGN => "^=",
+            BS_LEFT_ASSIGN => "<<=",
+            BS_RIGHT_ASSIGN => ">>=",
+            NULL => "null",
+            COLON => ":",
+            SEMICOLON => ";",
+            ENDING => "newline",
+            DOT => ".",
+            COMMA => ",",
+            EXCL_MARK => "!",
+            NUM => "number",
+            STRING => "string",
+            IDF => "identifier",
+            TRUE => "true",
+            FALSE => "false",
+            DATA => "data",
+            SYSTEM => "system",
+            TYPE => "type",
+            LIBRARY => "library",
+            IF => "if",
+            ELIF => "elif",
+            ELSE => "else",
+            FOR => "for",
+            WHILE => "while",
+            DO => "do",
+            SWITCH => "switch",
+            CASE => "case",
+            DEFAULT => "default",
+            EOF => "end of file",
+            RETURN => "return",
             _ => throw new System.ArgumentException()
         };
 
-        public override string ToString()
+        /// <summary>
+        /// return a string with all the values of the token
+        /// </summary>
+        public string ToPrettyString()
         {
             return $"type: {type}, token: {token}, offset: {offset}, length: {length}";
         }

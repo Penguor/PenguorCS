@@ -49,14 +49,14 @@ namespace Penguor.Compiler.Tests
         {
             Directory.CreateDirectory(Path.GetDirectoryName(file));
             using StreamWriter writer = new StreamWriter(file);
-            foreach (var t in tokens) writer.WriteLine(t.ToString());
+            foreach (var t in tokens) writer.WriteLine(t.ToPrettyString());
             writer.Close();
         }
 
         private List<string> TokensToString(ref List<Token> tokens)
         {
             List<string> stringTokens = new List<string>();
-            foreach (var t in tokens) stringTokens.Add(t.ToString());
+            foreach (var t in tokens) stringTokens.Add(t.ToPrettyString());
             return stringTokens;
         }
     }

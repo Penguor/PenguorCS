@@ -14,39 +14,41 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A UsingDecl Decl
+    /// A VarStmt Stmt
     /// </summary>
-    public sealed class UsingDecl : Decl
+    public sealed class VarStmt : Stmt
     {
         /// <summary>
-        /// creates a new instance of UsingDecl
+        /// creates a new instance of VarStmt
         /// </summary>
-        public UsingDecl(Expr lib)
+        public VarStmt(Expr variable, Expr? init)
         {
-            Lib = lib;
+            Variable = variable;
+            Init = init;
         }
-        public Expr Lib { get; }
+        public Expr Variable { get; }
+        public Expr? Init { get; }
 
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
         /// <param name="visitor">the visitor which should visit this instance</param>
         /// <returns>Visit() of this instance</returns>
-        public override T Accept<T>(IDeclVisitor<T> visitor)
+        public override T Accept<T>(IStmtVisitor<T> visitor)
         {
             return visitor.Visit(this);
         }
     }
 
     /// <summary>
-    /// Contains methods to visit all Decl
+    /// Contains methods to visit all Stmt
     /// </summary>
-    public partial interface IDeclVisitor<T>
+    public partial interface IStmtVisitor<T>
     {
         /// <summary>
-        /// visit a UsingDecl
+        /// visit a VarStmt
         /// </summary>
         /// <returns></returns>
-        T Visit(UsingDecl decl);
+        T Visit(VarStmt stmt);
     }
 }

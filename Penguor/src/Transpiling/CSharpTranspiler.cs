@@ -60,7 +60,7 @@ namespace Penguor.Compiler.Transpiling
             return builder.ToString();
         }
 
-        public string Visit(ContainerDecl decl)
+        public string Visit(DataDecl decl)
         {
             StringBuilder builder = new StringBuilder();
 
@@ -75,7 +75,7 @@ namespace Penguor.Compiler.Transpiling
             return builder.ToString();
         }
 
-        public string Visit(DatatypeDecl decl)
+        public string Visit(TypeDecl decl)
         {
             StringBuilder builder = new StringBuilder();
 
@@ -303,6 +303,13 @@ namespace Penguor.Compiler.Transpiling
         public string Visit(SwitchStmt stmt)
         {
             throw new System.NotImplementedException();
+        }
+
+        public string Visit(VarStmt stmt)
+        {
+            StringBuilder builder = new StringBuilder($"{stmt.Variable.Accept(this)}");
+            if (stmt.Init != null) builder.Append(" = ").Append(stmt.Init.Accept(this)).Append(';');
+            return builder.ToString();
         }
 
         public string Visit(WhileStmt stmt) => $"while ({stmt.Condition.Accept(this)}) {stmt.Condition.Accept(this)}";

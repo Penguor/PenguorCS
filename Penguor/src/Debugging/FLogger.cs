@@ -25,7 +25,10 @@ namespace Penguor.Compiler.Debugging
 
         public string LogFile { get; }
 
-        /// <param name="file">the name of the application, currently used to choose AppData folder</param>
+        /// <summary>
+        /// creates a new <c>Flogger</c> instance
+        /// </summary>
+        /// /// <param name="file">the name of the application, currently used to choose AppData folder</param>
         public FLogger(string file)
         {
             LogFile = file;

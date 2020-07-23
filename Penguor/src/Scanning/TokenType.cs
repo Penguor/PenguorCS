@@ -42,7 +42,7 @@ namespace Penguor.Compiler.Parsing
         , IDF
         , TRUE, FALSE
         , USING
-        , CONTAINER, SYSTEM, DATATYPE
+        , DATA, SYSTEM, TYPE
         , LIBRARY
         , IF, ELIF, ELSE
         , FOR, WHILE, DO

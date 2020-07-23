@@ -7,6 +7,8 @@
 # 
 */
 
+#pragma warning disable 1591
+
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
@@ -24,9 +26,7 @@ namespace Penguor.Compiler.Parsing.AST
             Op = op;
             Rhs = rhs;
         }
-        /// <summary></summary>
         public TokenType? Op { get; }
-        /// <summary></summary>
         public Expr Rhs { get; }
 
         /// <summary>

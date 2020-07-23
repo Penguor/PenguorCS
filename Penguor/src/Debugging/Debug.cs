@@ -105,15 +105,20 @@ namespace Penguor.Compiler.Debugging
             (LogLevel level, string debugMessage) = pgrcsMessages.GetValueOrDefault(
                 message,
                 (LogLevel.Error, "this error is not supposed to exist. Please create an issue at https://github.com/Penguor/PenguorCS"));
-            string completeMessage = $"[PGRCS-{String.Format("{0:D4}", message)}] {String.Format(debugMessage, arg0, arg1, arg2, arg3)}";
+            string completeMessage = $"[PGRCS-{string.Format("{0:D4}", message)}] {string.Format(debugMessage, arg0, arg1, arg2, arg3)}";
             Log(completeMessage, level);
         }
 
         /// <summary>
         /// log a Penguor language debug message
         /// </summary>
+        /// <param name="message"></param>
         /// <param name="offset">the offset where the error occurred</param>
         /// <param name="file">the file where the error occurred</param>
+        /// <param name="arg0"></param>
+        /// <param name="arg1"></param>
+        /// <param name="arg2"></param>
+        /// <param name="arg3"></param>
         public static void CastPGR(uint message, int offset, string? file, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
         {
             (LogLevel level, string debugMessage) = pgrMessages.GetValueOrDefault(
@@ -122,7 +127,7 @@ namespace Penguor.Compiler.Debugging
 
             // Format the message to contain error arguments
             string completeMessage =
-                $"[PGR-{String.Format("{0:D4}", message)}] {String.Format(debugMessage, arg0, arg1, arg2, arg3)} {(file == null ? "" : GetSourcePosition(offset, file))}";
+                $"[PGR-{string.Format("{0:D4}", message)}] {string.Format(debugMessage, arg0, arg1, arg2, arg3)} {(file == null ? "" : GetSourcePosition(offset, file))}";
             Log(completeMessage, level);
         }
 

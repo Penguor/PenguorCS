@@ -13,6 +13,7 @@ EOFExpr
 ; Stmt "Penguor\src\Parsing\AST\Statements"
 CompilerStmt TokenType dir Token[] val
 BlockStmt List<Stmt> content
+VarStmt Expr variable Expr? init
 IfStmt Expr condition Stmt ifC List<Stmt> elif Stmt? elseC
 ElifStmt Expr condition Stmt content
 WhileStmt Expr condition Stmt content
@@ -26,8 +27,8 @@ ExprStmt Expr expr
 ProgramDecl List<Decl> declarations
 UsingDecl Expr lib
 SystemDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
-ContainerDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
-DatatypeDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
+DataDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
+TypeDecl TokenType? accessMod TokenType[] nonAccessMod Token name Token? parent Decl content
 FunctionDecl TokenType? accessMod TokenType[] nonAccessMod Expr variable List<Expr> parameters Decl content
 LibraryDecl TokenType? accessMod TokenType[] nonAccessMod List<Token> name Decl content
 VarDecl TokenType? accessMod TokenType[] nonAccessMod Expr variable Expr? init

@@ -10,7 +10,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Parsing.AST;
@@ -25,8 +24,7 @@ namespace Penguor.Compiler.Parsing
     public class Parser
     {
         private readonly List<Token> tokens;
-        private int current = 0;
-
+        private int current;
         private readonly Builder builder;
 
         /// <summary>
@@ -51,7 +49,7 @@ namespace Penguor.Compiler.Parsing
             return new ProgramDecl(declarations);
         }
 
-        private Decl Declaration()
+        private Decl Declaration(bool allowDeclStmt = false)
         {
             TokenType? accessMod = null;
             bool hasAccessMod = false;
@@ -82,24 +80,26 @@ namespace Penguor.Compiler.Parsing
             {
                 if (Match(USING)) return UsingDecl();
                 if (Match(SYSTEM)) return SystemDecl(null, new TokenType[0]);
-                if (Match(CONTAINER)) return ContainerDecl(null, new TokenType[0]);
-                if (Match(DATATYPE)) return DatatypeDecl(null, new TokenType[0]);
+                if (Match(DATA)) return DataDecl(null, new TokenType[0]);
+                if (Match(TYPE)) return TypeDecl(null, new TokenType[0]);
                 if (Match(LIBRARY)) return LibraryDecl(null, new TokenType[0]);
+                if (Match(HASHTAG)) return new DeclStmt(CompilerStmt());
                 if (Check(IDF) && LookAhead(1).type == IDF && LookAhead(2).type == LPAREN)
                     return FunctionDecl(null, new TokenType[0]);
                 else if (Check(IDF) && LookAhead(1).type == IDF) return VarDecl(null, new TokenType[0]);
+                if (!allowDeclStmt) throw new ParsingException(1, GetCurrent(), new TokenType[0]);
                 return DeclStmt();
             }
             else
             {
                 if (Match(SYSTEM)) return SystemDecl(accessMod, nonAccessMods);
-                if (Match(CONTAINER)) return ContainerDecl(accessMod, nonAccessMods);
-                if (Match(DATATYPE)) return DatatypeDecl(accessMod, nonAccessMods);
+                if (Match(DATA)) return DataDecl(accessMod, nonAccessMods);
+                if (Match(TYPE)) return TypeDecl(accessMod, nonAccessMods);
                 if (Match(LIBRARY)) return LibraryDecl(accessMod, nonAccessMods);
                 if (Check(IDF) && LookAhead(1).type == IDF && LookAhead(2).type == LPAREN)
                     return FunctionDecl(accessMod, nonAccessMods);
                 else if (Check(IDF) && LookAhead(1).type == IDF) return VarDecl(accessMod, nonAccessMods);
-                else return Error(DeclStmt, 1, GetCurrent(), SYSTEM, CONTAINER, DATATYPE, LIBRARY, IDF);
+                else return Error(DeclStmt, 1, GetCurrent(), SYSTEM, DATA, TYPE, LIBRARY, IDF);
             }
         }
 
@@ -110,17 +110,17 @@ namespace Penguor.Compiler.Parsing
             return new UsingDecl(call);
         }
 
-        private Decl SystemDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new SystemDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
-        private Decl ContainerDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new ContainerDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
-        private Decl DatatypeDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new DatatypeDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
+        private SystemDecl SystemDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new SystemDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
+        private Decl DataDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new DataDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
+        private Decl TypeDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new TypeDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
         private Token? GetParent() => Match(LESS) ? Consume(IDF) : (Token?)null;
 
-        private Decl FunctionDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        private FunctionDecl FunctionDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
             Expr variable = VarExpr();
 
             Consume(LPAREN);
-            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, new List<Expr>(), BlockDecl());
+            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, new List<Expr>(), DeclContent());
             List<Expr> parameters = new List<Expr>();
             while (true)
             {
@@ -129,17 +129,17 @@ namespace Penguor.Compiler.Parsing
                 Consume(RPAREN);
                 break;
             }
-            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, BlockDecl());
+            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, DeclContent());
         }
 
-        private Decl VarDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        private VarDecl VarDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            Decl dec = new VarDecl(accessMod, nonAccessMods, VarExpr(), Match(ASSIGN) ? Expression() : null);
+            VarDecl dec = new VarDecl(accessMod, nonAccessMods, VarExpr(), Match(ASSIGN) ? Expression() : null);
             GetEnding();
             return dec;
         }
 
-        private Decl LibraryDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        private LibraryDecl LibraryDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
             List<Token> name = new List<Token>
             {
@@ -150,11 +150,19 @@ namespace Penguor.Compiler.Parsing
             return new LibraryDecl(accessMod, nonAccessMods, name, BlockDecl());
         }
 
-        private Decl BlockDecl()
+        // returns either a DeclStmt or a BlockDecl
+        private Decl DeclContent()
+        {
+            if (Check(LBRACE)) return BlockDecl(true);
+            if (Check(COLON)) return DeclStmt();
+            return Error(new DeclStmt(null!), 1, GetCurrent(), LBRACE, COLON);
+        }
+
+        private Decl BlockDecl(bool allowStmt = false)
         {
             Consume(LBRACE);
             List<Decl> declarations = new List<Decl>();
-            while (!Match(RBRACE)) declarations.Add(Declaration());
+            while (!Match(RBRACE)) declarations.Add(Declaration(allowStmt));
 
             return new BlockDecl(declarations);
         }
@@ -165,6 +173,7 @@ namespace Penguor.Compiler.Parsing
         {
             if (Match(HASHTAG)) return CompilerStmt();
             if (Check(LBRACE)) return BlockStmt();
+            if (Check(IDF) && LookAhead(1).type == IDF) return VarStmt();
             if (Match(IF)) return IfStmt();
             if (Match(WHILE)) return WhileStmt();
             if (Match(FOR)) return ForStmt();
@@ -201,6 +210,12 @@ namespace Penguor.Compiler.Parsing
             while (!Match(RBRACE)) statements.Add(Statement());
 
             return new BlockStmt(statements);
+        }
+
+        private Stmt VarStmt()
+        {
+            VarDecl variable = VarDecl(null, new TokenType[0]);
+            return new VarStmt(variable.Variable, variable.Init);
         }
 
         private Stmt IfStmt()
@@ -449,7 +464,7 @@ namespace Penguor.Compiler.Parsing
             }
         }
 
-        private Expr GroupingExpr()
+        private GroupingExpr GroupingExpr()
         {
             Consume(LPAREN);
             Expr expr = Expression();

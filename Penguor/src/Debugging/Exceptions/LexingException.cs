@@ -8,10 +8,6 @@
 # 
 */
 
-using System;
-
-using Penguor.Compiler.Parsing;
-
 namespace Penguor.Compiler.Debugging
 {
     /// <summary>

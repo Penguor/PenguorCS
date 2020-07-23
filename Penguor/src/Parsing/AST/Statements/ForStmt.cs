@@ -7,6 +7,8 @@
 # 
 */
 
+#pragma warning disable 1591
+
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
@@ -25,11 +27,8 @@ namespace Penguor.Compiler.Parsing.AST
             Vars = vars;
             Content = content;
         }
-        /// <summary></summary>
         public Expr CurrentVar { get; }
-        /// <summary></summary>
         public Expr Vars { get; }
-        /// <summary></summary>
         public Stmt Content { get; }
 
         /// <summary>

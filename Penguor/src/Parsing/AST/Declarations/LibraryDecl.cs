@@ -7,6 +7,8 @@
 # 
 */
 
+#pragma warning disable 1591
+
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
@@ -26,13 +28,9 @@ namespace Penguor.Compiler.Parsing.AST
             Name = name;
             Content = content;
         }
-        /// <summary></summary>
         public TokenType? AccessMod { get; }
-        /// <summary></summary>
         public TokenType[] NonAccessMod { get; }
-        /// <summary></summary>
         public List<Token> Name { get; }
-        /// <summary></summary>
         public Decl Content { get; }
 
         /// <summary>

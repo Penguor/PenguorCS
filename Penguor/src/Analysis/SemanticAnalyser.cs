@@ -41,12 +41,12 @@ namespace Penguor.Compiler.Analysis
             throw new System.NotImplementedException();
         }
 
-        public Decl Visit(ContainerDecl decl)
+        public Decl Visit(DataDecl decl)
         {
             throw new System.NotImplementedException();
         }
 
-        public Decl Visit(DatatypeDecl decl)
+        public Decl Visit(TypeDecl decl)
         {
             throw new System.NotImplementedException();
         }
@@ -133,6 +133,11 @@ namespace Penguor.Compiler.Analysis
         }
 
         public object Visit(SwitchStmt stmt)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public object Visit(VarStmt stmt)
         {
             throw new System.NotImplementedException();
         }

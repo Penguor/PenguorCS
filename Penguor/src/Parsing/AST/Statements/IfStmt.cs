@@ -7,6 +7,8 @@
 # 
 */
 
+#pragma warning disable 1591
+
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
@@ -26,13 +28,9 @@ namespace Penguor.Compiler.Parsing.AST
             Elif = elif;
             ElseC = elsec;
         }
-        /// <summary></summary>
         public Expr Condition { get; }
-        /// <summary></summary>
         public Stmt IfC { get; }
-        /// <summary></summary>
         public List<Stmt> Elif { get; }
-        /// <summary></summary>
         public Stmt? ElseC { get; }
 
         /// <summary>

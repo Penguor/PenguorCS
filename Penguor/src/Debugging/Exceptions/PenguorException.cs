@@ -13,11 +13,24 @@ namespace Penguor.Compiler.Debugging
     {
         private string? sourceFile;
 
+        /// <summary>
+        /// The Penguor exception message
+        /// </summary>
         public uint Msg { get; }
+
+        /// <summary>
+        /// the offset where the error occured in the source file
+        /// </summary>
         public int Offset { get; }
 
+        /// <summary>
+        /// the arguments which the exception message is formatted with
+        /// </summary>
         protected string arg0, arg1, arg2, arg3;
 
+        /// <summary>
+        /// the source file where the exception occurred
+        /// </summary>
         /// <exception cref="FileNotFoundException"></exception>
         public string? SourceFile
         {
@@ -29,6 +42,15 @@ namespace Penguor.Compiler.Debugging
             }
         }
 
+        /// <summary>
+        /// create a new Penguor Exception
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="offset"></param>
+        /// <param name="arg0"></param>
+        /// <param name="arg1"></param>
+        /// <param name="arg2"></param>
+        /// <param name="arg3"></param>
         public PenguorException(uint msg, int offset, string arg0 = "", string arg1 = "", string arg2 = "", string arg3 = "")
         {
             Msg = msg;

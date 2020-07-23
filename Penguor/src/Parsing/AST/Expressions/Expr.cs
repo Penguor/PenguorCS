@@ -8,6 +8,8 @@
 # 
 */
 
+#pragma warning disable 1591
+
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>

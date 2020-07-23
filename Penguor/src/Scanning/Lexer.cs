@@ -82,10 +82,10 @@ namespace Penguor.Compiler.Lexing
                             AddToken(TokenType.SYSTEM);
                             break;
                         case "container":
-                            AddToken(TokenType.CONTAINER);
+                            AddToken(TokenType.DATA);
                             break;
                         case "datatype":
-                            AddToken(TokenType.DATATYPE);
+                            AddToken(TokenType.TYPE);
                             break;
                         case "library":
                             AddToken(TokenType.LIBRARY);

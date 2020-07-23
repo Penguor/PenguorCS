@@ -7,6 +7,8 @@
 # 
 */
 
+#pragma warning disable 1591
+
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.Parsing.AST
@@ -25,11 +27,8 @@ namespace Penguor.Compiler.Parsing.AST
             Cases = cases;
             DefaultCase = defaultcase;
         }
-        /// <summary></summary>
         public Expr Condition { get; }
-        /// <summary></summary>
         public List<Stmt> Cases { get; }
-        /// <summary></summary>
         public Stmt? DefaultCase { get; }
 
         /// <summary>

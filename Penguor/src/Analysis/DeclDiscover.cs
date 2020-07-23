@@ -83,8 +83,8 @@ namespace Penguor.Compiler.Analysis
             return null;
         }
 
-        public object? Visit(ContainerDecl decl) => Register(decl.Name.token, decl.Content);
-        public object? Visit(DatatypeDecl decl) => Register(decl.Name.token, decl.Content);
+        public object? Visit(DataDecl decl) => Register(decl.Name.token, decl.Content);
+        public object? Visit(TypeDecl decl) => Register(decl.Name.token, decl.Content);
         public object? Visit(DeclStmt decl) => null;
 
         public object? Visit(FunctionDecl decl) => Register(((VarExpr)decl.Variable).Name.token, decl.Content);
