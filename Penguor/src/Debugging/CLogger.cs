@@ -20,7 +20,7 @@ namespace Penguor.Compiler.Debugging
             // writes the logging level in front of the actual text
             switch (logLevel)
             {
-#if (DEBUG)
+#if DEBUG
                 case LogLevel.Debug:
                     Console.ForegroundColor = ConsoleColor.Blue;
                     Console.Write("[Debug] ");
@@ -36,12 +36,21 @@ namespace Penguor.Compiler.Debugging
                     break;
                 case LogLevel.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("[Error] ");
+                    Console.Error.Write("[Error] ");
                     break;
                 case LogLevel.None:
                     break;
             }
-            Console.WriteLine(logText); // the text that gets be logged
+
+            if (logLevel == LogLevel.Error) Console.Error.WriteLine(logText);
+            else
+#if !DEBUG
+            if (logLevel != LogLevel.Debug)
+#endif
+            {
+                Console.WriteLine(logText);
+            }
+
             Console.ForegroundColor = FGColor;
         }
     }
