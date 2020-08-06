@@ -1,8 +1,5 @@
 #safety 1
 
-using Math
-using Hello
-
 
 library ShowPenguor
 {
@@ -29,7 +26,7 @@ library ShowPenguor
     /*/*nested block comments :) */*/
 
     // containers are there to store data
-    container HelloData
+    data HelloData
     {
         string n1
         string n2

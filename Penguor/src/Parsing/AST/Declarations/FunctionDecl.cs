@@ -21,7 +21,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of FunctionDecl
         /// </summary>
-        public FunctionDecl(TokenType? accessmod, TokenType[] nonaccessmod, Expr variable, List<Expr> parameters, Decl content)
+        public FunctionDecl(TokenType? accessmod, TokenType[] nonaccessmod, VarExpr variable, List<VarExpr> parameters, Decl content)
         {
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
@@ -31,8 +31,8 @@ namespace Penguor.Compiler.Parsing.AST
         }
         public TokenType? AccessMod { get; }
         public TokenType[] NonAccessMod { get; }
-        public Expr Variable { get; }
-        public List<Expr> Parameters { get; }
+        public VarExpr Variable { get; }
+        public List<VarExpr> Parameters { get; }
         public Decl Content { get; }
 
         /// <summary>

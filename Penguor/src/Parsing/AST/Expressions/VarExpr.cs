@@ -21,12 +21,12 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of VarExpr
         /// </summary>
-        public VarExpr(Expr type, Token name)
+        public VarExpr(CallExpr type, Token name)
         {
             Type = type;
             Name = name;
         }
-        public Expr Type { get; }
+        public CallExpr Type { get; }
         public Token Name { get; }
 
         /// <summary>

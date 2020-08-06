@@ -8,13 +8,12 @@
 # 
 */
 
+using System;
 using System.Collections.Generic;
 
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
-using Penguor.Compiler.IR;
 
-using static Penguor.Compiler.Parsing.TokenType;
 
 #pragma warning disable 1591
 
@@ -22,9 +21,9 @@ namespace Penguor.Compiler.Analysis
 {
     /*
      The following procedure should be followed in the visitor methods:
-        1. push the structure name to the "state" Stack
-        2. add a State instance representing the structure to the "symbols" List
-        3. call Accept(this) for all children declarations
+        1. push the structure Frame to the "state" Stack
+        2. add a State instance representing the structure to the SymbolTableManager
+        3. call Accept(this) for all child declarations
         4. pop the name from the "state" Stack to restore previous state
         5. return null
      
@@ -33,29 +32,46 @@ namespace Penguor.Compiler.Analysis
 
     public class DeclDiscover : IDeclVisitor<object?>
     {
+        private SymbolTableManager manager;
         private readonly ProgramDecl program;
 
-        private readonly List<State> symbols;
-        private readonly Stack<string> state;
+        private readonly Stack<AddressFrame> state;
 
         public DeclDiscover(ProgramDecl program)
         {
             this.program = program;
-            state = new Stack<string>();
-            symbols = new List<State>();
+            state = new Stack<AddressFrame>();
         }
 
-        public List<State> Discover()
+        public void Discover(ref SymbolTableManager tableManager)
         {
+            manager = tableManager;
             program.Accept(this);
-            return symbols;
         }
 
-        private object? Register(string name, Decl child)
+        private State GetState()
         {
-            state.Push(name);
+            AddressFrame[] frames = state.ToArray();
+            Array.Reverse(frames);
+            return new State(frames);
+        }
 
-            symbols.Add(new State(state.ToArray()));
+        private object? Register(Token name, AddressType type)
+        {
+            state.Push(new AddressFrame(name, type));
+
+            manager.AddDeclaration(GetState());
+
+            state.Pop();
+
+            return null;
+        }
+
+        private object? Register(Token name, AddressType type, Decl child)
+        {
+            state.Push(new AddressFrame(name, type));
+
+            manager.AddDeclaration(GetState());
 
             child.Accept(this);
 
@@ -64,13 +80,13 @@ namespace Penguor.Compiler.Analysis
             return null;
         }
 
-        private object? Register(string name, Decl[] child)
+        private object? Register(Token name, AddressType type, IEnumerable<Decl> children)
         {
-            state.Push(name);
+            state.Push(new AddressFrame(name, type));
 
-            symbols.Add(new State(state.ToArray()));
+            manager.AddDeclaration(GetState());
 
-            foreach (var decl in child) decl.Accept(this);
+            foreach (var decl in children) decl.Accept(this);
 
             state.Pop();
 
@@ -83,18 +99,18 @@ namespace Penguor.Compiler.Analysis
             return null;
         }
 
-        public object? Visit(DataDecl decl) => Register(decl.Name.token, decl.Content);
-        public object? Visit(TypeDecl decl) => Register(decl.Name.token, decl.Content);
+        public object? Visit(DataDecl decl) => Register(decl.Name, AddressType.DataDecl, decl.Content);
+        public object? Visit(TypeDecl decl) => Register(decl.Name, AddressType.TypeDecl, decl.Content);
         public object? Visit(DeclStmt decl) => null;
 
-        public object? Visit(FunctionDecl decl) => Register(((VarExpr)decl.Variable).Name.token, decl.Content);
+        public object? Visit(FunctionDecl decl) => Register(decl.Variable.Name, AddressType.FunctionDecl, decl.Content);
 
         public object? Visit(LibraryDecl decl)
         {
             for (int i = 0; i < decl.Name.Count; i++)
-                state.Push(decl.Name[i].token);
+                state.Push(new AddressFrame(decl.Name[i], i == (decl.Name.Count - 1) ? AddressType.LibraryDecl : AddressType.LibraryDeclPart));
 
-            symbols.Add(new State(state.ToArray()));
+            manager.AddDeclaration(GetState());
 
             decl.Content.Accept(this);
 
@@ -109,7 +125,7 @@ namespace Penguor.Compiler.Analysis
             return null;
         }
 
-        public object? Visit(SystemDecl decl) => Register(decl.Name.token, decl.Content);
+        public object? Visit(SystemDecl decl) => Register(decl.Name, AddressType.SystemDecl, decl.Content);
 
         public object? Visit(UsingDecl decl)
         {
@@ -118,8 +134,9 @@ namespace Penguor.Compiler.Analysis
 
         public object? Visit(VarDecl decl)
         {
-            state.Push(((VarExpr)decl.Variable).Name.token);
-            symbols.Add(new State(state.ToArray()));
+            var variable = decl.Variable;
+            state.Push(new AddressFrame(decl.Variable.Name, AddressType.VarDecl, State.FromCall((CallExpr)variable.Type))); //! this is not finished
+            manager.AddDeclaration(GetState());
             state.Pop();
 
             return null;

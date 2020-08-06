@@ -21,7 +21,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of SystemDecl
         /// </summary>
-        public SystemDecl(TokenType? accessmod, TokenType[] nonaccessmod, Token name, Token? parent, Decl content)
+        public SystemDecl(TokenType? accessmod, TokenType[] nonaccessmod, Token name, CallExpr? parent, BlockDecl content)
         {
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
@@ -32,8 +32,8 @@ namespace Penguor.Compiler.Parsing.AST
         public TokenType? AccessMod { get; }
         public TokenType[] NonAccessMod { get; }
         public Token Name { get; }
-        public Token? Parent { get; }
-        public Decl Content { get; }
+        public CallExpr? Parent { get; }
+        public BlockDecl Content { get; }
 
         /// <summary>
         /// returns Visit() of this instance

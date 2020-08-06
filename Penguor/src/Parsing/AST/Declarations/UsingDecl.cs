@@ -21,11 +21,11 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of UsingDecl
         /// </summary>
-        public UsingDecl(Expr lib)
+        public UsingDecl(CallExpr lib)
         {
             Lib = lib;
         }
-        public Expr Lib { get; }
+        public CallExpr Lib { get; }
 
         /// <summary>
         /// returns Visit() of this instance

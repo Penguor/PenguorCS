@@ -12,30 +12,41 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
 
-namespace Penguor.Compiler.IR
+namespace Penguor.Compiler
 {
-    public class State : IEnumerable<string>
+    /// <summary>
+    /// 
+    /// </summary>
+    public class State : IEnumerable<AddressFrame>, ICollection
     {
-        private readonly string[] addressFrames;
-
-        public int Length
-        {
-            get => addressFrames.Length;
-        }
-
-        public State(string[] frames)
-        {
-            addressFrames = frames;
-        }
+        private readonly AddressFrame[] addressFrames;
 
         /// <summary>
-        /// create a State from a token
+        /// the amount of <c>AddressFrame</c>s the <c>State</c> consists of
         /// </summary>
-        /// <param name="token">the token to create the State from</param>
-        public static State FromToken(Token token) => new State(new string[] { token.token });
+        public int Count => addressFrames.Length;
+
+        /// <summary>
+        /// Gets a value indicating whether access to the AddressFrame is threadsafe
+        /// </summary>
+        public bool IsSynchronized => addressFrames.IsSynchronized;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public object SyncRoot => addressFrames.SyncRoot;
+
+        /// <summary>
+        /// create a new State from a string array
+        /// </summary>
+        /// <param name="frames"></param>
+        public State(AddressFrame[] frames)
+        {
+            frames[frames.Length - 1].IsLastItem = true;
+            addressFrames = frames;
+        }
 
         /// <summary>
         /// create a State from a CallExpr
@@ -43,13 +54,15 @@ namespace Penguor.Compiler.IR
         /// <param name="call">the CallExpr to create the state from</param>
         public static State FromCall(CallExpr call)
         {
-            List<string> frames = new List<string>(call.Callee.Count);
-            foreach (var i in call.Callee)
+            List<AddressFrame> frames = new List<AddressFrame>(call.Callee.Count);
+            for (int i = 0; i < call.Callee.Count; i++)
             {
-                frames.Add(i switch
+                bool isLast = (i == call.Callee.Count - 1);
+                Call c = call.Callee[i];
+                frames.Add(c switch
                 {
-                    IdfCall a => a.Name.token,
-                    FunctionCall a => a.Name.token,
+                    IdfCall a => new AddressFrame(a.Name, AddressType.Call, isLast),
+                    FunctionCall a => new AddressFrame(a.Name, AddressType.Call, isLast),
                     _ => throw new ArgumentException()
                 });
             }
@@ -58,21 +71,30 @@ namespace Penguor.Compiler.IR
         }
 
         /// <summary>
-        /// Convert the state into an array
+        /// Convert the <c>State</c> into an array
         /// </summary>
         /// <returns>the array this instance of <c>State</c> encapsulates</returns>
-        public string[] ToArray() => addressFrames;
+        public AddressFrame[] ToArray() => addressFrames;
 
-        public IEnumerator<string> GetEnumerator()
-        {
-            return ((IEnumerable<string>)addressFrames).GetEnumerator();
-        }
+        /// <summary>
+        /// gets the Enumerator of the State
+        /// </summary>
+        public IEnumerator<AddressFrame> GetEnumerator() => ((IEnumerable<AddressFrame>)addressFrames).GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return addressFrames.GetEnumerator();
-        }
-        public string this[int i]
+        IEnumerator IEnumerable.GetEnumerator() => addressFrames.GetEnumerator();
+
+        /// <summary>
+        /// Copy the State to an array
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="index"></param>
+        public void CopyTo(Array array, int index) => addressFrames.CopyTo(array, index);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <value></value>
+        public AddressFrame this[int i]
         {
             get => addressFrames[i];
         }

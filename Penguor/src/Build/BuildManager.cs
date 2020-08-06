@@ -11,9 +11,15 @@
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Penguor.Compiler.Parsing;
+
 using Stopwatch = System.Diagnostics.Stopwatch;
+
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Transpiling;
+using Penguor.Compiler.Analysis;
 
 namespace Penguor.Compiler.Build
 {
@@ -30,6 +36,7 @@ namespace Penguor.Compiler.Build
         /// <param name="transpile">should the program be transpiled?</param>
         public static void SmartBuild(string path, string output, bool transpile = false)
         {
+            SymbolTableManager manager = new SymbolTableManager();
             if ((File.GetAttributes(path) & FileAttributes.Directory) != 0)
             {
                 if (path.Length == 0 || path == null) throw new PenguorCSException(1);
@@ -43,13 +50,28 @@ namespace Penguor.Compiler.Build
 
             if (!transpile)
             {
-                if (Path.GetExtension(path) == ".pgr") BuildFile(path);
+                if (Path.GetExtension(path) == ".pgr") BuildFile(ref manager, path);
                 else if (Path.GetExtension(path) == ".pgrp") BuildProject(path);
             }
-            else
+            else if (Path.GetExtension(path) == ".pgr")
             {
-                if (Path.GetExtension(path) == ".pgr") TranspileFile(path, output);
-                else if (Path.GetExtension(path) == ".pgrp") TranspileProject(path, output);
+                TranspileFile(path, output);
+            }
+            else if (Path.GetExtension(path) == ".pgrp")
+            {
+                TranspileProject(path, output);
+            }
+        }
+
+        public static void BuildProject(string project)
+        {
+            string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories);
+            Builder[] builders = new Builder[files.Length];
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                // builders[i] = new Builder(files[i]);
+                builders[i].Parse();
             }
         }
 
@@ -57,13 +79,35 @@ namespace Penguor.Compiler.Build
         /// build a Penguor project
         /// </summary>
         /// <param name="project">the project file in the project root directory</param>
-        public static void BuildProject(string project)
+        public static async void BuildProjectAsync(string project)
         {
             string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories);
-            foreach (string file in files)
+
+            int availableProcessors = Environment.ProcessorCount - 1;
+            uint activeThreads = 0;
+
+            Builder[] builders = new Builder[files.Length];
+            Task[] tasks = new Task[availableProcessors];
+
+            Stopwatch timeoutWatch = new Stopwatch();
+
+            for (int i = 0; i < files.Length; i++)
             {
-                Thread buildThread = new Thread(() => BuildFile(file));
-                buildThread.Start();
+                // builders[i] = new Builder(files[i]);
+
+                tasks[i] = builders[i].LexAsync();
+            }
+            for (int i = 0; i < files.Length; i++)
+            {
+                await tasks[i];
+            }
+            for (int i = 0; i < files.Length; i++)
+            {
+                timeoutWatch.Start();
+                while (activeThreads >= availableProcessors) ;
+
+                // Thread buildThread = new Thread(() => BuildFile(files[i]));
+                // buildThread.Start();
             }
         }
 
@@ -71,9 +115,9 @@ namespace Penguor.Compiler.Build
         /// build a single file from source
         /// </summary>
         /// <param name="file"></param>
-        public static void BuildFile(string file)
+        public static void BuildFile(ref SymbolTableManager manager, string file)
         {
-            Builder builder = new Builder(file);
+            Builder builder = new Builder(ref manager, file);
             builder.Build();
         }
 
@@ -104,9 +148,9 @@ namespace Penguor.Compiler.Build
         {
             Directory.CreateDirectory(Path.GetDirectoryName(output)!);
 
-            Builder builder = new Builder(file);
-            builder.Build();
-            builder.Transpile(TranspileLanguage.CSHARP, output);
+            // Builder builder = new Builder(file);
+            // builder.Build();
+            // builder.Transpile(TranspileLanguage.CSHARP, output);
         }
 
         /// <summary>
@@ -116,15 +160,15 @@ namespace Penguor.Compiler.Build
         public static void Benchmark(string file)
         {
             Stopwatch totalWatch = Stopwatch.StartNew();
-            Builder builder = new Builder(file);
+            // Builder builder = new Builder(file);
 
             Stopwatch watch = Stopwatch.StartNew();
-            builder.Lex();
+            // builder.Lex();
             watch.Stop();
             var lexTime = watch.Elapsed;
 
             watch.Restart();
-            builder.Parse();
+            // builder.Parse();
             watch.Stop();
             var parseTime = watch.Elapsed;
 

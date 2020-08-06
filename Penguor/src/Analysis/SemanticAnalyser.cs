@@ -21,6 +21,7 @@ namespace Penguor.Compiler.Analysis
 {
     public class SemanticAnalyser : IDeclVisitor<Decl>, IStmtVisitor<object>, IExprVisitor<Expr>, ICallVisitor<object>
     {
+        private SymbolTableManager manager;
         private readonly ProgramDecl program;
 
         private readonly Stack<string> state;
@@ -31,8 +32,9 @@ namespace Penguor.Compiler.Analysis
             state = new Stack<string>();
         }
 
-        public Decl Analyse()
+        public Decl Analyse(ref SymbolTableManager tableManager)
         {
+            manager = tableManager;
             return program.Accept(this);
         }
 

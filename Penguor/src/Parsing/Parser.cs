@@ -42,7 +42,7 @@ namespace Penguor.Compiler.Parsing
         /// start the Parsing process
         /// </summary>
         /// <returns>a statement containing the AST of the parsed file</returns>
-        public Decl Parse()
+        public ProgramDecl Parse()
         {
             List<Decl> declarations = new List<Decl>();
             while (!Match(EOF)) declarations.Add(Declaration());
@@ -105,7 +105,7 @@ namespace Penguor.Compiler.Parsing
 
         private Decl UsingDecl()
         {
-            Expr call = CallExpr();
+            var call = CallExpr();
             GetEnding();
             return new UsingDecl(call);
         }
@@ -113,15 +113,15 @@ namespace Penguor.Compiler.Parsing
         private SystemDecl SystemDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new SystemDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
         private Decl DataDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new DataDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
         private Decl TypeDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new TypeDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
-        private Token? GetParent() => Match(LESS) ? Consume(IDF) : (Token?)null;
+        private CallExpr? GetParent() => Match(LESS) ? CallExpr() : (CallExpr?)null;
 
         private FunctionDecl FunctionDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            Expr variable = VarExpr();
+            var variable = VarExpr();
 
             Consume(LPAREN);
-            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, new List<Expr>(), DeclContent());
-            List<Expr> parameters = new List<Expr>();
+            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, new List<VarExpr>(), DeclContent());
+            List<VarExpr> parameters = new List<VarExpr>();
             while (true)
             {
                 parameters.Add(VarExpr());
@@ -134,7 +134,7 @@ namespace Penguor.Compiler.Parsing
 
         private VarDecl VarDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            VarDecl dec = new VarDecl(accessMod, nonAccessMods, VarExpr(), Match(ASSIGN) ? Expression() : null);
+            VarDecl dec = new VarDecl(accessMod, nonAccessMods, VarExpr(), Match(ASSIGN) ? CondOrExpr() : null); //TODO: check this code 
             GetEnding();
             return dec;
         }
@@ -158,7 +158,7 @@ namespace Penguor.Compiler.Parsing
             return Error(new DeclStmt(null!), 1, GetCurrent(), LBRACE, COLON);
         }
 
-        private Decl BlockDecl(bool allowStmt = false)
+        private BlockDecl BlockDecl(bool allowStmt = false)
         {
             Consume(LBRACE);
             List<Decl> declarations = new List<Decl>();
@@ -167,7 +167,7 @@ namespace Penguor.Compiler.Parsing
             return new BlockDecl(declarations);
         }
 
-        private Decl DeclStmt() => new DeclStmt(Statement());
+        private DeclStmt DeclStmt() => new DeclStmt(Statement());
 
         private Stmt Statement()
         {
@@ -183,7 +183,7 @@ namespace Penguor.Compiler.Parsing
             return ExprStmt();
         }
 
-        private Stmt CompilerStmt()
+        private CompilerStmt CompilerStmt()
         {
             Token[] val;
             Token dir = Advance();
@@ -203,7 +203,7 @@ namespace Penguor.Compiler.Parsing
             return new CompilerStmt(dir.type, val);
         }
 
-        private Stmt BlockStmt()
+        private BlockStmt BlockStmt()
         {
             Match(LBRACE);
             List<Stmt> statements = new List<Stmt>();
@@ -212,13 +212,13 @@ namespace Penguor.Compiler.Parsing
             return new BlockStmt(statements);
         }
 
-        private Stmt VarStmt()
+        private VarStmt VarStmt()
         {
             VarDecl variable = VarDecl(null, new TokenType[0]);
             return new VarStmt(variable.Variable, variable.Init);
         }
 
-        private Stmt IfStmt()
+        private IfStmt IfStmt()
         {
             Consume(LPAREN);
             Expr condition = Expression();
@@ -235,7 +235,7 @@ namespace Penguor.Compiler.Parsing
             return new IfStmt(condition, ifC, elif, elseC);
         }
 
-        private Stmt ElifStmt()
+        private ElifStmt ElifStmt()
         {
             Consume(LPAREN);
             Expr condition = Expression();
@@ -244,7 +244,7 @@ namespace Penguor.Compiler.Parsing
             return new ElifStmt(condition, Statement());
         }
 
-        private Stmt WhileStmt()
+        private WhileStmt WhileStmt()
         {
             Consume(LPAREN);
             Expr condition = Expression();
@@ -253,7 +253,7 @@ namespace Penguor.Compiler.Parsing
             return new WhileStmt(condition, Statement());
         }
 
-        private Stmt ForStmt()
+        private ForStmt ForStmt()
         {
             Consume(LPAREN);
             Expr current = VarExpr();
@@ -264,7 +264,7 @@ namespace Penguor.Compiler.Parsing
             return new ForStmt(current, vars, Statement());
         }
 
-        private Stmt DoStmt()
+        private DoStmt DoStmt()
         {
             Stmt content = Statement();
 
@@ -276,7 +276,7 @@ namespace Penguor.Compiler.Parsing
             return new DoStmt(content, condition);
         }
 
-        private Stmt SwitchStmt()
+        private SwitchStmt SwitchStmt()
         {
             Consume(LPAREN);
             Expr condition = CallExpr();
@@ -296,7 +296,7 @@ namespace Penguor.Compiler.Parsing
             return new SwitchStmt(condition, cases, defaultCase);
         }
 
-        private Stmt CaseStmt()
+        private CaseStmt CaseStmt()
         {
             Expr? condition;
             if (GetPrevious().type == CASE)
@@ -321,7 +321,7 @@ namespace Penguor.Compiler.Parsing
             return new CaseStmt(condition, statements);
         }
 
-        private Stmt ReturnStmt()
+        private ReturnStmt ReturnStmt()
         {
             if (TryGetEnding())
             {
@@ -335,7 +335,7 @@ namespace Penguor.Compiler.Parsing
             }
         }
 
-        private Stmt ExprStmt()
+        private ExprStmt ExprStmt()
         {
             Expr expression = Expression();
             GetEnding();
@@ -473,7 +473,7 @@ namespace Penguor.Compiler.Parsing
             return new GroupingExpr(expr);
         }
 
-        private Expr VarExpr() => new VarExpr(CallExpr(), Consume(IDF));
+        private VarExpr VarExpr() => new VarExpr(CallExpr(), Consume(IDF));
 
         /// <summary>
         /// <c>Match() </c> consumes a token if matching
@@ -527,7 +527,6 @@ namespace Penguor.Compiler.Parsing
             return false;
         }
 
-        // TODO: improve xml documentation 
         /// <summary>
         /// <c>Advance() </c> advances to the next token if the eof isn't reached yet.
         /// </summary>

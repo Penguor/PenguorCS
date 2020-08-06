@@ -67,8 +67,8 @@ namespace Penguor.Compiler.Transpiling
             builder.Append(ConvertAccessMods(decl.AccessMod)).Append(' ');
             foreach (var naMod in decl.NonAccessMod) builder.Append(ConvertAccessMods(naMod)).Append(' ');
 
-            builder.Append("struct ").Append(decl.Name.token).Append(' ');
-            if (decl.Parent != null) builder.Append(": ").Append(decl.Parent.Value.token).Append(' ');
+            // builder.Append("struct ").Append(decl.Name.token).Append(' ');
+            if (decl.Parent != null) builder.Append(": ").Append(String.Join('.', decl.Parent.Callee)).Append(' ');
 
             builder.Append(decl.Content.Accept(this));
 
@@ -82,8 +82,8 @@ namespace Penguor.Compiler.Transpiling
             builder.Append(ConvertAccessMods(decl.AccessMod)).Append(' ');
             foreach (var naMod in decl.NonAccessMod) builder.Append(ConvertAccessMods(naMod)).Append(' ');
 
-            builder.Append("struct ").Append(decl.Name.token).Append(' ');
-            if (decl.Parent != null) builder.Append(": ").Append(decl.Parent.Value.token).Append(' ');
+            // builder.Append("struct ").Append(decl.Name.token).Append(' ');
+            if (decl.Parent != null) builder.Append(": ").Append(String.Join('.', decl.Parent.Callee)).Append(' ');
 
             builder.Append(decl.Content.Accept(this));
 
@@ -139,8 +139,8 @@ namespace Penguor.Compiler.Transpiling
 
             foreach (var naMod in decl.NonAccessMod) builder.Append(ConvertAccessMods(naMod)).Append(' ');
 
-            builder.Append("class ").Append(decl.Name.token).Append(' ');
-            if (decl.Parent != null) builder.Append(": ").Append(decl.Parent.Value.token).Append(' ');
+            // builder.Append("class ").Append(decl.Name.token).Append(' ');
+            if (decl.Parent != null) builder.Append(": ").Append(String.Join('.', decl.Parent.Callee)).Append(' ');
 
             builder.Append(decl.Content.Accept(this));
 

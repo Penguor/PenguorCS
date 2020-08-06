@@ -17,7 +17,7 @@ using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Tools;
 
-namespace Penguor
+namespace Penguor.Compiler
 {
     /// <summary>
     /// The main class and input handler for Penguor

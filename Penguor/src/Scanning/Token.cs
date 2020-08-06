@@ -51,6 +51,8 @@ namespace Penguor.Compiler.Parsing
             this.length = length;
         }
 
+        // public static implicit operator string(Token token) => token;
+
         /// <summary>
         /// returns the TokenType as string
         /// </summary>

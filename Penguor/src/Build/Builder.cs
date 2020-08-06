@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Lexing;
@@ -28,8 +29,10 @@ namespace Penguor.Compiler.Build
     /// </summary>
     public class Builder
     {
+        private SymbolTableManager tableManager;
+
         private List<Token>? tokens;
-        private Decl? program;
+        private ProgramDecl? program;
 
         /// <summary>
         /// has the lexer run?
@@ -55,8 +58,9 @@ namespace Penguor.Compiler.Build
         /// create a new instance of the Builder class
         /// </summary>
         /// <param name="file">the source file this builder is using</param>
-        public Builder(string file)
+        public Builder(ref SymbolTableManager tableManager, string file)
         {
+            this.tableManager = tableManager;
             Exceptions = new List<PenguorException>();
             if (!IOFile.Exists(file))
             {
@@ -81,7 +85,7 @@ namespace Penguor.Compiler.Build
         /// Split up the source file into tokens
         /// </summary>
         /// <returns>a list of tokens created from the source file</returns>
-        public List<Token> Lex()
+        public void Lex()
         {
             Lexer lexer = new Lexer(File, this);
             try
@@ -99,7 +103,40 @@ namespace Penguor.Compiler.Build
                 Exit(1);
             }
             lexerFinished = true;
-            return tokens!;
+        }
+
+        /// <summary>
+        /// Split up the source file into tokens and put the result into <c>tokens</c>
+        /// </summary>
+        /// <param name="tokens">where to</param>
+        public void Lex(out List<Token> tokens)
+        {
+            Lex();
+            if (this.tokens != null) tokens = this.tokens;
+            else throw new NullReferenceException();
+        }
+
+        public async Task LexAsync()
+        {
+            Lexer lexer = new Lexer(File, this);
+
+            Task<List<Token>> task = new Task<List<Token>>(lexer.Tokenize);
+            try
+            {
+                tokens = await task;
+                SubmitAllExceptions();
+            }
+            catch (LexingException e)
+            {
+                e.Log(File);
+                Exit(1);
+            }
+            catch (PenguorCSException)
+            {
+                Exit(1);
+            }
+
+            lexerFinished = true;
         }
 
         /// <summary>
@@ -134,9 +171,12 @@ namespace Penguor.Compiler.Build
             if (!lexerFinished) Lex();
             if (!parserFinished) Parse();
 
+            DeclDiscover declDiscover = new DeclDiscover(program!);
+            declDiscover.Discover(ref tableManager);
+
             SemanticAnalyser analyser = new SemanticAnalyser((ProgramDecl)program!);
 
-            Decl analysed = analyser.Analyse();
+            Decl analysed = analyser.Analyse(ref tableManager);
         }
 
         /// <summary>

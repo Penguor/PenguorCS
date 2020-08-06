@@ -17,11 +17,9 @@ namespace Penguor.Compiler.IR
 {
     public class IRProgram : IRDecl
     {
-        public ProgramDecl Program { get; }
 
-        public IRProgram(ProgramDecl decl) : base(new State(new string[0]))
+        public IRProgram() : base(new State(new AddressFrame[0]))
         {
-            Program = decl;
         }
     }
 }
