@@ -23,10 +23,21 @@ namespace Penguor.Compiler.Analysis
     public class SymbolTableManager
     {
         private Dictionary<string, AddressFrame> table;
+        Hashtable hTable = new Hashtable();
 
         public SymbolTableManager()
         {
             table = new Dictionary<string, AddressFrame>();
+        }
+
+        public void AddSymbol(string name)
+        {
+            table.Add(name, new AddressFrame());
+        }
+
+        public void AddDeclaration()
+        {
+            State address;
         }
 
         public void AddDeclaration(State address)

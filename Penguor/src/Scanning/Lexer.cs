@@ -10,8 +10,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using System.IO;
-using System.Threading.Tasks;
 
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Parsing;
@@ -20,52 +18,47 @@ using Penguor.Compiler.Debugging;
 namespace Penguor.Compiler.Lexing
 {
     /// <summary>
-    /// This class contains everything to scan Penguor files and return a token list
+    /// This class contains everything to split Penguor files up into tokens
     /// </summary>
     public class Lexer
     {
-        private readonly List<Token> tokens = new List<Token>();
-        private readonly string source;
-        private readonly Builder builder;
+        private Builder builder; // the builder who is holding the Lexer
 
-        private int current = 0;
-        private int offset = 0;
+        private string source; // the source code
+        private List<Token> tokens; // the list containing the tokens from the source file
+
+        private int current = 0; // the location in the source code
+        private int offset = 0; // the offset where the token scanned atm began
 
         /// <summary>
-        /// create a new instance of the Lexer class
+        /// creates a new instance of the Lexer class
         /// </summary>
-        /// <param name="filePath">the file to scan</param>
         /// <param name="builder">the Builder this class is executed from</param>
-        public Lexer(string filePath, Builder builder)
+        public Lexer(Builder builder)
         {
             this.builder = builder;
-            source = "";
-            try
-            {
-                source = File.ReadAllText(filePath);
-            }
-            catch (FileNotFoundException)
-            {
-                throw new PenguorCSException(6, filePath);
-            }
+            source = builder.Input;
+
+            tokens = new List<Token>();
         }
 
         /// <summary>
         /// scans a text file and breaks it into tokens
         /// </summary>
-        /// <returns>a list of tokens</returns>
-        public List<Token> Tokenize()
+        public ref List<Token> Tokenize()
         {
-            current = 0;
+            current = 0; // start from the beginning of the file
 
             StringBuilder stringBuilder = new StringBuilder();
             while (!AtEnd())
             {
                 stringBuilder.Clear();
-                while (char.IsWhiteSpace(Peek()) && Peek() != '\n') Advance();
+                while (char.IsWhiteSpace(Peek()) && Peek() != '\n') Advance(); // skip leading whitespace
 
+                // the offset is set to the offset in the source file at the beginning of the token
                 offset = current;
 
+                // lex keywords and identifiers
                 if (char.IsLetter(Peek()) || Peek() == '_')
                 {
                     stringBuilder.Append(Advance());
@@ -76,92 +69,95 @@ namespace Penguor.Compiler.Lexing
                     {
                         case "null":
                             AddToken(TokenType.NULL);
-                            break;
+                            continue;
                         case "using":
                             AddToken(TokenType.USING);
-                            break;
+                            continue;
                         case "system":
                             AddToken(TokenType.SYSTEM);
-                            break;
+                            continue;
                         case "data":
                             AddToken(TokenType.DATA);
-                            break;
+                            continue;
                         case "type":
                             AddToken(TokenType.TYPE);
-                            break;
+                            continue;
                         case "library":
                             AddToken(TokenType.LIBRARY);
-                            break;
+                            continue;
                         case "if":
                             AddToken(TokenType.IF);
-                            break;
+                            continue;
                         case "elif":
                             AddToken(TokenType.ELIF);
-                            break;
+                            continue;
                         case "else":
                             AddToken(TokenType.ELSE);
-                            break;
+                            continue;
                         case "while":
                             AddToken(TokenType.WHILE);
-                            break;
+                            continue;
                         case "for":
                             AddToken(TokenType.FOR);
-                            break;
+                            continue;
                         case "do":
                             AddToken(TokenType.DO);
-                            break;
+                            continue;
                         case "safety":
                             AddToken(TokenType.SAFETY);
-                            break;
+                            continue;
                         case "public":
                             AddToken(TokenType.PUBLIC);
-                            break;
+                            continue;
                         case "private":
                             AddToken(TokenType.PRIVATE);
-                            break;
+                            continue;
                         case "protected":
                             AddToken(TokenType.PROTECTED);
-                            break;
+                            continue;
                         case "restricted":
                             AddToken(TokenType.RESTRICTED);
-                            break;
+                            continue;
                         case "static":
                             AddToken(TokenType.STATIC);
-                            break;
+                            continue;
                         case "dynamic":
                             AddToken(TokenType.DYNAMIC);
-                            break;
+                            continue;
                         case "abstract":
                             AddToken(TokenType.ABSTRACT);
-                            break;
+                            continue;
                         case "const":
                             AddToken(TokenType.CONST);
-                            break;
+                            continue;
                         case "true":
                             AddToken(TokenType.TRUE);
-                            break;
+                            continue;
                         case "false":
                             AddToken(TokenType.FALSE);
-                            break;
+                            continue;
                         case "switch":
                             AddToken(TokenType.SWITCH);
-                            break;
+                            continue;
                         case "case":
                             AddToken(TokenType.CASE);
-                            break;
+                            continue;
                         case "default":
                             AddToken(TokenType.DEFAULT);
-                            break;
+                            continue;
                         case "return":
                             AddToken(TokenType.RETURN);
-                            break;
+                            continue;
                         default:
+                            // if none of the keywords is matched, the Token is an identifier
                             AddToken(TokenType.IDF, idf);
-                            break;
+                            builder.TableManager.AddSymbol(idf);
+                            continue;
                     }
-                    continue;
                 }
 
+                // lex numbers
+                // TODO: add all types of numbers and notations Penguor supports
                 if (char.IsDigit(Peek()))
                 {
                     stringBuilder.Append(Advance());
@@ -178,6 +174,7 @@ namespace Penguor.Compiler.Lexing
                     continue;
                 }
 
+                // lex strings
                 if (Match('"'))
                 {
                     while (!Match('"')) stringBuilder.Append(Advance());
@@ -185,6 +182,7 @@ namespace Penguor.Compiler.Lexing
                     continue;
                 }
 
+                // lex all other tokens
                 char c;
                 if (!AtEnd()) c = Advance();
                 else break;
@@ -286,260 +284,26 @@ namespace Penguor.Compiler.Lexing
                         AddToken(Match('=') ? TokenType.EQUALS : TokenType.ASSIGN);
                         break;
                     default:
-
                         builder.Exceptions.Add(new LexingException(7, offset, c.ToString()));
                         break;
                 }
             }
-
+            // add an end of file token at the end
+            // it will be used by the Parser to verify that all tokens have been parsed
             AddToken(TokenType.EOF);
-            return tokens;
+
+            return ref tokens;
         }
 
         /// <summary>
-        /// returns an IENumerable using yield return
+        /// returns whether the end of the source file is reached
         /// </summary>
-        public IEnumerable<Token> TokenizeEnumerable()
-        {
-            current = 0;
-
-            StringBuilder stringBuilder = new StringBuilder();
-            while (!AtEnd())
-            {
-                stringBuilder.Clear();
-                while (char.IsWhiteSpace(Peek()) && Peek() != '\n') Advance();
-
-                offset = current;
-
-                if (char.IsLetter(Peek()) || Peek() == '_')
-                {
-                    stringBuilder.Append(Advance());
-                    while (char.IsLetterOrDigit(Peek()) || Peek() == '_') stringBuilder.Append(Advance());
-                    string idf = stringBuilder.ToString();
-
-                    switch (idf)
-                    {
-                        case "null":
-                            yield return AddToken(TokenType.NULL);
-                            break;
-                        case "using":
-                            yield return AddToken(TokenType.USING);
-                            break;
-                        case "system":
-                            yield return AddToken(TokenType.SYSTEM);
-                            break;
-                        case "data":
-                            yield return AddToken(TokenType.DATA);
-                            break;
-                        case "type":
-                            yield return AddToken(TokenType.TYPE);
-                            break;
-                        case "library":
-                            yield return AddToken(TokenType.LIBRARY);
-                            break;
-                        case "if":
-                            yield return AddToken(TokenType.IF);
-                            break;
-                        case "elif":
-                            yield return AddToken(TokenType.ELIF);
-                            break;
-                        case "else":
-                            yield return AddToken(TokenType.ELSE);
-                            break;
-                        case "while":
-                            yield return AddToken(TokenType.WHILE);
-                            break;
-                        case "for":
-                            yield return AddToken(TokenType.FOR);
-                            break;
-                        case "do":
-                            yield return AddToken(TokenType.DO);
-                            break;
-                        case "safety":
-                            yield return AddToken(TokenType.SAFETY);
-                            break;
-                        case "public":
-                            yield return AddToken(TokenType.PUBLIC);
-                            break;
-                        case "private":
-                            yield return AddToken(TokenType.PRIVATE);
-                            break;
-                        case "protected":
-                            yield return AddToken(TokenType.PROTECTED);
-                            break;
-                        case "restricted":
-                            yield return AddToken(TokenType.RESTRICTED);
-                            break;
-                        case "static":
-                            yield return AddToken(TokenType.STATIC);
-                            break;
-                        case "dynamic":
-                            yield return AddToken(TokenType.DYNAMIC);
-                            break;
-                        case "abstract":
-                            yield return AddToken(TokenType.ABSTRACT);
-                            break;
-                        case "const":
-                            yield return AddToken(TokenType.CONST);
-                            break;
-                        case "true":
-                            yield return AddToken(TokenType.TRUE);
-                            break;
-                        case "false":
-                            yield return AddToken(TokenType.FALSE);
-                            break;
-                        case "switch":
-                            yield return AddToken(TokenType.SWITCH);
-                            break;
-                        case "case":
-                            yield return AddToken(TokenType.CASE);
-                            break;
-                        case "default":
-                            yield return AddToken(TokenType.DEFAULT);
-                            break;
-                        case "return":
-                            yield return AddToken(TokenType.RETURN);
-                            break;
-                        default:
-                            yield return AddToken(TokenType.IDF, idf);
-                            break;
-                    }
-                    continue;
-                }
-
-                if (char.IsDigit(Peek()))
-                {
-                    stringBuilder.Append(Advance());
-                    while (char.IsDigit(Peek())) stringBuilder.Append(Advance());
-                    if (Peek() == '.') do stringBuilder.Append(Advance()); while (char.IsDigit(Peek()));
-                    yield return AddToken(TokenType.NUM, stringBuilder.ToString());
-                    continue;
-                }
-                else if (Peek() == '.' && char.IsDigit(PeekNext()))
-                {
-                    stringBuilder.Append(Advance());
-                    do stringBuilder.Append(Advance()); while (char.IsDigit(Peek()));
-                    yield return AddToken(TokenType.NUM, stringBuilder.ToString());
-                    continue;
-                }
-
-                if (Match('"'))
-                {
-                    while (!Match('"')) stringBuilder.Append(Advance());
-                    yield return AddToken(TokenType.STRING, stringBuilder.ToString());
-                    continue;
-                }
-
-                char c;
-                if (!AtEnd()) c = Advance();
-                else break;
-
-                switch (c)
-                {
-                    case '+':
-                        yield return AddToken(Match('=') ? TokenType.ADD_ASSIGN : Match('+') ? TokenType.DPLUS : TokenType.PLUS);
-                        break;
-                    case '-':
-                        yield return AddToken(Match('=') ? TokenType.SUB_ASSIGN : Match('-') ? TokenType.DMINUS : TokenType.MINUS);
-                        break;
-                    case '*':
-                        yield return AddToken(Match('=') ? TokenType.MUL_ASSIGN : TokenType.MUL);
-                        break;
-                    case '/':
-                        if (Match('/'))
-                        {
-                            while (!Match('\n')) Advance();
-                        }
-                        else if (Match('*'))
-                        {
-                            int nested = 1;
-                            while (nested > 0)
-                            {
-                                if (Match('/') && Match('*')) nested++;
-                                else if (Match('*') && Match('/')) nested--;
-                                else Advance();
-                            }
-                        }
-                        else
-                        {
-                            yield return AddToken(Match('=') ? TokenType.DIV_ASSIGN : TokenType.DIV);
-                        }
-
-                        break;
-                    case '%':
-                        yield return AddToken(Match('=') ? TokenType.PERCENT_ASSIGN : TokenType.PERCENT);
-                        break;
-                    case '!':
-                        yield return AddToken(TokenType.EXCL_MARK);
-                        break;
-                    case '~':
-                        yield return AddToken(TokenType.BW_NOT);
-                        break;
-                    case '(':
-                        yield return AddToken(TokenType.LPAREN);
-                        break;
-                    case ')':
-                        yield return AddToken(TokenType.RPAREN);
-                        break;
-                    case '{':
-                        yield return AddToken(TokenType.LBRACE);
-                        break;
-                    case '}':
-                        yield return AddToken(TokenType.RBRACE);
-                        break;
-                    case '[':
-                        while (char.IsWhiteSpace(Peek())) Advance();
-                        yield return AddToken(Match(']') ? TokenType.ARRAY : TokenType.LBRACK);
-                        break;
-                    case ']':
-                        yield return AddToken(TokenType.RBRACK);
-                        break;
-                    case '.':
-                        yield return AddToken(TokenType.DOT);
-                        break;
-                    case ',':
-                        yield return AddToken(TokenType.COMMA);
-                        break;
-                    case ':':
-                        yield return AddToken(TokenType.COLON);
-                        break;
-                    case ';':
-                        yield return AddToken(TokenType.SEMICOLON);
-                        break;
-                    case '\n':
-                        yield return AddToken(TokenType.ENDING);
-                        break;
-                    case '<':
-                        yield return AddToken(Match('=') ? TokenType.LESS_EQUALS : Match('<') ? (Match('=') ? TokenType.BS_LEFT_ASSIGN : TokenType.BS_LEFT) : TokenType.LESS);
-                        break;
-                    case '>':
-                        yield return AddToken(Match('=') ? TokenType.GREATER_EQUALS : Match('>') ? (Match('=') ? TokenType.BS_RIGHT_ASSIGN : TokenType.BS_RIGHT) : TokenType.GREATER);
-                        break;
-                    case '&':
-                        yield return AddToken(Match('=') ? TokenType.BW_AND_ASSIGN : Match('&') ? TokenType.AND : TokenType.BW_AND);
-                        break;
-                    case '|':
-                        yield return AddToken(Match('=') ? TokenType.BW_OR_ASSIGN : Match('|') ? TokenType.OR : TokenType.BW_OR);
-                        break;
-                    case '^':
-                        yield return AddToken(Match('=') ? TokenType.BW_XOR_ASSIGN : Match('^') ? TokenType.XOR : TokenType.BW_XOR);
-                        break;
-                    case '#':
-                        yield return AddToken(TokenType.HASHTAG);
-                        break;
-                    case '=':
-                        yield return AddToken(Match('=') ? TokenType.EQUALS : TokenType.ASSIGN);
-                        break;
-                    default:
-                        builder.Exceptions.Add(new LexingException(7, offset, c.ToString()));
-                        break;
-                }
-            }
-            yield return AddToken(TokenType.EOF);
-        }
-
         private bool AtEnd() => current >= source.Length;
 
+        /// <summary>
+        /// advances the position by one
+        /// </summary>
+        /// <returns>the character at the previous position after advancing</returns>
         private char Advance()
         {
             current++;
@@ -547,6 +311,14 @@ namespace Penguor.Compiler.Lexing
             return source[current - 1];
         }
 
+        /// <summary>
+        /// matches the current character against the expected character
+        /// </summary>
+        /// <param name="expected">the character which should be matched against</param>
+        /// <returns>
+        /// whether the expected character is equal to the current char in the source file
+        /// and <c>false</c> when the end of the file is reached
+        /// </returns>
         private bool Match(char expected)
         {
             if (AtEnd()) return false;
@@ -556,24 +328,27 @@ namespace Penguor.Compiler.Lexing
             return true;
         }
 
+        /// <summary>
+        /// returns the character at the current position without advancing
+        /// </summary>
         private char Peek()
         {
             if (AtEnd()) return '\0';
             return source[current];
         }
 
+        /// <summary>
+        /// returns the next character
+        /// </summary>
         private char PeekNext()
         {
             if (current + 1 >= source.Length) return '\0';
             return source[current + 1];
         }
 
-        private Token AddToken(TokenType type) => AddToken(type, "");
-        private Token AddToken(TokenType type, string literal)
-        {
-            Token t = new Token(type, literal, offset, current - offset);
-            tokens.Add(t);
-            return t;
-        }
+        // add tokens to the List
+        private void AddToken(TokenType type) => AddToken(type, "");
+        private void AddToken(TokenType type, string literal) =>
+            tokens.Add(new Token(type, literal, offset, current - offset));
     }
 }

@@ -9,6 +9,7 @@
 */
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -29,7 +30,10 @@ namespace Penguor.Compiler.Build
     /// </summary>
     public class Builder
     {
-        private SymbolTableManager tableManager;
+        /// <summary>
+        /// contains the SymbolTableManager for the compilation process
+        /// </summary>
+        public SymbolTableManager TableManager { get; }
 
         private List<Token>? tokens;
         private ProgramDecl? program;
@@ -47,7 +51,13 @@ namespace Penguor.Compiler.Build
         /// the source file this builder builds
         /// </summary>
         /// <value></value>
-        public string File { get; }
+        public string SourceFile { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <value></value>
+        public string Input { get; set; }
 
         /// <summary>
         /// The code the program exits with. If it isn't 0, an error has occurred
@@ -57,17 +67,21 @@ namespace Penguor.Compiler.Build
         /// <summary>
         /// create a new instance of the Builder class
         /// </summary>
-        /// <param name="file">the source file this builder is using</param>
+        /// <param name="tableManager">the Manager which contains the symbols</param>
+        /// <param name="file">the source file to compile</param>
         public Builder(ref SymbolTableManager tableManager, string file)
         {
-            this.tableManager = tableManager;
+            this.TableManager = tableManager;
             Exceptions = new List<PenguorException>();
-            if (!IOFile.Exists(file))
+            try
             {
-                Debug.CastPGRCS(6, file);
-                Exit(1);
+                Input = File.ReadAllText(file);
+                SourceFile = file;
             }
-            File = file;
+            catch (FileNotFoundException)
+            {
+                throw new PenguorCSException(6, file);
+            }
         }
 
         /// <summary>
@@ -87,7 +101,7 @@ namespace Penguor.Compiler.Build
         /// <returns>a list of tokens created from the source file</returns>
         public void Lex()
         {
-            Lexer lexer = new Lexer(File, this);
+            Lexer lexer = new Lexer(this);
             try
             {
                 tokens = lexer.Tokenize();
@@ -95,7 +109,7 @@ namespace Penguor.Compiler.Build
             }
             catch (LexingException e)
             {
-                e.Log(File);
+                e.Log(SourceFile);
                 Exit(1);
             }
             catch (PenguorCSException)
@@ -116,29 +130,6 @@ namespace Penguor.Compiler.Build
             else throw new NullReferenceException();
         }
 
-        public async Task LexAsync()
-        {
-            Lexer lexer = new Lexer(File, this);
-
-            Task<List<Token>> task = new Task<List<Token>>(lexer.Tokenize);
-            try
-            {
-                tokens = await task;
-                SubmitAllExceptions();
-            }
-            catch (LexingException e)
-            {
-                e.Log(File);
-                Exit(1);
-            }
-            catch (PenguorCSException)
-            {
-                Exit(1);
-            }
-
-            lexerFinished = true;
-        }
-
         /// <summary>
         /// parses the Tokens produced by Lex()
         /// </summary>
@@ -156,7 +147,7 @@ namespace Penguor.Compiler.Build
             }
             catch (ParsingException e)
             {
-                e.Log(File);
+                e.Log(SourceFile);
                 Exit(1);
             }
             parserFinished = true;
@@ -171,12 +162,12 @@ namespace Penguor.Compiler.Build
             if (!lexerFinished) Lex();
             if (!parserFinished) Parse();
 
-            DeclDiscover declDiscover = new DeclDiscover(program!);
+            DeclDiscover declDiscover = new DeclDiscover(program ?? throw new ArgumentNullException());
             declDiscover.Discover(ref tableManager);
 
-            SemanticAnalyser analyser = new SemanticAnalyser((ProgramDecl)program!);
+            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(), ref tableManager);
 
-            Decl analysed = analyser.Analyse(ref tableManager);
+            Decl analysed = analyser.Analyse();
         }
 
         /// <summary>
@@ -214,7 +205,7 @@ namespace Penguor.Compiler.Build
             if (Exceptions.Count == 0) return;
             PenguorException p = Exceptions[0];
             Exceptions.RemoveAt(0);
-            p.Log(File);
+            p.Log(SourceFile);
         }
 
         /// <summary>
@@ -223,7 +214,7 @@ namespace Penguor.Compiler.Build
         public void SubmitAllExceptions()
         {
             foreach (var e in Exceptions)
-                e.Log(File);
+                e.Log(SourceFile);
             Exceptions.Clear();
         }
 
