@@ -177,7 +177,7 @@ namespace Penguor.Compiler.Build
             switch (lang)
             {
                 case TranspileLanguage.CSHARP:
-                    CSharpTranspiler transpiler = new CSharpTranspiler((ProgramDecl)program);
+                    CSharpTranspiler transpiler = new CSharpTranspiler(program);
                     transpiler.Transpile(output);
                     break;
             }

@@ -15,26 +15,26 @@ namespace Penguor.Compiler.Parsing
     /// <summary>
     /// a Penguor token
     /// </summary>
-    public struct Token
+    public class Token
     {
         /// <summary>
         /// the type of token
         /// </summary>
-        public readonly TokenType type;
+        public TokenType Type { get; init; }
 
         /// <summary>
         /// the content
         /// </summary>
-        public readonly string token;
+        public string token { get; init; }
 
         /// <summary>
         /// offset of the token
         /// </summary>
-        public readonly int offset;
+        public int Offset { get; init; }
         /// <summary>
         /// length of the token
         /// </summary>
-        public readonly int length;
+        public int Length { get; init; }
 
         /// <summary>
         /// create a new Token with the given values
@@ -45,10 +45,10 @@ namespace Penguor.Compiler.Parsing
         /// <param name="length">the length of the token</param>
         public Token(TokenType type, string token, int offset, int length)
         {
-            this.type = type;
+            Type = type;
             this.token = token;
-            this.offset = offset;
-            this.length = length;
+            Offset = offset;
+            Length = length;
         }
 
         // public static implicit operator string(Token token) => token;
@@ -56,7 +56,7 @@ namespace Penguor.Compiler.Parsing
         /// <summary>
         /// returns the TokenType as string
         /// </summary>
-        public override string ToString() => ToString(type);
+        public override string ToString() => ToString(Type);
 
         /// <summary>
         /// returns <c>type</c> as string
@@ -150,7 +150,7 @@ namespace Penguor.Compiler.Parsing
         /// </summary>
         public string ToPrettyString()
         {
-            return $"type: {type}, token: {token}, offset: {offset}, length: {length}";
+            return $"type: {Type}, token: {token}, offset: {Offset}, length: {Length}";
         }
     }
 }

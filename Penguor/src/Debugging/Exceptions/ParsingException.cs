@@ -30,7 +30,7 @@ namespace Penguor.Compiler.Debugging
         /// <param name="msg">the error message number</param>
         /// <param name="actual">the actual Token</param>
         /// <param name="expected">the expected Token, optional</param>
-        public ParsingException(uint msg, Token actual, TokenType[] expected) : base(msg, actual.offset)
+        public ParsingException(uint msg, Token actual, TokenType[] expected) : base(msg, actual.Offset)
         {
             ExpectedTypes = expected;
             ActualToken = actual;
