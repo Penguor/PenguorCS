@@ -41,9 +41,10 @@ namespace Penguor.Compiler.Analysis
         {
             this.program = program;
             state = new Stack<AddressFrame>();
+            manager = new SymbolTableManager();
         }
 
-        public void Discover(ref SymbolTableManager tableManager)
+        public void Discover(SymbolTableManager tableManager)
         {
             manager = tableManager;
             program.Accept(this);
@@ -129,13 +130,13 @@ namespace Penguor.Compiler.Analysis
 
         public object? Visit(UsingDecl decl)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public object? Visit(VarDecl decl)
         {
             var variable = decl.Variable;
-            state.Push(new AddressFrame(decl.Variable.Name, AddressType.VarDecl, State.FromCall((CallExpr)variable.Type))); //! this is not finished
+            state.Push(new AddressFrame(decl.Variable.Name, AddressType.VarDecl, State.FromCall(variable.Type))); //! this is not finished
             manager.AddDeclaration(GetState());
             state.Pop();
 

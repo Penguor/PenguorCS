@@ -1,12 +1,12 @@
 /*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-2020
-# 
-# 
-*/
+ #
+ # PenguorCS Compiler
+ # ------------------
+ #
+ # (c) Carl Schierig 2019-2020
+ #
+ #
+ */
 
 using System;
 using System.Collections.Generic;
@@ -23,9 +23,12 @@ namespace Penguor.Compiler.Parsing
     /// </summary>
     public class Parser
     {
+        private readonly Builder builder;  // the builder which is holding the Lexer
         private readonly List<Token> tokens;
-        private int current;
-        private readonly Builder builder;
+        private int current; // the position of the current token in the tokens list
+
+        private readonly Stack<AddressFrame> state;
+
 
         /// <summary>
         /// create a new parser with the tokens that should be parsed
@@ -36,6 +39,8 @@ namespace Penguor.Compiler.Parsing
         {
             this.builder = builder;
             this.tokens = tokens;
+
+            state = new Stack<AddressFrame>();
         }
 
         /// <summary>
@@ -110,10 +115,37 @@ namespace Penguor.Compiler.Parsing
             return new UsingDecl(call);
         }
 
-        private SystemDecl SystemDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new SystemDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
-        private Decl DataDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new DataDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
-        private Decl TypeDecl(TokenType? accessMod, TokenType[] nonAccessMods) => new TypeDecl(accessMod, nonAccessMods, Consume(IDF), GetParent(), BlockDecl());
-        private CallExpr? GetParent() => Match(LESS) ? CallExpr() : (CallExpr?)null;
+        private SystemDecl SystemDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        {
+            Token name = Consume(IDF);
+            CallExpr? parent = GetParent();
+            state.Push(new AddressFrame(name.token, AddressType.SystemDecl));
+            BlockDecl content = BlockDecl();
+            state.Pop();
+            return new SystemDecl(accessMod, nonAccessMods, name, parent, content);
+        }
+
+        private Decl DataDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        {
+            Token name = Consume(IDF);
+            CallExpr? parent = GetParent();
+            state.Push(new AddressFrame(name.token, AddressType.DataDecl));
+            BlockDecl content = BlockDecl();
+            state.Pop();
+            return new DataDecl(accessMod, nonAccessMods, name, parent, content);
+        }
+
+        private Decl TypeDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        {
+            Token name = Consume(IDF);
+            CallExpr? parent = GetParent();
+            state.Push(new AddressFrame(name.token, AddressType.TypeDecl));
+            BlockDecl content = BlockDecl();
+            state.Pop();
+            return new TypeDecl(accessMod, nonAccessMods, name, parent, content);
+        }
+
+        private CallExpr? GetParent() => Match(LESS) ? CallExpr() : null;
 
         private FunctionDecl FunctionDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
@@ -129,6 +161,7 @@ namespace Penguor.Compiler.Parsing
                 Consume(RPAREN);
                 break;
             }
+            
             return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, DeclContent());
         }
 
@@ -162,6 +195,7 @@ namespace Penguor.Compiler.Parsing
         {
             Consume(LBRACE);
             List<Decl> declarations = new List<Decl>();
+
             while (!Match(RBRACE)) declarations.Add(Declaration(allowStmt));
 
             return new BlockDecl(declarations);
@@ -474,6 +508,12 @@ namespace Penguor.Compiler.Parsing
         }
 
         private VarExpr VarExpr() => new VarExpr(CallExpr(), Consume(IDF));
+
+        private void AddSymbolToTable(Token token)
+        {
+            bool succeeded = builder.TableManager.AddSymbol(State.FromStack(state), new Symbol(token.token));
+            if (!succeeded) throw new PenguorException(1, GetCurrent().offset);
+        }
 
         /// <summary>
         /// <c>Match() </c> consumes a token if matching

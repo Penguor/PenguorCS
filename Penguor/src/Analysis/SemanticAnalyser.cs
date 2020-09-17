@@ -11,17 +11,13 @@
 using System.Collections.Generic;
 
 using Penguor.Compiler.Parsing.AST;
-using Penguor.Compiler.IR;
-
-using static Penguor.Compiler.Parsing.TokenType;
 
 #pragma warning disable 1591
 
 namespace Penguor.Compiler.Analysis
 {
-    public class SemanticAnalyser : IDeclVisitor<Decl>, IStmtVisitor<object>, IExprVisitor<Expr>, ICallVisitor<object>
+    public class SemanticAnalyser : IDeclVisitor<Decl>, IStmtVisitor<Stmt>, IExprVisitor<Expr>, ICallVisitor<Call>
     {
-        private SymbolTableManager manager;
         private readonly ProgramDecl program;
 
         private readonly Stack<string> state;
@@ -32,20 +28,22 @@ namespace Penguor.Compiler.Analysis
             state = new Stack<string>();
         }
 
-        public Decl Analyse(ref SymbolTableManager tableManager)
+        public Decl Analyse()
         {
-            manager = tableManager;
             return program.Accept(this);
         }
 
         public Decl Visit(BlockDecl decl)
         {
-            throw new System.NotImplementedException();
+            foreach (var i in decl.Content) i.Accept(this);
+            return decl;
         }
 
         public Decl Visit(DataDecl decl)
         {
+            state.Push(decl.Name.token);
             throw new System.NotImplementedException();
+
         }
 
         public Decl Visit(TypeDecl decl)
@@ -70,8 +68,9 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(ProgramDecl decl)
         {
-            foreach (var declaration in decl.Declarations) declaration.Accept(this);
+            foreach (var i in decl.Declarations) i.Accept(this);
             throw new System.NotImplementedException();
+
         }
 
         public Decl Visit(SystemDecl decl)
@@ -89,62 +88,62 @@ namespace Penguor.Compiler.Analysis
             throw new System.NotImplementedException();
         }
 
-        public object Visit(BlockStmt stmt)
+        public Stmt Visit(BlockStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(CaseStmt stmt)
+        public Stmt Visit(CaseStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(DoStmt stmt)
+        public Stmt Visit(DoStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(ElifStmt stmt)
+        public Stmt Visit(ElifStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(ExprStmt stmt)
+        public Stmt Visit(ExprStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(ForStmt stmt)
+        public Stmt Visit(ForStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(IfStmt stmt)
+        public Stmt Visit(IfStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(CompilerStmt stmt)
+        public Stmt Visit(CompilerStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(ReturnStmt stmt)
+        public Stmt Visit(ReturnStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(SwitchStmt stmt)
+        public Stmt Visit(SwitchStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(VarStmt stmt)
+        public Stmt Visit(VarStmt stmt)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(WhileStmt stmt)
+        public Stmt Visit(WhileStmt stmt)
         {
             throw new System.NotImplementedException();
         }
@@ -156,105 +155,64 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(BinaryExpr expr)
         {
-            Expr lhs = expr.Lhs.Accept(this);
-            Expr rhs = expr.Rhs.Accept(this);
+            //! this doesn't work properly
+            //! it should track return types as well
+            /*// verify that operations are applied
             switch (expr.Op)
             {
-                case AND:
-                    if (typeof(BooleanExpr).Equals(lhs.GetType()) && typeof(BooleanExpr).Equals(rhs.GetType()))
-                    {
-                        bool a = ((BooleanExpr)lhs).Value;
-                        bool b = ((BooleanExpr)rhs).Value;
-                        return new BooleanExpr(a && b);
-                    }
-                    else if (lhs.GetType() == typeof(BooleanExpr))
-                    {
-                        bool a = ((BooleanExpr)lhs).Value;
-                        if (!a) return new BooleanExpr(false);
-                    }
-                    break;
+                // verify that both lhs and rhs are boolean
                 case OR:
-                    if (typeof(BooleanExpr).Equals(lhs.GetType()) && typeof(BooleanExpr).Equals(rhs.GetType()))
-                    {
-                        bool a = ((BooleanExpr)lhs).Value;
-                        bool b = ((BooleanExpr)rhs).Value;
-                        return new BooleanExpr(a || b);
-                    }
-                    else if (lhs.GetType() == typeof(BooleanExpr))
-                    {
-                        bool a = ((BooleanExpr)lhs).Value;
-                        if (a) return new BooleanExpr(true);
-                    }
-                    break;
                 case XOR:
-                    if (typeof(BooleanExpr).Equals(lhs.GetType()) && typeof(BooleanExpr).Equals(rhs.GetType()))
-                    {
-                        bool a = ((BooleanExpr)lhs).Value;
-                        bool b = ((BooleanExpr)rhs).Value;
-                        return new BooleanExpr(a != b);
-                    }
-                    break;
+                case AND:
+                case EQUALS:
                 case NEQUALS:
-                    if (typeof(BooleanExpr).Equals(lhs.GetType()) && typeof(BooleanExpr).Equals(rhs.GetType()))
+                case LESS:
+                case GREATER:
+                case LESS_EQUALS:
+                case GREATER_EQUALS:
+                    if (expr.Lhs.GetType() != typeof(BooleanExpr)
+                       || expr.Rhs.GetType() != typeof(BooleanExpr))
                     {
-                        bool a = ((BooleanExpr)lhs).Value;
-                        bool b = ((BooleanExpr)rhs).Value;
-                        return new BooleanExpr(a != b);
-                    }
-                    if (typeof(StringExpr).Equals(lhs.GetType()) && typeof(StringExpr).Equals(rhs.GetType()))
-                    {
-                        string a = ((StringExpr)lhs).Value;
-                        string b = ((StringExpr)rhs).Value;
-                        return new BooleanExpr(a != b);
-                    }
-                    if (typeof(NumExpr).Equals(lhs.GetType()) && typeof(NumExpr).Equals(rhs.GetType()))
-                    {
-                        double a = ((NumExpr)lhs).Value;
-                        double b = ((NumExpr)rhs).Value;
-                        return new BooleanExpr(a != b);
+                        throw new PenguorException(1, 1); //TODO: proper error handling
                     }
                     break;
-                case PLUS:
-                    if (typeof(NumExpr).Equals(lhs.GetType()) && typeof(NumExpr).Equals(rhs.GetType()))
-                    {
-                        double a = ((NumExpr)lhs).Value;
-                        double b = ((NumExpr)rhs).Value;
-
-                        return new NumExpr(a + b);
-                    }
-                    break;
+                // verify that both lhs and rhs are numbers
+                case BW_OR:
+                case BW_XOR:
+                case BW_AND:
+                case BS_LEFT:
+                case BS_RIGHT:
                 case MINUS:
-                    if (typeof(NumExpr).Equals(lhs.GetType()) && typeof(NumExpr).Equals(rhs.GetType()))
-                    {
-                        double a = ((NumExpr)lhs).Value;
-                        double b = ((NumExpr)rhs).Value;
-
-                        return new NumExpr(a - b);
-                    }
-                    break;
                 case MUL:
-                    if (typeof(NumExpr).Equals(lhs.GetType()) && typeof(NumExpr).Equals(rhs.GetType()))
-                    {
-                        double a = ((NumExpr)lhs).Value;
-                        double b = ((NumExpr)rhs).Value;
-
-                        return new NumExpr(a * b);
-                    }
-                    break;
                 case DIV:
-                    if (typeof(NumExpr).Equals(lhs.GetType()) && typeof(NumExpr).Equals(rhs.GetType()))
+                case PERCENT:
+                    if (expr.Lhs.GetType() != typeof(NumExpr)
+                       || expr.Rhs.GetType() != typeof(NumExpr))
                     {
-                        double a = ((NumExpr)lhs).Value;
-                        double b = ((NumExpr)rhs).Value;
-
-                        return new NumExpr(a / b);
+                        throw new PenguorException(1, 1); //TODO: proper error handling
                     }
                     break;
-            }
-            return new BinaryExpr(lhs, expr.Op, rhs);
+                // verify that both lhs and rhs are numbers or strings
+                case PLUS:
+                    if (!((expr.Lhs.GetType() == typeof(NumExpr)
+                        && expr.Rhs.GetType() == typeof(NumExpr))
+                        || (expr.Lhs.GetType() == typeof(StringExpr)
+                        && expr.Rhs.GetType() == typeof(StringExpr))))
+                    {
+                        throw new PenguorException(1, 1); //TODO: proper error handling
+                    }
+                    break;
+                default:
+                    throw new PenguorCSException(1);
+            }*/
+            return expr;
         }
 
-        public Expr Visit(BooleanExpr expr) => expr;
+        public Expr Visit(BooleanExpr expr)
+        {
+            throw new System.NotImplementedException();
+
+        }
 
         public Expr Visit(CallExpr expr)
         {
@@ -287,15 +245,17 @@ namespace Penguor.Compiler.Analysis
             throw new System.NotImplementedException();
         }
 
-        public object Visit(FunctionCall call)
+        public Call Visit(FunctionCall call)
         {
             throw new System.NotImplementedException();
         }
 
-        public object Visit(IdfCall call)
+        public Call Visit(IdfCall call)
         {
             state.Push(call.Name.token);
-            return call.Name;
+            // return call.Name;
+            throw new System.NotImplementedException();
+
         }
     }
 }

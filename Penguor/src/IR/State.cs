@@ -44,7 +44,7 @@ namespace Penguor.Compiler
         /// <param name="frames"></param>
         public State(AddressFrame[] frames)
         {
-            frames[frames.Length - 1].IsLastItem = true;
+            frames[^1].IsLastItem = true;
             addressFrames = frames;
         }
 
@@ -57,7 +57,7 @@ namespace Penguor.Compiler
             List<AddressFrame> frames = new List<AddressFrame>(call.Callee.Count);
             for (int i = 0; i < call.Callee.Count; i++)
             {
-                bool isLast = (i == call.Callee.Count - 1);
+                bool isLast = i == call.Callee.Count - 1;
                 Call c = call.Callee[i];
                 frames.Add(c switch
                 {
@@ -68,6 +68,17 @@ namespace Penguor.Compiler
             }
 
             return new State(frames.ToArray());
+        }
+
+        /// <summary>
+        /// create a State from a Stack
+        /// </summary>
+        /// <param name="stack">the Stack to create the state from</param>
+        public static State FromStack(Stack<AddressFrame> stack)
+        {
+            var frames = stack.ToArray();
+            Array.Reverse(frames);
+            return new State(frames);
         }
 
         /// <summary>
@@ -91,9 +102,37 @@ namespace Penguor.Compiler
         public void CopyTo(Array array, int index) => addressFrames.CopyTo(array, index);
 
         /// <summary>
-        /// 
+        /// check for equality of two states
         /// </summary>
-        /// <value></value>
+        /// <param name="obj">the object to compare the State to</param>
+        public override bool Equals(object? obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            var state = (State)obj;
+            for (int i = 0; i < addressFrames.Length; i++)
+            {
+                if (!(addressFrames[i].Symbol.token == state[i].Symbol.token)) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// generate a hash code for this instance of State
+        /// </summary>
+        public override int GetHashCode()
+        {
+            var hashCode = 25937216;
+            hashCode *= -28674107 + addressFrames.GetHashCode();
+            return hashCode;
+        }
+
+        /// <summary>
+        /// returns the AddressFrame at the index i
+        /// </summary>
         public AddressFrame this[int i]
         {
             get => addressFrames[i];

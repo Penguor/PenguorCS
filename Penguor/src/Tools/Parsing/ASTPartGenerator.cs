@@ -13,7 +13,6 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.Tools
 {
-    //! improve code, currently terrible
     internal class ASTPartGenerator
     {
         private StreamReader? reader;
@@ -228,7 +227,7 @@ namespace Penguor.Compiler.Parsing.AST
         private void Advance()
         {
             if (reader != null) current = (char)reader.Read();
-            else throw new System.NullReferenceException();
+            else throw new NullReferenceException();
         }
     }
 }

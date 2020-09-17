@@ -15,7 +15,7 @@ using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler.IR
 {
-    public class IRDecl
+    public class IRDecl : IRStruct
     {
         public List<IRDecl> Structures { get; set; }
 

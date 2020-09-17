@@ -22,9 +22,9 @@ namespace Penguor.Compiler.Lexing
     /// </summary>
     public class Lexer
     {
-        private Builder builder; // the builder who is holding the Lexer
+        private readonly Builder builder; // the builder which is holding the Lexer
 
-        private string source; // the source code
+        private readonly string source; // the source code
         private List<Token> tokens; // the list containing the tokens from the source file
 
         private int current = 0; // the location in the source code
@@ -151,7 +151,6 @@ namespace Penguor.Compiler.Lexing
                         default:
                             // if none of the keywords is matched, the Token is an identifier
                             AddToken(TokenType.IDF, idf);
-                            builder.TableManager.AddSymbol(idf);
                             continue;
                     }
                 }

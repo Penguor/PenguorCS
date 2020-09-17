@@ -28,6 +28,13 @@ namespace Penguor.Compiler.Build
     /// </summary>
     public static class BuildManager
     {
+        public static SymbolTableManager tableManager;
+
+        static BuildManager()
+        {
+            tableManager = new SymbolTableManager();
+        }
+
         /// <summary>
         /// automatically chooses whether to build a project or a file.
         /// </summary>
@@ -66,48 +73,11 @@ namespace Penguor.Compiler.Build
         public static void BuildProject(string project)
         {
             string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories);
-            Builder[] builders = new Builder[files.Length];
 
             for (int i = 0; i < files.Length; i++)
             {
-                // builders[i] = new Builder(files[i]);
-                builders[i].Parse();
-            }
-        }
-
-        /// <summary>
-        /// build a Penguor project
-        /// </summary>
-        /// <param name="project">the project file in the project root directory</param>
-        public static async void BuildProjectAsync(string project)
-        {
-            string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories);
-
-            int availableProcessors = Environment.ProcessorCount - 1;
-            uint activeThreads = 0;
-
-            Builder[] builders = new Builder[files.Length];
-            Task[] tasks = new Task[availableProcessors];
-
-            Stopwatch timeoutWatch = new Stopwatch();
-
-            for (int i = 0; i < files.Length; i++)
-            {
-                // builders[i] = new Builder(files[i]);
-
-                tasks[i] = builders[i].LexAsync();
-            }
-            for (int i = 0; i < files.Length; i++)
-            {
-                await tasks[i];
-            }
-            for (int i = 0; i < files.Length; i++)
-            {
-                timeoutWatch.Start();
-                while (activeThreads >= availableProcessors) ;
-
-                // Thread buildThread = new Thread(() => BuildFile(files[i]));
-                // buildThread.Start();
+                var builder = new Builder(ref tableManager, files[i]);
+                builder.Build();
             }
         }
 

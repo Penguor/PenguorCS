@@ -9,12 +9,8 @@
 */
 
 using System.Collections.Generic;
-using System.Collections;
 
-using Penguor.Compiler.Parsing;
-using Penguor.Compiler.Debugging;
-
-namespace Penguor.Compiler.Analysis
+namespace Penguor.Compiler
 {
     /// <summary>
     /// Manages all the symbol tables during a build, 
@@ -22,53 +18,51 @@ namespace Penguor.Compiler.Analysis
     /// </summary>
     public class SymbolTableManager
     {
-        private Dictionary<string, AddressFrame> table;
-        Hashtable hTable = new Hashtable();
+        private readonly Dictionary<State, SymbolTable> tables;
 
+        /// <summary>
+        /// initialize a new Instance of the SymbolTableManager class
+        /// </summary>
         public SymbolTableManager()
         {
-            table = new Dictionary<string, AddressFrame>();
+            tables = new Dictionary<State, SymbolTable>();
         }
 
-        public void AddSymbol(string name)
+        /// <summary>
+        /// add a symbol to a table
+        /// </summary>
+        /// <param name="scope">the scope where the Symbol occurs</param>
+        /// <param name="symbol">the Symbol to add</param>
+        public bool AddSymbol(State scope, Symbol symbol)
         {
-            table.Add(name, new AddressFrame());
-        }
-
-        public void AddDeclaration()
-        {
-            State address;
-        }
-
-        public void AddDeclaration(State address)
-        {
-            Dictionary<string, AddressFrame> tmp = table;
-            for (int i = 0; i < address.Count; i++)
+            if (tables.ContainsKey(scope))
             {
-                if (!address[i].IsLastItem)
-                {
-                    if (tmp.ContainsKey(address[i].Symbol.token))
-                    {
-                        tmp = address[i].Children;
-                    }
-                    else
-                    {
-                        tmp.Add(address[i].Symbol.token, address[i]);
-                        tmp = tmp[address[i].Symbol.token].Children;
-                    }
-                }
-                else
-                {
-                    if (tmp.ContainsKey(address[i].Symbol.token))
-                    {
-                        throw new PenguorException(1, address[i].Symbol.offset);
-                    }
-                    else
-                    {
-                        tmp.Add(address[i].Symbol.token, address[i]);
-                    }
-                }
+                tables[scope].Insert(symbol);
+                return true;
             }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Create a new SymbolTable for the specified scope
+        /// </summary>
+        /// <param name="scope">the scope the SymbolTable will be used for</param>
+        public void AddTable(State scope)
+        {
+            tables.Add(scope, new SymbolTable(scope.Count));
+        }
+
+
+        /// <summary>
+        /// returns the AddressFrame described by the string a
+        /// </summary>
+        public SymbolTable this[State a]
+        {
+            get => tables[a];
+            set => tables[a] = value;
         }
     }
 }

@@ -21,6 +21,8 @@ namespace Penguor.Compiler.IR
 
         public IRFunction(State name, TokenType? accessMod, TokenType[] nonAccessMod, State[] signature) : base(name)
         {
+            AccessMod = accessMod;
+            NonAccessMod = nonAccessMod;
             Signature = signature;
         }
     }

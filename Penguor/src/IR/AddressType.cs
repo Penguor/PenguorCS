@@ -15,7 +15,7 @@ namespace Penguor.Compiler
     public enum AddressType
     {
         // LibraryDecl refers to the last AddressFrame of a LibraryDecl, while a LibraryDeclPart is part of a LibraryDecl, but not a last one
-        LibraryDecl, LibraryDeclPart,
+        LibraryDecl,
         SystemDecl, DataDecl, TypeDecl,
         FunctionDecl,
         VarDecl,

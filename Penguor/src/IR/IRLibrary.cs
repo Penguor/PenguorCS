@@ -18,6 +18,8 @@ namespace Penguor.Compiler.IR
         public TokenType[] NonAccessMod { get; }
         public IRLibrary(State name, TokenType? accessMod, TokenType[] nonAccessMod) : base(name)
         {
+            AccessMod = accessMod;
+            NonAccessMod = nonAccessMod;
         }
     }
 }

@@ -18,10 +18,7 @@ using Penguor.Compiler.Lexing;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Analysis;
-using Penguor.Compiler.IR;
 using Penguor.Compiler.Transpiling;
-
-using IOFile = System.IO.File;
 
 namespace Penguor.Compiler.Build
 {
@@ -71,7 +68,7 @@ namespace Penguor.Compiler.Build
         /// <param name="file">the source file to compile</param>
         public Builder(ref SymbolTableManager tableManager, string file)
         {
-            this.TableManager = tableManager;
+            TableManager = tableManager;
             Exceptions = new List<PenguorException>();
             try
             {
@@ -163,9 +160,9 @@ namespace Penguor.Compiler.Build
             if (!parserFinished) Parse();
 
             DeclDiscover declDiscover = new DeclDiscover(program ?? throw new ArgumentNullException());
-            declDiscover.Discover(ref tableManager);
+            declDiscover.Discover(TableManager);
 
-            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(), ref tableManager);
+            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(), TableManager);
 
             Decl analysed = analyser.Analyse();
         }
