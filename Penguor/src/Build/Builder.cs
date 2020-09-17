@@ -159,12 +159,9 @@ namespace Penguor.Compiler.Build
             if (!lexerFinished) Lex();
             if (!parserFinished) Parse();
 
-            DeclDiscover declDiscover = new DeclDiscover(program ?? throw new ArgumentNullException());
-            declDiscover.Discover(TableManager);
+            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException());
 
-            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(), TableManager);
-
-            Decl analysed = analyser.Analyse();
+            // Decl analysed = analyser.Analyse();
         }
 
         /// <summary>

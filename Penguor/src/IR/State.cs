@@ -44,7 +44,6 @@ namespace Penguor.Compiler
         /// <param name="frames"></param>
         public State(AddressFrame[] frames)
         {
-            frames[^1].IsLastItem = true;
             addressFrames = frames;
         }
 
@@ -61,8 +60,8 @@ namespace Penguor.Compiler
                 Call c = call.Callee[i];
                 frames.Add(c switch
                 {
-                    IdfCall a => new AddressFrame(a.Name, AddressType.Call, isLast),
-                    FunctionCall a => new AddressFrame(a.Name, AddressType.Call, isLast),
+                    IdfCall a => new AddressFrame(a.Name.token, AddressType.Call),
+                    FunctionCall a => new AddressFrame(a.Name.token, AddressType.Call),
                     _ => throw new ArgumentException()
                 });
             }
@@ -115,7 +114,7 @@ namespace Penguor.Compiler
             var state = (State)obj;
             for (int i = 0; i < addressFrames.Length; i++)
             {
-                if (!(addressFrames[i].Symbol.token == state[i].Symbol.token)) return false;
+                if (!(addressFrames[i].Symbol == state[i].Symbol)) return false;
             }
             return true;
         }
