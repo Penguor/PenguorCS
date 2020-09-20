@@ -200,7 +200,7 @@ namespace Penguor.Compiler.Lexing
                     case '/':
                         if (Match('/'))
                         {
-                            while (!Match('\n') && current < (source.Length)) Advance();
+                            while (!Match('\n') && current < source.Length) Advance();
                         }
                         else if (Match('*'))
                         {
