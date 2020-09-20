@@ -27,8 +27,8 @@ namespace Penguor.Compiler.Lexing
         private readonly string source; // the source code
         private List<Token> tokens; // the list containing the tokens from the source file
 
-        private int current = 0; // the location in the source code
-        private int offset = 0; // the offset where the token scanned atm began
+        private int current; // the location in the source code
+        private int offset; // the offset where the token scanned atm began
 
         /// <summary>
         /// creates a new instance of the Lexer class
@@ -200,7 +200,7 @@ namespace Penguor.Compiler.Lexing
                     case '/':
                         if (Match('/'))
                         {
-                            while (!Match('\n')) Advance();
+                            while (!Match('\n') && current < source.Length) Advance();
                         }
                         else if (Match('*'))
                         {

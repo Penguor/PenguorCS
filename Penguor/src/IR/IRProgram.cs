@@ -9,16 +9,17 @@
 */
 
 using System;
-using System.Collections.Generic;
-
-using Penguor.Compiler.Parsing.AST;
 
 namespace Penguor.Compiler.IR
 {
-    public class IRProgram : IRDecl
+    /// <summary>
+    /// the base of a program
+    /// </summary>
+    public record IRProgram : IRStruct
     {
-        public IRProgram() : base(new State(new AddressFrame[0]))
-        {
-        }
+        /// <summary>
+        /// Initialize a new instance of IRProgram
+        /// </summary>
+        public IRProgram() : base(new State(Array.Empty<AddressFrame>())) { }
     }
 }

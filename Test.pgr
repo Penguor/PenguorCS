@@ -1,42 +1,52 @@
-#safety 1
-
-
-library ShowPenguor
+public system Hello
 {
-    restricted dynamic system HelloWorld < Parent
+    void execute()
     {
-        public void execute(string t)
-        {
-            string a = ""; int b = 2
-            Call()
-            a = "Hello " + Test()
-            if(true || false) 
-            {
-                string a = ""
-                a += "no"
-            } 
-            elif(b & 1)
-            {
-                b |= .2
-                a += "why?"
-            }
-        }
-    }
-
-    /*/*nested block comments :) */*/
-
-    // containers are there to store data
-    data HelloData
-    {
-        string n1
-        string n2
-        string n3
-
-        public void HelloData()
-        {
-            n1 = a
-            n2 = "Frank"
-            n3 = "Anna"
-        }
+        print("Hello World")
     }
 }
+
+//#safety 1
+//
+//
+//library ShowPenguor
+//{
+//    restricted dynamic system HelloWorld < Parent
+//    {
+//        public string a;
+//
+//        public void execute(string t)
+//        {
+//            string a = ""; int b = 2
+//            Call()
+//            a = "Hello " + Test()
+//            if(true || false) 
+//            {
+//                string a = ""
+//                a += "no"
+//            } 
+//            elif(b & 1)
+//            {
+//                b |= .2
+//                a += "why?"
+//            }
+//        }
+//    }
+//
+//    /*/*nested block comments :) */*/
+//
+//    // containers are there to store data
+//    data HelloData
+//    {
+//        string n1
+//        string n2
+//        string n3
+//
+//        public void HelloData()
+//        {
+//            n1 = a
+//            n2 = "Frank"
+//            n3 = "Anna"
+//        }
+//    }
+//}  

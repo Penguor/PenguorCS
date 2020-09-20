@@ -41,7 +41,7 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(DataDecl decl)
         {
-            state.Push(decl.Name.token);
+            state.Push(decl.Name.Name);
             throw new System.NotImplementedException();
 
         }
@@ -69,8 +69,8 @@ namespace Penguor.Compiler.Analysis
         public Decl Visit(ProgramDecl decl)
         {
             foreach (var i in decl.Declarations) i.Accept(this);
-            throw new System.NotImplementedException();
 
+            return decl;
         }
 
         public Decl Visit(SystemDecl decl)
@@ -155,57 +155,7 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(BinaryExpr expr)
         {
-            //! this doesn't work properly
-            //! it should track return types as well
-            /*// verify that operations are applied
-            switch (expr.Op)
-            {
-                // verify that both lhs and rhs are boolean
-                case OR:
-                case XOR:
-                case AND:
-                case EQUALS:
-                case NEQUALS:
-                case LESS:
-                case GREATER:
-                case LESS_EQUALS:
-                case GREATER_EQUALS:
-                    if (expr.Lhs.GetType() != typeof(BooleanExpr)
-                       || expr.Rhs.GetType() != typeof(BooleanExpr))
-                    {
-                        throw new PenguorException(1, 1); //TODO: proper error handling
-                    }
-                    break;
-                // verify that both lhs and rhs are numbers
-                case BW_OR:
-                case BW_XOR:
-                case BW_AND:
-                case BS_LEFT:
-                case BS_RIGHT:
-                case MINUS:
-                case MUL:
-                case DIV:
-                case PERCENT:
-                    if (expr.Lhs.GetType() != typeof(NumExpr)
-                       || expr.Rhs.GetType() != typeof(NumExpr))
-                    {
-                        throw new PenguorException(1, 1); //TODO: proper error handling
-                    }
-                    break;
-                // verify that both lhs and rhs are numbers or strings
-                case PLUS:
-                    if (!((expr.Lhs.GetType() == typeof(NumExpr)
-                        && expr.Rhs.GetType() == typeof(NumExpr))
-                        || (expr.Lhs.GetType() == typeof(StringExpr)
-                        && expr.Rhs.GetType() == typeof(StringExpr))))
-                    {
-                        throw new PenguorException(1, 1); //TODO: proper error handling
-                    }
-                    break;
-                default:
-                    throw new PenguorCSException(1);
-            }*/
-            return expr;
+            throw new System.NotImplementedException();
         }
 
         public Expr Visit(BooleanExpr expr)
@@ -252,7 +202,7 @@ namespace Penguor.Compiler.Analysis
 
         public Call Visit(IdfCall call)
         {
-            state.Push(call.Name.token);
+            state.Push(call.Name.Name);
             // return call.Name;
             throw new System.NotImplementedException();
 

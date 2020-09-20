@@ -50,6 +50,7 @@ namespace Penguor.Compiler.Parsing
         public ProgramDecl Parse()
         {
             List<Decl> declarations = new List<Decl>();
+            AddTable();
             while (!Match(EOF)) declarations.Add(Declaration());
             return new ProgramDecl(declarations);
         }
@@ -62,37 +63,37 @@ namespace Penguor.Compiler.Parsing
 
             if (Match(PUBLIC, PRIVATE, PROTECTED, RESTRICTED))
             {
-                accessMod = GetPrevious().type;
+                accessMod = GetPrevious().Type;
                 hasAccessMod = true;
             }
             if (Check(STATIC) != Check(DYNAMIC))
             {
-                nonAccessMods[0] = Advance().type;
+                nonAccessMods[0] = Advance().Type;
                 hasAccessMod = true;
             }
             if (Check(ABSTRACT))
             {
-                nonAccessMods[1] = Advance().type;
+                nonAccessMods[1] = Advance().Type;
                 hasAccessMod = true;
             }
             if (Check(CONST))
             {
-                nonAccessMods[2] = Advance().type;
+                nonAccessMods[2] = Advance().Type;
                 hasAccessMod = true;
             }
 
             if (!hasAccessMod)
             {
                 if (Match(USING)) return UsingDecl();
-                if (Match(SYSTEM)) return SystemDecl(null, new TokenType[0]);
-                if (Match(DATA)) return DataDecl(null, new TokenType[0]);
-                if (Match(TYPE)) return TypeDecl(null, new TokenType[0]);
-                if (Match(LIBRARY)) return LibraryDecl(null, new TokenType[0]);
+                if (Match(SYSTEM)) return SystemDecl(null, Array.Empty<TokenType>());
+                if (Match(DATA)) return DataDecl(null, Array.Empty<TokenType>());
+                if (Match(TYPE)) return TypeDecl(null, Array.Empty<TokenType>());
+                if (Match(LIBRARY)) return LibraryDecl(null, Array.Empty<TokenType>());
                 if (Match(HASHTAG)) return new DeclStmt(CompilerStmt());
-                if (Check(IDF) && LookAhead(1).type == IDF && LookAhead(2).type == LPAREN)
-                    return FunctionDecl(null, new TokenType[0]);
-                else if (Check(IDF) && LookAhead(1).type == IDF) return VarDecl(null, new TokenType[0]);
-                if (!allowDeclStmt) throw new ParsingException(1, GetCurrent(), new TokenType[0]);
+                if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
+                    return FunctionDecl(null, Array.Empty<TokenType>());
+                else if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(null, Array.Empty<TokenType>());
+                if (!allowDeclStmt) throw new ParsingException(1, GetCurrent(), Array.Empty<TokenType>());
                 return DeclStmt();
             }
             else
@@ -101,9 +102,9 @@ namespace Penguor.Compiler.Parsing
                 if (Match(DATA)) return DataDecl(accessMod, nonAccessMods);
                 if (Match(TYPE)) return TypeDecl(accessMod, nonAccessMods);
                 if (Match(LIBRARY)) return LibraryDecl(accessMod, nonAccessMods);
-                if (Check(IDF) && LookAhead(1).type == IDF && LookAhead(2).type == LPAREN)
+                if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
                     return FunctionDecl(accessMod, nonAccessMods);
-                else if (Check(IDF) && LookAhead(1).type == IDF) return VarDecl(accessMod, nonAccessMods);
+                else if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(accessMod, nonAccessMods);
                 else return Error(DeclStmt, 1, GetCurrent(), SYSTEM, DATA, TYPE, LIBRARY, IDF);
             }
         }
@@ -119,7 +120,9 @@ namespace Penguor.Compiler.Parsing
         {
             Token name = Consume(IDF);
             CallExpr? parent = GetParent();
-            state.Push(new AddressFrame(name.token, AddressType.SystemDecl));
+            AddSymbol(name);
+            state.Push(new AddressFrame(name.Name, AddressType.SystemDecl));
+            AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
             return new SystemDecl(accessMod, nonAccessMods, name, parent, content);
@@ -129,7 +132,9 @@ namespace Penguor.Compiler.Parsing
         {
             Token name = Consume(IDF);
             CallExpr? parent = GetParent();
-            state.Push(new AddressFrame(name.token, AddressType.DataDecl));
+            AddSymbol(name);
+            state.Push(new AddressFrame(name.Name, AddressType.DataDecl));
+            AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
             return new DataDecl(accessMod, nonAccessMods, name, parent, content);
@@ -139,7 +144,9 @@ namespace Penguor.Compiler.Parsing
         {
             Token name = Consume(IDF);
             CallExpr? parent = GetParent();
-            state.Push(new AddressFrame(name.token, AddressType.TypeDecl));
+            AddSymbol(name);
+            state.Push(new AddressFrame(name.Name, AddressType.TypeDecl));
+            AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
             return new TypeDecl(accessMod, nonAccessMods, name, parent, content);
@@ -150,24 +157,36 @@ namespace Penguor.Compiler.Parsing
         private FunctionDecl FunctionDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
             var variable = VarExpr();
+            AddSymbol(variable.Name);
+            state.Push(new AddressFrame(variable.Name.Name, AddressType.FunctionDecl));
+            AddTable();
 
             Consume(LPAREN);
-            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, new List<VarExpr>(), DeclContent());
-            List<VarExpr> parameters = new List<VarExpr>();
-            while (true)
+            List<VarExpr> parameters = new();
+            if (!Match(RPAREN))
             {
-                parameters.Add(VarExpr());
-                if (Match(COMMA)) continue;
-                Consume(RPAREN);
-                break;
+                while (true)
+                {
+                    VarExpr var = VarExpr();
+                    AddSymbol(var.Name);
+                    parameters.Add(var);
+                    if (Match(COMMA)) continue;
+                    Consume(RPAREN);
+                    break;
+                }
             }
-            
-            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, DeclContent());
+
+            Decl content = DeclContent();
+
+            state.Pop();
+            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, content);
         }
 
         private VarDecl VarDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            VarDecl dec = new VarDecl(accessMod, nonAccessMods, VarExpr(), Match(ASSIGN) ? CondOrExpr() : null); //TODO: check this code 
+            var variable = VarExpr();
+            AddSymbol(variable.Name);
+            VarDecl dec = new VarDecl(accessMod, nonAccessMods, variable, Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
             return dec;
         }
@@ -179,8 +198,17 @@ namespace Penguor.Compiler.Parsing
                 Consume(IDF)
             };
             while (Match(DOT)) name.Add(Consume(IDF));
+            foreach (var i in name)
+            {
+                state.Push(new AddressFrame(i.Name, AddressType.LibraryDecl));
+            }
+            AddTable();
 
-            return new LibraryDecl(accessMod, nonAccessMods, name, BlockDecl());
+            var content = BlockDecl();
+
+            for (int i = name.Count; i > 0; i--) state.Pop();
+
+            return new LibraryDecl(accessMod, nonAccessMods, name, content);
         }
 
         // returns either a DeclStmt or a BlockDecl
@@ -207,7 +235,7 @@ namespace Penguor.Compiler.Parsing
         {
             if (Match(HASHTAG)) return CompilerStmt();
             if (Check(LBRACE)) return BlockStmt();
-            if (Check(IDF) && LookAhead(1).type == IDF) return VarStmt();
+            if (Check(IDF) && LookAhead(1).Type == IDF) return VarStmt();
             if (Match(IF)) return IfStmt();
             if (Match(WHILE)) return WhileStmt();
             if (Match(FOR)) return ForStmt();
@@ -221,20 +249,20 @@ namespace Penguor.Compiler.Parsing
         {
             Token[] val;
             Token dir = Advance();
-            switch (dir.type)
+            switch (dir.Type)
             {
                 case SAFETY:
                     val = new Token[1];
                     val[0] = Consume(NUM);
-                    if (Convert.ToInt32(val[0].token) < 0 || Convert.ToInt32(val[0].token) > 2) Error(1, val[0], NUM);
+                    if (Convert.ToInt32(val[0].Name) < 0 || Convert.ToInt32(val[0].Name) > 2) Error(1, val[0], NUM);
                     break;
                 default:
-                    val = new Token[0];
+                    val = Array.Empty<Token>();
                     Error(8, dir, SAFETY);
                     break;
             }
             GetEnding();
-            return new CompilerStmt(dir.type, val);
+            return new CompilerStmt(dir.Type, val);
         }
 
         private BlockStmt BlockStmt()
@@ -248,8 +276,9 @@ namespace Penguor.Compiler.Parsing
 
         private VarStmt VarStmt()
         {
-            VarDecl variable = VarDecl(null, new TokenType[0]);
-            return new VarStmt(variable.Variable, variable.Init);
+            VarStmt stmt = new VarStmt(VarExpr(), Match(ASSIGN) ? CondOrExpr() : null);
+            GetEnding();
+            return stmt;
         }
 
         private IfStmt IfStmt()
@@ -333,7 +362,7 @@ namespace Penguor.Compiler.Parsing
         private CaseStmt CaseStmt()
         {
             Expr? condition;
-            if (GetPrevious().type == CASE)
+            if (GetPrevious().Type == CASE)
             {
                 Consume(LPAREN);
                 condition = VarExpr();
@@ -393,52 +422,52 @@ namespace Penguor.Compiler.Parsing
                       BW_OR_ASSIGN,
                       BW_XOR_ASSIGN))
             {
-                return new AssignExpr(lhs, GetPrevious().type, CondOrExpr());
+                return new AssignExpr(lhs, GetPrevious().Type, CondOrExpr());
             }
 
             return lhs;
         }
 
-        private Expr CondOrExpr() => Check(OR, 1) ? new BinaryExpr(CondXorExpr(), Consume(OR).type, CondOrExpr()) : CondXorExpr();
-        private Expr CondXorExpr() => Check(XOR, 1) ? new BinaryExpr(CondAndExpr(), Consume(XOR).type, CondXorExpr()) : CondAndExpr();
-        private Expr CondAndExpr() => Check(AND, 1) ? new BinaryExpr(BWOrExpr(), Consume(AND).type, CondAndExpr()) : BWOrExpr();
+        private Expr CondOrExpr() => Check(OR, 1) ? new BinaryExpr(CondXorExpr(), Consume(OR).Type, CondOrExpr()) : CondXorExpr();
+        private Expr CondXorExpr() => Check(XOR, 1) ? new BinaryExpr(CondAndExpr(), Consume(XOR).Type, CondXorExpr()) : CondAndExpr();
+        private Expr CondAndExpr() => Check(AND, 1) ? new BinaryExpr(BWOrExpr(), Consume(AND).Type, CondAndExpr()) : BWOrExpr();
 
-        private Expr BWOrExpr() => Check(BW_OR, 1) ? new BinaryExpr(BWXorExpr(), Consume(BW_OR).type, BWOrExpr()) : BWXorExpr();
-        private Expr BWXorExpr() => Check(BW_XOR, 1) ? new BinaryExpr(BWAndExpr(), Consume(BW_XOR).type, BWXorExpr()) : BWAndExpr();
-        private Expr BWAndExpr() => Check(BW_AND, 1) ? new BinaryExpr(EqualityExpr(), Consume(BW_AND).type, BWAndExpr()) : EqualityExpr();
+        private Expr BWOrExpr() => Check(BW_OR, 1) ? new BinaryExpr(BWXorExpr(), Consume(BW_OR).Type, BWOrExpr()) : BWXorExpr();
+        private Expr BWXorExpr() => Check(BW_XOR, 1) ? new BinaryExpr(BWAndExpr(), Consume(BW_XOR).Type, BWXorExpr()) : BWAndExpr();
+        private Expr BWAndExpr() => Check(BW_AND, 1) ? new BinaryExpr(EqualityExpr(), Consume(BW_AND).Type, BWAndExpr()) : EqualityExpr();
 
         private Expr EqualityExpr()
         {
             Expr lhs = RelationExpr();
-            if (Match(EQUALS, NEQUALS)) return new BinaryExpr(lhs, GetPrevious().type, EqualityExpr());
+            if (Match(EQUALS, NEQUALS)) return new BinaryExpr(lhs, GetPrevious().Type, EqualityExpr());
             return lhs;
         }
 
         private Expr RelationExpr()
         {
             Expr lhs = AdditionExpr();
-            if (Match(LESS, GREATER, LESS_EQUALS, GREATER_EQUALS)) return new BinaryExpr(lhs, GetPrevious().type, RelationExpr());
+            if (Match(LESS, GREATER, LESS_EQUALS, GREATER_EQUALS)) return new BinaryExpr(lhs, GetPrevious().Type, RelationExpr());
             return lhs;
         }
 
         private Expr AdditionExpr()
         {
             Expr lhs = MultiplicationExpr();
-            if (Match(PLUS, MINUS)) return new BinaryExpr(lhs, GetPrevious().type, AdditionExpr());
+            if (Match(PLUS, MINUS)) return new BinaryExpr(lhs, GetPrevious().Type, AdditionExpr());
             return lhs;
         }
 
         private Expr MultiplicationExpr()
         {
             Expr lhs = UnaryExpr();
-            if (Match(MUL, DIV)) return new BinaryExpr(lhs, GetPrevious().type, MultiplicationExpr());
+            if (Match(MUL, DIV)) return new BinaryExpr(lhs, GetPrevious().Type, MultiplicationExpr());
             return lhs;
         }
 
         private Expr UnaryExpr()
         {
             TokenType? op = null;
-            if (Match(EXCL_MARK, PLUS, MINUS, BW_NOT, DPLUS, DMINUS)) op = GetPrevious().type;
+            if (Match(EXCL_MARK, PLUS, MINUS, BW_NOT, DPLUS, DMINUS)) op = GetPrevious().Type;
             if (Check(LPAREN)) return new UnaryExpr(op, GroupingExpr());
             return BaseExpr();
         }
@@ -448,8 +477,8 @@ namespace Penguor.Compiler.Parsing
             if (Match(TRUE)) return new BooleanExpr(true);
             if (Match(FALSE)) return new BooleanExpr(false);
             if (Match(NULL)) return new NullExpr();
-            if (Match(NUM)) return new NumExpr(Double.Parse(GetPrevious().token, System.Globalization.CultureInfo.InvariantCulture));
-            if (Match(STRING)) return new StringExpr(GetPrevious().token);
+            if (Match(NUM)) return new NumExpr(double.Parse(GetPrevious().Name, System.Globalization.CultureInfo.InvariantCulture));
+            if (Match(STRING)) return new StringExpr(GetPrevious().Name);
             return CallExpr();
         }
 
@@ -473,7 +502,7 @@ namespace Penguor.Compiler.Parsing
                 }
                 else if (Match(DPLUS, DMINUS, ARRAY))
                 {
-                    postfix = GetPrevious().type;
+                    postfix = GetPrevious().Type;
                 }
                 else
                 {
@@ -509,10 +538,15 @@ namespace Penguor.Compiler.Parsing
 
         private VarExpr VarExpr() => new VarExpr(CallExpr(), Consume(IDF));
 
-        private void AddSymbolToTable(Token token)
+        private void AddTable()
         {
-            bool succeeded = builder.TableManager.AddSymbol(State.FromStack(state), new Symbol(token.token));
-            if (!succeeded) throw new PenguorException(1, GetCurrent().offset);
+            builder.TableManager.AddTable(State.FromStack(state));
+        }
+
+        private void AddSymbol(Token token)
+        {
+            bool succeeded = builder.TableManager.AddSymbol(State.FromStack(state), new Symbol(token.Name));
+            if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
         }
 
         /// <summary>
@@ -543,7 +577,7 @@ namespace Penguor.Compiler.Parsing
             if (Check(type)) return Advance();
             Error(6, GetCurrent(), type);
             var tmp = Advance();
-            return new Token(type, "", tmp.offset, tmp.length);
+            return new Token(type, "", tmp.Offset, tmp.Length);
         }
 
         /// <summary>
@@ -557,8 +591,8 @@ namespace Penguor.Compiler.Parsing
         {
             int endings = 0;
             if (matchEnding)
-                while (LookAhead(endings).type == ENDING) endings++;
-            if (LookAhead(n + endings).type == type)
+                while (LookAhead(endings).Type == ENDING) endings++;
+            if (LookAhead(n + endings).Type == type)
             {
                 for (int i = 0; i < endings; i++)
                     Advance();
@@ -605,7 +639,7 @@ namespace Penguor.Compiler.Parsing
         /// <returns>true if the parser has reached the end of the file, otherwise false</returns>
         private bool AtEnd()
         {
-            return GetCurrent().type == EOF;
+            return GetCurrent().Type == EOF;
         }
 
         private bool GetEnding()

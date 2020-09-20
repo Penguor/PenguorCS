@@ -18,7 +18,6 @@ namespace Penguor.Compiler.Tools
     {
         public static string ToUppercase(this string input)
         {
-            if (string.IsNullOrEmpty(input)) throw new System.ArgumentNullException();
             char[] output = input.ToCharArray();
             output[0] = char.ToUpper(output[0]);
             return new string(output);

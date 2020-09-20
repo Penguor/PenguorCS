@@ -38,11 +38,11 @@ namespace Penguor.Compiler.Build
         /// <summary>
         /// has the lexer run?
         /// </summary>
-        public bool lexerFinished = false;
+        public bool lexerFinished;
         /// <summary>
         /// has the parser run?
         /// </summary>
-        public bool parserFinished = false;
+        public bool parserFinished;
 
         /// <summary>
         /// the source file this builder builds
@@ -159,7 +159,7 @@ namespace Penguor.Compiler.Build
             if (!lexerFinished) Lex();
             if (!parserFinished) Parse();
 
-            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException());
+            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(nameof(program)));
 
             // Decl analysed = analyser.Analyse();
         }
@@ -177,7 +177,7 @@ namespace Penguor.Compiler.Build
             switch (lang)
             {
                 case TranspileLanguage.CSHARP:
-                    CSharpTranspiler transpiler = new CSharpTranspiler((ProgramDecl)program);
+                    CSharpTranspiler transpiler = new CSharpTranspiler(program);
                     transpiler.Transpile(output);
                     break;
             }

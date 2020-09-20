@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Debugging
     /// </summary>
     internal static class Debug
     {
-        private static readonly CLogger cLogger;
         private static FLogger? fLogger;
 
         private static readonly Dictionary<uint, (LogLevel, string)> pgrcsMessages = new Dictionary<uint, (LogLevel, string)>
@@ -76,11 +75,6 @@ namespace Penguor.Compiler.Debugging
             {9, (LogLevel.Error, "Unexpected end of file")}
         };
 
-        static Debug()
-        {
-            cLogger = new CLogger();
-        }
-
         /// <summary>
         /// Log a single line of text with the given Log level
         /// </summary>
@@ -88,7 +82,7 @@ namespace Penguor.Compiler.Debugging
         /// <param name="logLevel">The loglevel</param>
         public static void Log(string logText, LogLevel logLevel)
         {
-            cLogger.Log(logText, logLevel);
+            CLogger.Log(logText, logLevel);
             fLogger?.Log(logText, logLevel);
         }
 

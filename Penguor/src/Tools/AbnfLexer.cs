@@ -33,8 +33,8 @@ namespace Penguor.Compiler.Tools.Lexer
 
     internal class AbnfLexer
     {
-        private int current = 0; // the location in the source code
-        private int offset = 0; // the offset where the token scanned atm began
+        private int current; // the location in the source code
+        private int offset; // the offset where the token scanned atm began
 
         private string source;
         readonly List<(AbnfToken, string, int)> tokens;

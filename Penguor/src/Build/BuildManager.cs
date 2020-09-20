@@ -28,7 +28,13 @@ namespace Penguor.Compiler.Build
     /// </summary>
     public static class BuildManager
     {
-        public static SymbolTableManager tableManager;
+        private static SymbolTableManager tableManager;
+
+        public static SymbolTableManager TableManager
+        {
+            get => tableManager;
+            set => tableManager = value;
+        }
 
         static BuildManager()
         {
@@ -98,9 +104,10 @@ namespace Penguor.Compiler.Build
         /// <param name="output">where to write the output file to</param>
         public static void TranspileProject(string project, string output)
         {
+            if (!Directory.Exists(project)) throw new DirectoryNotFoundException(); // throw an error if the project path doesn't exist
             Uri? basePath = new Uri(Path.GetDirectoryName(project)!);
 
-            foreach (string file in Directory.GetFiles(Path.GetDirectoryName(project), "*.pgr", SearchOption.AllDirectories))
+            foreach (string file in Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories))
             {
                 Uri relativeOut = basePath.MakeRelativeUri(new Uri(file));
                 string outputFile = Uri.UnescapeDataString(relativeOut.OriginalString);
