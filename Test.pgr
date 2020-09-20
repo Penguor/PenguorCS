@@ -5,6 +5,8 @@ library ShowPenguor
 {
     restricted dynamic system HelloWorld < Parent
     {
+        public string a;
+
         public void execute(string t)
         {
             string a = ""; int b = 2

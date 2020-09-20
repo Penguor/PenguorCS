@@ -15,7 +15,7 @@ namespace Penguor.Compiler.Parsing
     /// <summary>
     /// a Penguor token
     /// </summary>
-    public class Token
+    public record Token
     {
         /// <summary>
         /// the type of token
@@ -25,7 +25,7 @@ namespace Penguor.Compiler.Parsing
         /// <summary>
         /// the content
         /// </summary>
-        public string token { get; init; }
+        public string Name { get; init; }
 
         /// <summary>
         /// offset of the token
@@ -46,17 +46,15 @@ namespace Penguor.Compiler.Parsing
         public Token(TokenType type, string token, int offset, int length)
         {
             Type = type;
-            this.token = token;
+            Name = token;
             Offset = offset;
             Length = length;
         }
 
-        // public static implicit operator string(Token token) => token;
-
         /// <summary>
         /// returns the TokenType as string
         /// </summary>
-        public override string ToString() => ToString(Type);
+        public string ToTTypeString() => ToString(Type);
 
         /// <summary>
         /// returns <c>type</c> as string
@@ -142,7 +140,7 @@ namespace Penguor.Compiler.Parsing
             DEFAULT => "default",
             EOF => "end of file",
             RETURN => "return",
-            _ => throw new System.ArgumentException()
+            _ => throw new System.ArgumentException("this TokenType either doesn't exist or it wasn't added to the ToString() method yet", nameof(type))
         };
 
         /// <summary>
@@ -150,7 +148,7 @@ namespace Penguor.Compiler.Parsing
         /// </summary>
         public string ToPrettyString()
         {
-            return $"type: {Type}, token: {token}, offset: {Offset}, length: {Length}";
+            return $"type: {Type}, token: {Name}, offset: {Offset}, length: {Length}";
         }
     }
 }

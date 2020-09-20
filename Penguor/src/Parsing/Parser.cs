@@ -50,6 +50,7 @@ namespace Penguor.Compiler.Parsing
         public ProgramDecl Parse()
         {
             List<Decl> declarations = new List<Decl>();
+            AddTable();
             while (!Match(EOF)) declarations.Add(Declaration());
             return new ProgramDecl(declarations);
         }
@@ -84,15 +85,15 @@ namespace Penguor.Compiler.Parsing
             if (!hasAccessMod)
             {
                 if (Match(USING)) return UsingDecl();
-                if (Match(SYSTEM)) return SystemDecl(null, new TokenType[0]);
-                if (Match(DATA)) return DataDecl(null, new TokenType[0]);
-                if (Match(TYPE)) return TypeDecl(null, new TokenType[0]);
-                if (Match(LIBRARY)) return LibraryDecl(null, new TokenType[0]);
+                if (Match(SYSTEM)) return SystemDecl(null, Array.Empty<TokenType>());
+                if (Match(DATA)) return DataDecl(null, Array.Empty<TokenType>());
+                if (Match(TYPE)) return TypeDecl(null, Array.Empty<TokenType>());
+                if (Match(LIBRARY)) return LibraryDecl(null, Array.Empty<TokenType>());
                 if (Match(HASHTAG)) return new DeclStmt(CompilerStmt());
                 if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
-                    return FunctionDecl(null, new TokenType[0]);
-                else if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(null, new TokenType[0]);
-                if (!allowDeclStmt) throw new ParsingException(1, GetCurrent(), new TokenType[0]);
+                    return FunctionDecl(null, Array.Empty<TokenType>());
+                else if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(null, Array.Empty<TokenType>());
+                if (!allowDeclStmt) throw new ParsingException(1, GetCurrent(), Array.Empty<TokenType>());
                 return DeclStmt();
             }
             else
@@ -119,7 +120,9 @@ namespace Penguor.Compiler.Parsing
         {
             Token name = Consume(IDF);
             CallExpr? parent = GetParent();
-            state.Push(new AddressFrame(name.token, AddressType.SystemDecl));
+            AddSymbol(name);
+            state.Push(new AddressFrame(name.Name, AddressType.SystemDecl));
+            AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
             return new SystemDecl(accessMod, nonAccessMods, name, parent, content);
@@ -129,7 +132,9 @@ namespace Penguor.Compiler.Parsing
         {
             Token name = Consume(IDF);
             CallExpr? parent = GetParent();
-            state.Push(new AddressFrame(name.token, AddressType.DataDecl));
+            AddSymbol(name);
+            state.Push(new AddressFrame(name.Name, AddressType.DataDecl));
+            AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
             return new DataDecl(accessMod, nonAccessMods, name, parent, content);
@@ -139,7 +144,9 @@ namespace Penguor.Compiler.Parsing
         {
             Token name = Consume(IDF);
             CallExpr? parent = GetParent();
-            state.Push(new AddressFrame(name.token, AddressType.TypeDecl));
+            AddSymbol(name);
+            state.Push(new AddressFrame(name.Name, AddressType.TypeDecl));
+            AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
             return new TypeDecl(accessMod, nonAccessMods, name, parent, content);
@@ -150,24 +157,36 @@ namespace Penguor.Compiler.Parsing
         private FunctionDecl FunctionDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
             var variable = VarExpr();
+            AddSymbol(variable.Name);
+            state.Push(new AddressFrame(variable.Name.Name, AddressType.FunctionDecl));
+            AddTable();
 
             Consume(LPAREN);
-            if (Match(RPAREN)) return new FunctionDecl(accessMod, nonAccessMods, variable, new List<VarExpr>(), DeclContent());
-            List<VarExpr> parameters = new List<VarExpr>();
-            while (true)
+            List<VarExpr> parameters = new();
+            if (!Match(RPAREN))
             {
-                parameters.Add(VarExpr());
-                if (Match(COMMA)) continue;
-                Consume(RPAREN);
-                break;
+                while (true)
+                {
+                    VarExpr var = VarExpr();
+                    AddSymbol(var.Name);
+                    parameters.Add(var);
+                    if (Match(COMMA)) continue;
+                    Consume(RPAREN);
+                    break;
+                }
             }
-            
-            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, DeclContent());
+
+            Decl content = DeclContent();
+
+            state.Pop();
+            return new FunctionDecl(accessMod, nonAccessMods, variable, parameters, content);
         }
 
         private VarDecl VarDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            VarDecl dec = new VarDecl(accessMod, nonAccessMods, VarExpr(), Match(ASSIGN) ? CondOrExpr() : null); //TODO: check this code 
+            var variable = VarExpr();
+            AddSymbol(variable.Name);
+            VarDecl dec = new VarDecl(accessMod, nonAccessMods, variable, Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
             return dec;
         }
@@ -179,8 +198,17 @@ namespace Penguor.Compiler.Parsing
                 Consume(IDF)
             };
             while (Match(DOT)) name.Add(Consume(IDF));
+            foreach (var i in name)
+            {
+                state.Push(new AddressFrame(i.Name, AddressType.LibraryDecl));
+            }
+            AddTable();
 
-            return new LibraryDecl(accessMod, nonAccessMods, name, BlockDecl());
+            var content = BlockDecl();
+
+            for (int i = name.Count; i > 0; i--) state.Pop();
+
+            return new LibraryDecl(accessMod, nonAccessMods, name, content);
         }
 
         // returns either a DeclStmt or a BlockDecl
@@ -226,10 +254,10 @@ namespace Penguor.Compiler.Parsing
                 case SAFETY:
                     val = new Token[1];
                     val[0] = Consume(NUM);
-                    if (Convert.ToInt32(val[0].token) < 0 || Convert.ToInt32(val[0].token) > 2) Error(1, val[0], NUM);
+                    if (Convert.ToInt32(val[0].Name) < 0 || Convert.ToInt32(val[0].Name) > 2) Error(1, val[0], NUM);
                     break;
                 default:
-                    val = new Token[0];
+                    val = Array.Empty<Token>();
                     Error(8, dir, SAFETY);
                     break;
             }
@@ -248,8 +276,9 @@ namespace Penguor.Compiler.Parsing
 
         private VarStmt VarStmt()
         {
-            VarDecl variable = VarDecl(null, new TokenType[0]);
-            return new VarStmt(variable.Variable, variable.Init);
+            VarStmt stmt = new VarStmt(VarExpr(), Match(ASSIGN) ? CondOrExpr() : null);
+            GetEnding();
+            return stmt;
         }
 
         private IfStmt IfStmt()
@@ -448,8 +477,8 @@ namespace Penguor.Compiler.Parsing
             if (Match(TRUE)) return new BooleanExpr(true);
             if (Match(FALSE)) return new BooleanExpr(false);
             if (Match(NULL)) return new NullExpr();
-            if (Match(NUM)) return new NumExpr(Double.Parse(GetPrevious().token, System.Globalization.CultureInfo.InvariantCulture));
-            if (Match(STRING)) return new StringExpr(GetPrevious().token);
+            if (Match(NUM)) return new NumExpr(double.Parse(GetPrevious().Name, System.Globalization.CultureInfo.InvariantCulture));
+            if (Match(STRING)) return new StringExpr(GetPrevious().Name);
             return CallExpr();
         }
 
@@ -509,9 +538,14 @@ namespace Penguor.Compiler.Parsing
 
         private VarExpr VarExpr() => new VarExpr(CallExpr(), Consume(IDF));
 
-        private void AddSymbolToTable(Token token)
+        private void AddTable()
         {
-            bool succeeded = builder.TableManager.AddSymbol(State.FromStack(state), new Symbol(token.token));
+            builder.TableManager.AddTable(State.FromStack(state));
+        }
+
+        private void AddSymbol(Token token)
+        {
+            bool succeeded = builder.TableManager.AddSymbol(State.FromStack(state), new Symbol(token.Name));
             if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
         }
 

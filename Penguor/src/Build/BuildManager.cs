@@ -28,7 +28,13 @@ namespace Penguor.Compiler.Build
     /// </summary>
     public static class BuildManager
     {
-        public static SymbolTableManager tableManager;
+        private static SymbolTableManager tableManager;
+
+        public static SymbolTableManager TableManager
+        {
+            get => tableManager;
+            set => tableManager = value;
+        }
 
         static BuildManager()
         {

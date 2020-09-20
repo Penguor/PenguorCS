@@ -41,7 +41,7 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(DataDecl decl)
         {
-            state.Push(decl.Name.token);
+            state.Push(decl.Name.Name);
             throw new System.NotImplementedException();
 
         }
@@ -252,7 +252,7 @@ namespace Penguor.Compiler.Analysis
 
         public Call Visit(IdfCall call)
         {
-            state.Push(call.Name.token);
+            state.Push(call.Name.Name);
             // return call.Name;
             throw new System.NotImplementedException();
 

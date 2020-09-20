@@ -56,13 +56,12 @@ namespace Penguor.Compiler
             List<AddressFrame> frames = new List<AddressFrame>(call.Callee.Count);
             for (int i = 0; i < call.Callee.Count; i++)
             {
-                bool isLast = i == call.Callee.Count - 1;
                 Call c = call.Callee[i];
                 frames.Add(c switch
                 {
-                    IdfCall a => new AddressFrame(a.Name.token, AddressType.Call),
-                    FunctionCall a => new AddressFrame(a.Name.token, AddressType.Call),
-                    _ => throw new ArgumentException()
+                    IdfCall a => new AddressFrame(a.Name.Name, AddressType.Call),
+                    FunctionCall a => new AddressFrame(a.Name.Name, AddressType.Call),
+                    _ => throw new ArgumentException("this call is not known to the parser")
                 });
             }
 
@@ -125,7 +124,10 @@ namespace Penguor.Compiler
         public override int GetHashCode()
         {
             var hashCode = 25937216;
-            hashCode *= -28674107 + addressFrames.GetHashCode();
+            foreach (var i in addressFrames)
+            {
+                hashCode *= -28674107 + i.GetHashCode();
+            }
             return hashCode;
         }
 

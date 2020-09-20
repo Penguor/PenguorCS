@@ -39,17 +39,17 @@ namespace Penguor.Compiler.Transpiling
         }
         public string Visit(FunctionCall call)
         {
-            StringBuilder builder = new StringBuilder($"{call.Name.token}(");
+            StringBuilder builder = new StringBuilder($"{call.Name.Name}(");
 
             foreach (var arg in call.Args) builder.Append(arg.Accept(this)).Append(',');
             if (call.Args.Count > 0) builder.Length--;
 
-            builder.Append(")");
+            builder.Append(')');
 
             return builder.ToString();
         }
 
-        public string Visit(IdfCall call) => call.Name.token;
+        public string Visit(IdfCall call) => call.Name.Name;
 
         public string Visit(BlockDecl decl)
         {
@@ -110,7 +110,7 @@ namespace Penguor.Compiler.Transpiling
 
             foreach (var p in decl.Parameters!) builder.Append(p.Accept(this)).Append(',');
             if (decl.Parameters.Count > 0) builder.Length--;
-            builder.Append(")");
+            builder.Append(')');
 
             builder.Append(decl.Content.Accept(this));
 
@@ -259,7 +259,7 @@ namespace Penguor.Compiler.Transpiling
             _ => throw new PenguorCSException(1)
         } + expr.Rhs.Accept(this);
 
-        public string Visit(VarExpr expr) => $"{expr.Type.Accept(this)} {expr.Name.token}";
+        public string Visit(VarExpr expr) => $"{expr.Type.Accept(this)} {expr.Name.Name}";
 
         public string Visit(BlockStmt stmt)
         {
@@ -314,7 +314,7 @@ namespace Penguor.Compiler.Transpiling
 
         public string Visit(WhileStmt stmt) => $"while ({stmt.Condition.Accept(this)}) {stmt.Condition.Accept(this)}";
 
-        private string ConvertAccessMods(TokenType? type)
+        private static string ConvertAccessMods(TokenType? type)
         {
             if (type == null) return "";
             return type switch

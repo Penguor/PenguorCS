@@ -19,7 +19,7 @@ namespace Penguor.Compiler.Debugging
         public uint Msg { get; }
 
         /// <summary>
-        /// the offset where the error occured in the source file
+        /// the offset where the error occurred in the source file
         /// </summary>
         public int Offset { get; }
 
@@ -67,7 +67,7 @@ namespace Penguor.Compiler.Debugging
         /// </summary>
         public virtual void Log()
         {
-            Debug.CastPGR(Msg, Offset, sourceFile ?? throw new ArgumentNullException(), arg0, arg1, arg2, arg3);
+            Debug.CastPGR(Msg, Offset, SourceFile ?? throw new ArgumentNullException(), arg0, arg1, arg2, arg3);
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Penguor.Compiler.Debugging
         public virtual void Log(string file)
         {
             SourceFile = file;
-            Debug.CastPGR(Msg, Offset, sourceFile ?? throw new ArgumentNullException(), arg0, arg1, arg2, arg3);
+            Debug.CastPGR(Msg, Offset, SourceFile ?? throw new ArgumentNullException(nameof(file)), arg0, arg1, arg2, arg3);
         }
     }
 }
