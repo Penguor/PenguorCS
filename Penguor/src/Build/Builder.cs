@@ -159,9 +159,9 @@ namespace Penguor.Compiler.Build
             if (!lexerFinished) Lex();
             if (!parserFinished) Parse();
 
-            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(nameof(program)));
+            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(nameof(program)), this);
 
-            // Decl analysed = analyser.Analyse();
+            Decl analysed = analyser.Analyse();
         }
 
         /// <summary>

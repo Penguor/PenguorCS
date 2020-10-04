@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 
 using Penguor.Compiler.Parsing.AST;
+using Penguor.Compiler.Build;
 
 #pragma warning disable 1591
 
@@ -18,14 +19,20 @@ namespace Penguor.Compiler.Analysis
 {
     public class SemanticAnalyser : IDeclVisitor<Decl>, IStmtVisitor<Stmt>, IExprVisitor<Expr>, ICallVisitor<Call>
     {
+        private readonly Builder builder;
+
         private readonly ProgramDecl program;
 
-        private readonly Stack<string> state;
+        private readonly Dictionary<State, List<State>> usingDeclarations;
+        private readonly State state;
 
-        public SemanticAnalyser(ProgramDecl program)
+        public SemanticAnalyser(ProgramDecl program, Builder builder)
         {
             this.program = program;
-            state = new Stack<string>();
+            state = new();
+            this.builder = builder;
+
+            usingDeclarations = new();
         }
 
         public Decl Analyse()
@@ -41,9 +48,9 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(DataDecl decl)
         {
-            state.Push(decl.Name.Name);
-            throw new System.NotImplementedException();
+            if (decl.Parent != null) decl.Parent.Accept(this);
 
+            return decl;
         }
 
         public Decl Visit(TypeDecl decl)
@@ -69,7 +76,6 @@ namespace Penguor.Compiler.Analysis
         public Decl Visit(ProgramDecl decl)
         {
             foreach (var i in decl.Declarations) i.Accept(this);
-
             return decl;
         }
 
@@ -158,15 +164,12 @@ namespace Penguor.Compiler.Analysis
             throw new System.NotImplementedException();
         }
 
-        public Expr Visit(BooleanExpr expr)
-        {
-            throw new System.NotImplementedException();
-
-        }
+        public Expr Visit(BooleanExpr expr) => expr;
 
         public Expr Visit(CallExpr expr)
         {
             throw new System.NotImplementedException();
+            // builder.TableManager.FindSymbol(State.FromCall(expr), Symbol);
         }
 
         public Expr Visit(EOFExpr expr) => expr;
@@ -192,6 +195,8 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(VarExpr expr)
         {
+            expr.Type.Accept(this);
+
             throw new System.NotImplementedException();
         }
 
@@ -202,10 +207,7 @@ namespace Penguor.Compiler.Analysis
 
         public Call Visit(IdfCall call)
         {
-            state.Push(call.Name.Name);
-            // return call.Name;
             throw new System.NotImplementedException();
-
         }
     }
 }

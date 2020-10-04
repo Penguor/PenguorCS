@@ -56,11 +56,12 @@ namespace Penguor.Compiler
         /// </summary>
         /// <param name="name">the identifier to search for</param>
         /// <param name="symbol">the variable into which the result is copied to</param>
-        public void Lookup(string name, out Symbol symbol)
+        public bool Lookup(string name, out Symbol? symbol)
         {
-            Symbols.TryGetValue(name, out Symbol? outSymbol);
+            bool succeeded = Symbols.TryGetValue(name, out Symbol? outSymbol);
 
-            symbol = outSymbol ?? throw new PenguorCSException(1);
+            symbol = outSymbol;
+            return succeeded;
         }
     }
 }

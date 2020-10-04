@@ -27,7 +27,7 @@ namespace Penguor.Compiler.Parsing
         private readonly List<Token> tokens;
         private int current; // the position of the current token in the tokens list
 
-        private readonly Stack<AddressFrame> state;
+        private readonly State state;
 
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Penguor.Compiler.Parsing
             this.builder = builder;
             this.tokens = tokens;
 
-            state = new Stack<AddressFrame>();
+            state = new State();
         }
 
         /// <summary>
@@ -540,12 +540,12 @@ namespace Penguor.Compiler.Parsing
 
         private void AddTable()
         {
-            builder.TableManager.AddTable(State.FromStack(state));
+            builder.TableManager.AddTable(state);
         }
 
         private void AddSymbol(Token token)
         {
-            bool succeeded = builder.TableManager.AddSymbol(State.FromStack(state), new Symbol(token.Name));
+            bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(token.Name));
             if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
         }
 

@@ -21,22 +21,39 @@ namespace Penguor.Compiler
     /// </summary>
     public class State : IEnumerable<AddressFrame>, ICollection
     {
-        private readonly AddressFrame[] addressFrames;
+        private readonly List<AddressFrame> addressFrames;
 
         /// <summary>
         /// the amount of <c>AddressFrame</c>s the <c>State</c> consists of
         /// </summary>
-        public int Count => addressFrames.Length;
+        public int Count => addressFrames.Count;
 
         /// <summary>
-        /// Gets a value indicating whether access to the AddressFrame is threadsafe
+        /// Gets a value indicating whether access to AddressFrame is threadsafe
         /// </summary>
-        public bool IsSynchronized => addressFrames.IsSynchronized;
+        public bool IsSynchronized => ((ICollection)addressFrames).IsSynchronized;
 
         /// <summary>
         /// 
         /// </summary>
-        public object SyncRoot => addressFrames.SyncRoot;
+        public object SyncRoot => ((ICollection)addressFrames).SyncRoot;
+
+        /// <summary>
+        /// create a new State without any content
+        /// </summary>
+        public State()
+        {
+            addressFrames = new List<AddressFrame>();
+        }
+
+        /// <summary>
+        /// create a new State from a List
+        /// </summary>
+        /// <param name="frames"></param>
+        public State(List<AddressFrame> frames)
+        {
+            addressFrames = frames;
+        }
 
         /// <summary>
         /// create a new State from a string array
@@ -44,7 +61,7 @@ namespace Penguor.Compiler
         /// <param name="frames"></param>
         public State(AddressFrame[] frames)
         {
-            addressFrames = frames;
+            addressFrames = new List<AddressFrame>(frames);
         }
 
         /// <summary>
@@ -83,7 +100,7 @@ namespace Penguor.Compiler
         /// Convert the <c>State</c> into an array
         /// </summary>
         /// <returns>the array this instance of <c>State</c> encapsulates</returns>
-        public AddressFrame[] ToArray() => addressFrames;
+        public AddressFrame[] ToArray() => addressFrames.ToArray();
 
         /// <summary>
         /// gets the Enumerator of the State
@@ -97,7 +114,28 @@ namespace Penguor.Compiler
         /// </summary>
         /// <param name="array"></param>
         /// <param name="index"></param>
-        public void CopyTo(Array array, int index) => addressFrames.CopyTo(array, index);
+        public void CopyTo(Array array, int index)
+        {
+            addressFrames.CopyTo((AddressFrame[])array, index);
+        }
+
+        public void Push(AddressFrame frame) => addressFrames.Add(frame);
+
+        /// <summary>
+        /// Pops an AddressFrame from the state
+        /// </summary>
+        /// <returns>the AddressFrame which was removed</returns>
+        /// <Exception cref="InvalidOperationException">Thrown when state is empty</Exception>
+        public AddressFrame Pop()
+        {
+            if (addressFrames.Count > 0)
+            {
+                var frame = addressFrames[^1];
+                addressFrames.RemoveAt(addressFrames.Count - 1);
+                return frame;
+            }
+            else throw new InvalidOperationException();
+        }
 
         /// <summary>
         /// check for equality of two states
@@ -111,7 +149,7 @@ namespace Penguor.Compiler
             }
 
             var state = (State)obj;
-            for (int i = 0; i < addressFrames.Length; i++)
+            for (int i = 0; i < addressFrames.Count; i++)
             {
                 if (!(addressFrames[i].Symbol == state[i].Symbol)) return false;
             }
