@@ -19,9 +19,9 @@ namespace Penguor.Compiler
     /// <summary>
     /// 
     /// </summary>
-    public class State : IEnumerable<AddressFrame>, ICollection
+    public class State : IEnumerable<AddressFrame>, ICollection, ICollection<AddressFrame>
     {
-        private readonly List<AddressFrame> addressFrames;
+        private List<AddressFrame> addressFrames;
 
         /// <summary>
         /// the amount of <c>AddressFrame</c>s the <c>State</c> consists of
@@ -37,6 +37,8 @@ namespace Penguor.Compiler
         /// 
         /// </summary>
         public object SyncRoot => ((ICollection)addressFrames).SyncRoot;
+
+        public bool IsReadOnly => ((ICollection<AddressFrame>)addressFrames).IsReadOnly;
 
         /// <summary>
         /// create a new State without any content
@@ -76,8 +78,8 @@ namespace Penguor.Compiler
                 Call c = call.Callee[i];
                 frames.Add(c switch
                 {
-                    IdfCall a => new AddressFrame(a.Name.Name, AddressType.Call),
-                    FunctionCall a => new AddressFrame(a.Name.Name, AddressType.Call),
+                    IdfCall a => a.Name,
+                    FunctionCall a => a.Name,
                     _ => throw new ArgumentException("this call is not known to the parser")
                 });
             }
@@ -137,6 +139,23 @@ namespace Penguor.Compiler
             else throw new InvalidOperationException();
         }
 
+        public static State operator +(State a, State b)
+        {
+            a.addressFrames.AddRange(b);
+            return a;
+        }
+
+        public static State operator -(State minuend, State subtrahend)
+        {
+            while (true)
+            {
+                if (subtrahend.Count == 0 || minuend.Count == 0) break;
+                else if (minuend[^1].Equals(subtrahend[^1])) minuend.Pop();
+                else break;
+            }
+            return minuend;
+        }
+
         /// <summary>
         /// check for equality of two states
         /// </summary>
@@ -168,6 +187,18 @@ namespace Penguor.Compiler
             }
             return hashCode;
         }
+        public void Append(IEnumerable<AddressFrame> item) => addressFrames.AddRange(item);
+
+        public void Add(AddressFrame item) => addressFrames.Add(item);
+
+        public void Clear() => addressFrames.Clear();
+
+        public bool Contains(AddressFrame item) => addressFrames.Contains(item);
+
+        public void CopyTo(AddressFrame[] array, int arrayIndex) => addressFrames.CopyTo(array, arrayIndex);
+
+        public bool Remove(AddressFrame item) => addressFrames.Remove(item);
+        public void Remove(State item) => addressFrames = (this - item).addressFrames;
 
         /// <summary>
         /// returns the AddressFrame at the index i

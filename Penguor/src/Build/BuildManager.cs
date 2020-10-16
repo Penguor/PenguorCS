@@ -10,16 +10,10 @@
 
 using System;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Penguor.Compiler.Parsing;
 
 using Stopwatch = System.Diagnostics.Stopwatch;
 
 using Penguor.Compiler.Debugging;
-using Penguor.Compiler.Transpiling;
-using Penguor.Compiler.Analysis;
 
 namespace Penguor.Compiler.Build
 {
@@ -45,9 +39,7 @@ namespace Penguor.Compiler.Build
         /// automatically chooses whether to build a project or a file.
         /// </summary>
         /// <param name="path">the file/project to build</param>
-        /// <param name="output">where to put output files</param>
-        /// <param name="transpile">should the program be transpiled?</param>
-        public static void SmartBuild(string path, string output, bool transpile = false)
+        public static void SmartBuild(string path)
         {
             SymbolTableManager manager = new SymbolTableManager();
             if ((File.GetAttributes(path) & FileAttributes.Directory) != 0)
@@ -61,19 +53,8 @@ namespace Penguor.Compiler.Build
             }
             if (!File.Exists(path)) throw new PenguorException(5, 0, path, path);
 
-            if (!transpile)
-            {
-                if (Path.GetExtension(path) == ".pgr") BuildFile(ref manager, path);
-                else if (Path.GetExtension(path) == ".pgrp") BuildProject(path);
-            }
-            else if (Path.GetExtension(path) == ".pgr")
-            {
-                TranspileFile(path, output);
-            }
-            else if (Path.GetExtension(path) == ".pgrp")
-            {
-                TranspileProject(path, output);
-            }
+            if (Path.GetExtension(path) == ".pgr") BuildFile(ref manager, path);
+            else if (Path.GetExtension(path) == ".pgrp") BuildProject(path);
         }
 
         public static void BuildProject(string project)
@@ -95,39 +76,6 @@ namespace Penguor.Compiler.Build
         {
             Builder builder = new Builder(ref manager, file);
             builder.Build();
-        }
-
-        /// <summary>
-        /// build a Penguor project
-        /// </summary>
-        /// <param name="project">the project file in the project root directory</param>
-        /// <param name="output">where to write the output file to</param>
-        public static void TranspileProject(string project, string output)
-        {
-            if (!Directory.Exists(project)) throw new DirectoryNotFoundException(); // throw an error if the project path doesn't exist
-            Uri? basePath = new Uri(Path.GetDirectoryName(project)!);
-
-            foreach (string file in Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories))
-            {
-                Uri relativeOut = basePath.MakeRelativeUri(new Uri(file));
-                string outputFile = Uri.UnescapeDataString(relativeOut.OriginalString);
-                Thread buildThread = new Thread(() => TranspileFile(file, outputFile));
-                buildThread.Start();
-            }
-        }
-
-        /// <summary>
-        ///  Transpile a Penguor file to C#
-        /// </summary>
-        /// <param name="file"></param>
-        /// <param name="output"></param>
-        public static void TranspileFile(string file, string output)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(output)!);
-
-            // Builder builder = new Builder(file);
-            // builder.Build();
-            // builder.Transpile(TranspileLanguage.CSHARP, output);
         }
 
         /// <summary>

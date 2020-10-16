@@ -70,6 +70,7 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(LibraryDecl decl)
         {
+            state.Append(decl.Name);
             throw new System.NotImplementedException();
         }
 

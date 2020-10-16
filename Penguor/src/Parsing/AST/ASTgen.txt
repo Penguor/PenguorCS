@@ -26,14 +26,14 @@ ExprStmt Expr expr
 ; Decl "Penguor\src\Parsing\AST\Declarations"
 ProgramDecl List<Decl> declarations
 UsingDecl CallExpr lib
-SystemDecl TokenType? accessMod TokenType[] nonAccessMod Token name CallExpr? parent BlockDecl content
-DataDecl TokenType? accessMod TokenType[] nonAccessMod Token name CallExpr? parent BlockDecl content
-TypeDecl TokenType? accessMod TokenType[] nonAccessMod Token name CallExpr? parent BlockDecl content
+SystemDecl TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
+DataDecl TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
+TypeDecl TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
 FunctionDecl TokenType? accessMod TokenType[] nonAccessMod VarExpr variable List<VarExpr> parameters Decl content
-LibraryDecl TokenType? accessMod TokenType[] nonAccessMod List<Token> name BlockDecl content
+LibraryDecl TokenType? accessMod TokenType[] nonAccessMod State name BlockDecl content
 VarDecl TokenType? accessMod TokenType[] nonAccessMod VarExpr variable Expr? init
 BlockDecl List<Decl> content
 DeclStmt Stmt stmt
 ; Call "Penguor\src\Parsing\AST\Calls"
-FunctionCall Token name List<Expr> args
-IdfCall Token name
+FunctionCall AddressFrame name List<Expr> args
+IdfCall AddressFrame name

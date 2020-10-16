@@ -118,10 +118,10 @@ namespace Penguor.Compiler.Parsing
 
         private SystemDecl SystemDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            Token name = Consume(IDF);
+            AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.SystemDecl);
             CallExpr? parent = GetParent();
             AddSymbol(name);
-            state.Push(new AddressFrame(name.Name, AddressType.SystemDecl));
+            state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
@@ -130,10 +130,10 @@ namespace Penguor.Compiler.Parsing
 
         private Decl DataDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            Token name = Consume(IDF);
+            AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.DataDecl);
             CallExpr? parent = GetParent();
             AddSymbol(name);
-            state.Push(new AddressFrame(name.Name, AddressType.DataDecl));
+            state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
@@ -142,10 +142,10 @@ namespace Penguor.Compiler.Parsing
 
         private Decl TypeDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            Token name = Consume(IDF);
+            AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.TypeDecl);
             CallExpr? parent = GetParent();
             AddSymbol(name);
-            state.Push(new AddressFrame(name.Name, AddressType.TypeDecl));
+            state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
@@ -193,22 +193,17 @@ namespace Penguor.Compiler.Parsing
 
         private LibraryDecl LibraryDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            List<Token> name = new List<Token>
-            {
-                Consume(IDF)
-            };
-            while (Match(DOT)) name.Add(Consume(IDF));
-            foreach (var i in name)
-            {
-                state.Push(new AddressFrame(i.Name, AddressType.LibraryDecl));
-            }
+            State name = new State { new AddressFrame(Consume(IDF).Name, AddressType.LibraryDecl) };
+            while (Match(DOT)) name.Add(new AddressFrame(Consume(IDF).Name, AddressType.LibraryDecl));
+            state.Append(name);
+
             AddTable();
 
             var content = BlockDecl();
 
-            for (int i = name.Count; i > 0; i--) state.Pop();
+            state.Remove(name);
 
-            return new LibraryDecl(accessMod, nonAccessMods, name, content);
+            return new LibraryDecl(accessMod, nonAccessMods, new State(), content);
         }
 
         // returns either a DeclStmt or a BlockDecl
@@ -492,12 +487,12 @@ namespace Penguor.Compiler.Parsing
                 Token idf = Consume(IDF);
                 if (Match(DOT))
                 {
-                    callee.Add(new IdfCall(idf));
+                    callee.Add(new IdfCall(new AddressFrame(idf.Name, AddressType.IdfCall)));
                     continue;
                 }
                 else if (Match(LPAREN))
                 {
-                    callee.Add(FunctionCall(idf));
+                    callee.Add(FunctionCall(new AddressFrame(idf.Name, AddressType.FunctionCall)));
                     if (Match(DOT)) continue;
                 }
                 else if (Match(DPLUS, DMINUS, ARRAY))
@@ -506,14 +501,14 @@ namespace Penguor.Compiler.Parsing
                 }
                 else
                 {
-                    callee.Add(new IdfCall(idf));
+                    callee.Add(new IdfCall(new AddressFrame(idf.Name, AddressType.IdfCall)));
                 }
                 break;
             }
 
             return new CallExpr(callee, postfix);
 
-            FunctionCall FunctionCall(Token name)
+            FunctionCall FunctionCall(AddressFrame name)
             {
                 List<Expr> args = new List<Expr>();
                 if (!Match(RPAREN)) args.Add(Expression());
@@ -546,6 +541,12 @@ namespace Penguor.Compiler.Parsing
         private void AddSymbol(Token token)
         {
             bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(token.Name));
+            if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
+        }
+
+        private void AddSymbol(AddressFrame frame)
+        {
+            bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(frame.Symbol));
             if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
         }
 

@@ -18,7 +18,6 @@ using Penguor.Compiler.Lexing;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Analysis;
-using Penguor.Compiler.Transpiling;
 
 namespace Penguor.Compiler.Build
 {
@@ -162,25 +161,6 @@ namespace Penguor.Compiler.Build
             SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(nameof(program)), this);
 
             Decl analysed = analyser.Analyse();
-        }
-
-        /// <summary>
-        /// transpiles a file to another language
-        /// </summary>
-        /// <param name="lang">the language to transpile to</param>
-        /// <param name="output">where to write the output file to</param>
-        public void Transpile(TranspileLanguage lang, string output)
-        {
-            if (!parserFinished) Parse();
-            if (program == null) throw new PenguorCSException(1);
-
-            switch (lang)
-            {
-                case TranspileLanguage.CSHARP:
-                    CSharpTranspiler transpiler = new CSharpTranspiler(program);
-                    transpiler.Transpile(output);
-                    break;
-            }
         }
 
         // Below this is the code for handling errors in the Penguor source code

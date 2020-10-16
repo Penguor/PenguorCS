@@ -34,12 +34,11 @@ namespace Penguor.Compiler
             var buildCommand = new Command("build", "compile a Penguor file or project");
             buildCommand.AddOption(new Option<string>(new string[] { "--input", "-i" }, "the file or project to build"));
             buildCommand.AddOption(new Option("--benchmark", "when this option is set, the build time will be benchmarked"));
-            buildCommand.AddOption(new Option<string>("--transpile", "transpile the input to the specified location"));
-            buildCommand.Handler = CommandHandler.Create<string, bool, string, string>(Build);
+            buildCommand.Handler = CommandHandler.Create<string, bool, string>(Build);
             rootCommand.AddCommand(buildCommand);
 
             // with debug builds, the tools command provides access to several developer tools
-#if (DEBUG)
+#if DEBUG
             var toolsCommand = new Command("tools", "tools for Penguor Compiler development");
 
             // generate the AST node files from a txt file
@@ -47,9 +46,9 @@ namespace Penguor.Compiler
             {
                 new Argument<string>("file", "the file to generate the AST files from")
             };
-            ASTGenTool.Handler = CommandHandler.Create<string, string>((string file, string log) =>
+            ASTGenTool.Handler = CommandHandler.Create((string file, string log) =>
             {
-                if (log != null) Debug.EnableFileLogger(log);
+                if (log is not null) Debug.EnableFileLogger(log);
                 new ASTPartGenerator().Generate(file);
             });
             toolsCommand.AddCommand(ASTGenTool);
@@ -59,13 +58,12 @@ namespace Penguor.Compiler
 
             return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
 
-            static void Build(string input, bool benchmark, string transpile, string log)
+            static void Build(string input, bool benchmark, string log)
             {
                 if (log != null) Debug.EnableFileLogger(log);
                 if (input == null) input = Environment.CurrentDirectory;
-                Console.WriteLine(transpile);
                 if (benchmark) BuildManager.Benchmark(input);
-                else BuildManager.SmartBuild(input, transpile ?? "", transpile != null);
+                else BuildManager.SmartBuild(input);
             }
         }
     }

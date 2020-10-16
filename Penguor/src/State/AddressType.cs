@@ -20,6 +20,6 @@ namespace Penguor.Compiler
         FunctionDecl,
         VarDecl,
 
-        Call
+        IdfCall, FunctionCall
     }
 }
