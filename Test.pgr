@@ -1,8 +1,12 @@
-public system Hello
+library Test
 {
-    void execute()
+    public system Hello
     {
-        print("Hello World")
+        void main()
+        {
+            string test;
+            print("Hello World")
+        }
     }
 }
 
