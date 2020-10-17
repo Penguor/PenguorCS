@@ -15,7 +15,7 @@ Work-in-progress documentation can soon be found [here](https://penguor.readthed
 
 The following code will show a "Hello World" program written in Penguor:
 
-```
+```Penguor
 public system Hello
 {
     void execute()
