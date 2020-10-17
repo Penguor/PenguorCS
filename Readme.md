@@ -1,10 +1,13 @@
 # PenguorCS
 
+![license](https://img.shields.io/github/license/Penguor/PenguorCS?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Penguor/PenguorCS/.NET%20Core?style=flat-square)
+
 This repository contains the source code of the PenguorCS compiler for the Penguor language.
 
 ## Overview
 
-Penguor is an in-development data-oriented language. Currently, it is in a `very` early stage and it does not have many features yet. The ultimate goal is to create a fast, feature-rich language optimized for games and other applications which need to handle lots of data.
+Penguor is an in-development data-oriented language. Currently, it is in a _very_ early stage and it does not have many features yet. The ultimate goal is to create a fast, feature-rich language optimized for games and other applications which need to handle lots of data.
 
 Work-in-progress documentation can soon be found [here](https://penguor.readthedocs.io/).
 
@@ -29,7 +32,7 @@ If you are new to programming language development and data-oriented languages, 
 - <http://craftinginterpreters.com/> An online book about compiler building.
 - <http://www.dataorienteddesign.com/site.php> A book about data-oriented design.
 
-If you want to contribute, make sure to join the community using one of following links.
+If you want to contribute check out [CONTRIBUTING](./CONTRIBUTING.md)
 
 ## Community
 
