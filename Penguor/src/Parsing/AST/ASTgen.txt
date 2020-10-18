@@ -6,10 +6,9 @@ CallExpr List<Call> callee TokenType? postfix
 BooleanExpr bool value
 NullExpr
 GroupingExpr Expr content
-VarExpr CallExpr type Token name
+VarExpr CallExpr type AddressFrame name
 NumExpr double value
 StringExpr string value
-EOFExpr
 ; Stmt "Penguor\src\Parsing\AST\Statements"
 CompilerStmt TokenType dir Token[] val
 BlockStmt List<Stmt> content

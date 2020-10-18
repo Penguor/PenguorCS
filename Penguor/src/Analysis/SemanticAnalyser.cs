@@ -23,7 +23,7 @@ namespace Penguor.Compiler.Analysis
 
         private readonly ProgramDecl program;
 
-        private readonly Dictionary<State, List<State>> usingDeclarations;
+        private readonly List<State> scopes;
         private readonly State state;
 
         public SemanticAnalyser(ProgramDecl program, Builder builder)
@@ -32,7 +32,7 @@ namespace Penguor.Compiler.Analysis
             state = new();
             this.builder = builder;
 
-            usingDeclarations = new();
+            scopes = new();
         }
 
         public Decl Analyse()
@@ -50,28 +50,47 @@ namespace Penguor.Compiler.Analysis
         {
             if (decl.Parent != null) decl.Parent.Accept(this);
 
+            state.Push(decl.Name);
+            decl.Content.Accept(this);
+            state.Pop();
+
             return decl;
         }
 
         public Decl Visit(TypeDecl decl)
         {
-            throw new System.NotImplementedException();
+            if (decl.Parent != null) decl.Parent.Accept(this);
+
+            state.Push(decl.Name);
+            decl.Content.Accept(this);
+            state.Pop();
+
+            return decl;
         }
 
         public Decl Visit(DeclStmt decl)
         {
-            throw new System.NotImplementedException();
+            decl.Stmt.Accept(this);
+            return decl;
         }
 
         public Decl Visit(FunctionDecl decl)
         {
-            throw new System.NotImplementedException();
+            decl.Variable.Accept(this);
+            foreach (var i in decl.Parameters) i.Accept(this);
+            state.Push(decl.Variable.Name);
+            decl.Content.Accept(this);
+            state.Pop();
+
+            return decl;
         }
 
         public Decl Visit(LibraryDecl decl)
         {
             state.Append(decl.Name);
-            throw new System.NotImplementedException();
+            decl.Content.Accept(this);
+            state.Remove(decl.Name);
+            return decl;
         }
 
         public Decl Visit(ProgramDecl decl)
@@ -82,22 +101,38 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(SystemDecl decl)
         {
-            throw new System.NotImplementedException();
+            if (decl.Parent != null) decl.Parent.Accept(this);
+
+            state.Push(decl.Name);
+            decl.Content.Accept(this);
+            state.Pop();
+
+            return decl;
         }
 
         public Decl Visit(UsingDecl decl)
         {
-            throw new System.NotImplementedException();
+            var call = State.FromCall(decl.Lib);
+            if (builder.TableManager.FindTable(call))
+                scopes.Add(call);
+            else throw new System.Exception();
+            return decl;
         }
 
         public Decl Visit(VarDecl decl)
         {
-            throw new System.NotImplementedException();
+            decl.Variable.Accept(this);
+            if (decl.Init is not null) decl.Init.Accept(this);
+            return decl;
         }
 
         public Stmt Visit(BlockStmt stmt)
         {
-            throw new System.NotImplementedException();
+            foreach (var i in stmt.Content)
+            {
+                i.Accept(this);
+            }
+            return stmt;
         }
 
         public Stmt Visit(CaseStmt stmt)
@@ -117,7 +152,12 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(ExprStmt stmt)
         {
-            throw new System.NotImplementedException();
+            if (stmt.Expr is AssignExpr || stmt.Expr is CallExpr)
+            {
+                stmt.Expr.Accept(this);
+                return stmt;
+            }
+            else throw new System.Exception();
         }
 
         public Stmt Visit(ForStmt stmt)
@@ -169,11 +209,9 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(CallExpr expr)
         {
-            throw new System.NotImplementedException();
-            // builder.TableManager.FindSymbol(State.FromCall(expr), Symbol);
+            if (!builder.TableManager.FindSymbol(State.FromCall(expr), state, scopes.ToArray())) throw new System.Exception();
+            return expr;
         }
-
-        public Expr Visit(EOFExpr expr) => expr;
 
         public Expr Visit(GroupingExpr expr) => new GroupingExpr(expr.Content.Accept(this));
 
@@ -197,18 +235,12 @@ namespace Penguor.Compiler.Analysis
         public Expr Visit(VarExpr expr)
         {
             expr.Type.Accept(this);
-
-            throw new System.NotImplementedException();
+            //TODO: sometimes the identifier may need to be added to the current table
+            return expr;
         }
 
-        public Call Visit(FunctionCall call)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Call Visit(FunctionCall call) => throw new System.NotImplementedException();
 
-        public Call Visit(IdfCall call)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Call Visit(IdfCall call) => throw new System.NotImplementedException();
     }
 }

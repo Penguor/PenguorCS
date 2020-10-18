@@ -33,7 +33,7 @@ namespace Penguor.Compiler
         /// </summary>
         /// <param name="scope">the scope where the Symbol occurs</param>
         /// <param name="symbol">the Symbol to add</param>
-        public bool AddSymbol(State scope, Symbol symbol)
+        public bool AddSymbol(State scope, AddressFrame symbol)
         {
 
             if (tables.ContainsKey(scope))
@@ -52,13 +52,13 @@ namespace Penguor.Compiler
         /// </summary>
         /// <param name="scope">the scope in which the symbol exists</param>
         /// <param name="symbol">the symbol to look for</param>
-        public Symbol LookupSymbolInScope(State scope, Symbol symbol)
+        public AddressFrame LookupSymbolInScope(State scope, AddressFrame symbol)
         {
             bool exists = tables.ContainsKey(scope);
             if (exists)
             {
-                exists = tables[scope].Lookup(symbol.Name, out Symbol? outSym);
-                return exists ? outSym! : throw new System.Exception();
+                exists = tables[scope].Lookup(symbol.Symbol, out AddressFrame? outSym);
+                return exists ? (outSym ?? throw new System.Exception()) : throw new System.Exception();
             }
             else throw new System.Exception();
         }
@@ -70,12 +70,12 @@ namespace Penguor.Compiler
         /// <param name="symbol">the symbol to look for</param>
         /// <param name="outSymbol">the Symbol to put the output to</param>
         /// <returns></returns>
-        public bool TryLookupSymbolInScope(State scope, Symbol symbol, out Symbol? outSymbol)
+        public bool TryLookupSymbolInScope(State scope, AddressFrame symbol, out AddressFrame? outSymbol)
         {
             bool exists = tables.ContainsKey(scope);
             if (exists)
             {
-                exists = tables[scope].Lookup(symbol.Name, out outSymbol);
+                exists = tables[scope].Lookup(symbol.Symbol, out outSymbol);
                 if (!exists) return false;
                 return true;
             }
@@ -83,7 +83,7 @@ namespace Penguor.Compiler
             return false;
         }
 
-        public bool FindSymbol(Symbol symbol, State scope)
+        public bool FindSymbol(AddressFrame symbol, State scope)
         {
             for (int i = scope.Count - 1; i >= 0; i--)
             {
@@ -92,10 +92,10 @@ namespace Penguor.Compiler
                 else if (scope[i].Type == AddressType.LibraryDecl) return false;
                 else scope.Pop();
             }
-            throw new System.Exception();
+            return false;
         }
 
-        public bool FindSymbol(Symbol symbol, params State[] scopes)
+        public bool FindSymbol(AddressFrame symbol, params State[] scopes)
         {
             bool found;
             foreach (var i in scopes)
@@ -105,6 +105,25 @@ namespace Penguor.Compiler
             }
             return false;
         }
+
+        public bool FindSymbol(State symbol, State scope) => FindSymbol(symbol.Pop(), scope + symbol);
+        public bool FindSymbol(State symbol, State currentScope, params State[] scopes)
+        {
+            var temp = new State(new List<AddressFrame>(currentScope));
+            var allScopes = new List<State>(scopes) { temp };
+            return FindSymbol(symbol, allScopes.ToArray());
+        }
+        public bool FindSymbol(State symbol, params State[] scopes)
+        {
+            var frame = symbol.Pop();
+            var allScopes = new List<State>(scopes)
+            {
+                symbol
+            };
+            return FindSymbol(frame, allScopes.ToArray());
+        }
+
+        public bool FindTable(State scope) => tables.ContainsKey(scope);
 
         /// <summary>
         /// Create a new SymbolTable for the specified scope

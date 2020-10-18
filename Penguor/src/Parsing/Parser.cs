@@ -156,9 +156,10 @@ namespace Penguor.Compiler.Parsing
 
         private FunctionDecl FunctionDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            var variable = VarExpr();
-            AddSymbol(variable.Name);
-            state.Push(new AddressFrame(variable.Name.Name, AddressType.FunctionDecl));
+            var variable = VarExpr(AddressType.FunctionDecl);
+            AddressFrame frame = variable.Name;
+            AddSymbol(frame);
+            state.Push(frame);
             AddTable();
 
             Consume(LPAREN);
@@ -167,7 +168,7 @@ namespace Penguor.Compiler.Parsing
             {
                 while (true)
                 {
-                    VarExpr var = VarExpr();
+                    VarExpr var = VarExpr(AddressType.VarExpr);
                     AddSymbol(var.Name);
                     parameters.Add(var);
                     if (Match(COMMA)) continue;
@@ -184,7 +185,7 @@ namespace Penguor.Compiler.Parsing
 
         private VarDecl VarDecl(TokenType? accessMod, TokenType[] nonAccessMods)
         {
-            var variable = VarExpr();
+            var variable = VarExpr(AddressType.VarDecl);
             AddSymbol(variable.Name);
             VarDecl dec = new VarDecl(accessMod, nonAccessMods, variable, Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
@@ -271,7 +272,7 @@ namespace Penguor.Compiler.Parsing
 
         private VarStmt VarStmt()
         {
-            VarStmt stmt = new VarStmt(VarExpr(), Match(ASSIGN) ? CondOrExpr() : null);
+            VarStmt stmt = new VarStmt(VarExpr(AddressType.VarStmt), Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
             return stmt;
         }
@@ -314,7 +315,7 @@ namespace Penguor.Compiler.Parsing
         private ForStmt ForStmt()
         {
             Consume(LPAREN);
-            Expr current = VarExpr();
+            Expr current = VarExpr(AddressType.VarExpr);
             Consume(COLON);
             Expr vars = CallExpr();
             Consume(RPAREN);
@@ -360,7 +361,7 @@ namespace Penguor.Compiler.Parsing
             if (GetPrevious().Type == CASE)
             {
                 Consume(LPAREN);
-                condition = VarExpr();
+                condition = VarExpr(AddressType.VarExpr);
                 Consume(RPAREN);
             }
             else
@@ -531,22 +532,16 @@ namespace Penguor.Compiler.Parsing
             return new GroupingExpr(expr);
         }
 
-        private VarExpr VarExpr() => new VarExpr(CallExpr(), Consume(IDF));
+        private VarExpr VarExpr(AddressType type) => new VarExpr(CallExpr(), new AddressFrame(Consume(IDF).Name, type));
 
         private void AddTable()
         {
             builder.TableManager.AddTable(state);
         }
 
-        private void AddSymbol(Token token)
-        {
-            bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(token.Name));
-            if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
-        }
-
         private void AddSymbol(AddressFrame frame)
         {
-            bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(frame.Symbol));
+            bool succeeded = builder.TableManager.AddSymbol(state, frame);
             if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
         }
 
@@ -623,11 +618,6 @@ namespace Penguor.Compiler.Parsing
         /// </summary>
         /// <returns>the current item in <c>tokens</c></returns>
         private Token GetCurrent() => LookAhead(0);
-        /// <summary>
-        /// <c>GetNext() </c> returns the next token without advancing.
-        /// </summary>
-        /// <returns>the next item in <c>tokens</c></returns>
-        private Token GetNext() => LookAhead(1);
         /// <summary>
         /// <c>GetNext() </c> returns the next token without advancing.
         /// </summary>

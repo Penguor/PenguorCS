@@ -11,7 +11,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
 using Penguor.Compiler.Parsing.AST;
 
 namespace Penguor.Compiler
@@ -111,15 +110,7 @@ namespace Penguor.Compiler
 
         IEnumerator IEnumerable.GetEnumerator() => addressFrames.GetEnumerator();
 
-        /// <summary>
-        /// Copy the State to an array
-        /// </summary>
-        /// <param name="array"></param>
-        /// <param name="index"></param>
-        public void CopyTo(Array array, int index)
-        {
-            addressFrames.CopyTo((AddressFrame[])array, index);
-        }
+        public void CopyTo(Array array, int index) => addressFrames.CopyTo((AddressFrame[])array, index);
 
         public void Push(AddressFrame frame) => addressFrames.Add(frame);
 

@@ -28,7 +28,7 @@ namespace Penguor.Compiler
         /// <summary>
         /// the dictionary containing the symbols
         /// </summary>
-        public Dictionary<string, Symbol> Symbols { get; init; }
+        public Dictionary<string, AddressFrame> Symbols { get; init; }
 
         /// <summary>
         /// initializes a new instance of the SymbolTable class
@@ -38,16 +38,16 @@ namespace Penguor.Compiler
         {
             Level = level;
 
-            Symbols = new Dictionary<string, Symbol>();
+            Symbols = new();
         }
 
         /// <summary>
         /// insert a new Symbol into the symbol table
         /// </summary>
         /// <param name="symbol">the symbol to insert into the table</param>
-        public void Insert(Symbol symbol)
+        public void Insert(AddressFrame symbol)
         {
-            bool succeeded = Symbols.TryAdd(symbol.Name, symbol);
+            bool succeeded = Symbols.TryAdd(symbol.Symbol, symbol);
             if (!succeeded) throw new PenguorCSException(1);
         }
 
@@ -56,9 +56,9 @@ namespace Penguor.Compiler
         /// </summary>
         /// <param name="name">the identifier to search for</param>
         /// <param name="symbol">the variable into which the result is copied to</param>
-        public bool Lookup(string name, out Symbol? symbol)
+        public bool Lookup(string name, out AddressFrame? symbol)
         {
-            bool succeeded = Symbols.TryGetValue(name, out Symbol? outSymbol);
+            bool succeeded = Symbols.TryGetValue(name, out AddressFrame? outSymbol);
 
             symbol = outSymbol;
             return succeeded;
