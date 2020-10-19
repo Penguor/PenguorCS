@@ -204,7 +204,7 @@ namespace Penguor.Compiler.Parsing
 
             state.Remove(name);
 
-            return new LibraryDecl(accessMod, nonAccessMods, new State(), content);
+            return new LibraryDecl(accessMod, nonAccessMods, name, content);
         }
 
         // returns either a DeclStmt or a BlockDecl

@@ -37,6 +37,7 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Analyse()
         {
+            scopes.Add(new State());
             return program.Accept(this);
         }
 
@@ -209,7 +210,8 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(CallExpr expr)
         {
-            if (!builder.TableManager.FindSymbol(State.FromCall(expr), state, scopes.ToArray())) throw new System.Exception();
+            var e = State.FromCall(expr);
+            if (!builder.TableManager.FindSymbol(e, state, scopes.ToArray())) throw new System.Exception();
             return expr;
         }
 

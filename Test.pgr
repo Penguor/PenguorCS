@@ -1,7 +1,15 @@
+public type void {}
+public type string {}
+
 library Test
 {
     public system Hello
     {
+        void print()
+        {
+            
+        }
+
         void main()
         {
             string test;

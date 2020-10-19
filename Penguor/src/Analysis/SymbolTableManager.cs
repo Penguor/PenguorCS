@@ -8,6 +8,7 @@
 # 
 */
 
+using System;
 using System.Collections.Generic;
 
 namespace Penguor.Compiler
@@ -85,6 +86,7 @@ namespace Penguor.Compiler
 
         public bool FindSymbol(AddressFrame symbol, State scope)
         {
+            if (scope.Count == 0) return TryLookupSymbolInScope(scope, symbol, out _);
             for (int i = scope.Count - 1; i >= 0; i--)
             {
                 bool found = TryLookupSymbolInScope(scope, symbol, out _);
@@ -109,8 +111,7 @@ namespace Penguor.Compiler
         public bool FindSymbol(State symbol, State scope) => FindSymbol(symbol.Pop(), scope + symbol);
         public bool FindSymbol(State symbol, State currentScope, params State[] scopes)
         {
-            var temp = new State(new List<AddressFrame>(currentScope));
-            var allScopes = new List<State>(scopes) { temp };
+            var allScopes = new List<State>(scopes) { currentScope };
             return FindSymbol(symbol, allScopes.ToArray());
         }
         public bool FindSymbol(State symbol, params State[] scopes)
@@ -131,7 +132,11 @@ namespace Penguor.Compiler
         /// <param name="scope">the scope the SymbolTable will be used for</param>
         public void AddTable(State scope)
         {
-            tables.Add(scope, new SymbolTable(scope.Count));
+            AddressFrame[] frames = new AddressFrame[scope.Count];
+            scope.CopyTo(frames, 0);
+            State newState = new State(frames);
+
+            tables.Add(newState, new SymbolTable(scope.Count));
         }
 
 
