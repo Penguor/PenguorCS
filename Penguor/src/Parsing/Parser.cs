@@ -327,9 +327,9 @@ namespace Penguor.Compiler.Parsing
         {
             int offset = GetPrevious().Offset;
             Consume(LPAREN);
-            Expr current = VarExpr(AddressType.VarExpr);
+            VarExpr current = VarExpr(AddressType.VarExpr);
             Consume(COLON);
-            Expr vars = CallExpr();
+            CallExpr vars = CallExpr();
             Consume(RPAREN);
 
             return new ForStmt(offset, current, vars, Statement());

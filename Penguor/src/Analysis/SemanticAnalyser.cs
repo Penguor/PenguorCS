@@ -141,10 +141,11 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(BlockStmt stmt)
         {
+            scopes[0].Push(new AddressFrame(".block", AddressType.BlockStmt));
+            builder.TableManager.AddTable(scopes[0]);
             foreach (var i in stmt.Content)
-            {
                 i.Accept(this);
-            }
+            scopes[0].Pop();
             return stmt;
         }
 
@@ -178,7 +179,14 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(ForStmt stmt)
         {
-            throw new System.NotImplementedException();
+            stmt.CurrentVar.Accept(this);
+            stmt.Vars.Accept(this);
+            scopes[0].Push(new AddressFrame(".for", AddressType.Control));
+            builder.TableManager.AddTable(scopes[0]);
+            AddVarExpr(stmt.CurrentVar);
+            stmt.Content.Accept(this);
+            scopes[0].Pop();
+            return stmt;
         }
 
         public Stmt Visit(IfStmt stmt)
@@ -193,7 +201,8 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(ReturnStmt stmt)
         {
-            throw new System.NotImplementedException();
+            stmt.Value?.Accept(this);
+            return stmt;
         }
 
         public Stmt Visit(SwitchStmt stmt)
@@ -203,7 +212,10 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(VarStmt stmt)
         {
-            throw new System.NotImplementedException();
+            stmt.Type.Accept(this);
+            builder.TableManager.AddSymbol(scopes[0], stmt.Name);
+            stmt.Init?.Accept(this);
+            return stmt;
         }
 
         public Stmt Visit(WhileStmt stmt)

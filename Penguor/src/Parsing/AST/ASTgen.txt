@@ -17,7 +17,7 @@ IfStmt Expr condition Stmt ifC List<Stmt> elif Stmt? elseC
 ElifStmt Expr condition Stmt content
 WhileStmt Expr condition Stmt content
 DoStmt Stmt content Expr condition
-ForStmt Expr currentVar Expr vars Stmt content
+ForStmt VarExpr currentVar CallExpr vars Stmt content
 SwitchStmt Expr condition List<Stmt> cases Stmt? defaultCase
 CaseStmt Expr? condition List<Stmt> content
 ReturnStmt Expr? value

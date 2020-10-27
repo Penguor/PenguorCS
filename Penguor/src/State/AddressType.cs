@@ -19,7 +19,8 @@ namespace Penguor.Compiler
         SystemDecl, DataDecl, TypeDecl,
         FunctionDecl,
         VarDecl, VarExpr, VarStmt,
-
+        BlockStmt,
+        Control,
         IdfCall, FunctionCall
     }
 }

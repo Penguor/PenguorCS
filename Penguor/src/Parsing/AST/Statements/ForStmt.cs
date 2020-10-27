@@ -21,7 +21,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of ForStmt
         /// </summary>
-        public ForStmt(int offset, Expr currentvar, Expr vars, Stmt content)
+        public ForStmt(int offset, VarExpr currentvar, CallExpr vars, Stmt content)
         {
             Offset = offset;
             CurrentVar = currentvar;
@@ -29,8 +29,8 @@ namespace Penguor.Compiler.Parsing.AST
             Content = content;
         }
         public int Offset { get; }
-        public Expr CurrentVar { get; }
-        public Expr Vars { get; }
+        public VarExpr CurrentVar { get; }
+        public CallExpr Vars { get; }
         public Stmt Content { get; }
 
         /// <summary>
