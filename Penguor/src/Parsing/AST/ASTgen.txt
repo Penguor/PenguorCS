@@ -12,7 +12,7 @@ StringExpr string value
 ; Stmt "Penguor\src\Parsing\AST\Statements"
 CompilerStmt TokenType dir Token[] val
 BlockStmt List<Stmt> content
-VarStmt Expr variable Expr? init
+VarStmt CallExpr type AddressFrame name Expr? init
 IfStmt Expr condition Stmt ifC List<Stmt> elif Stmt? elseC
 ElifStmt Expr condition Stmt content
 WhileStmt Expr condition Stmt content
@@ -28,9 +28,9 @@ UsingDecl CallExpr lib
 SystemDecl TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
 DataDecl TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
 TypeDecl TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
-FunctionDecl TokenType? accessMod TokenType[] nonAccessMod VarExpr variable List<VarExpr> parameters Decl content
+FunctionDecl TokenType? accessMod TokenType[] nonAccessMod CallExpr returns AddressFrame name List<VarExpr> parameters Decl content
 LibraryDecl TokenType? accessMod TokenType[] nonAccessMod State name BlockDecl content
-VarDecl TokenType? accessMod TokenType[] nonAccessMod VarExpr variable Expr? init
+VarDecl TokenType? accessMod TokenType[] nonAccessMod CallExpr type AddressFrame name Expr? init
 BlockDecl List<Decl> content
 DeclStmt Stmt stmt
 ; Call "Penguor\src\Parsing\AST\Calls"

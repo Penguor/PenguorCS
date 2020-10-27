@@ -21,14 +21,16 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of VarStmt
         /// </summary>
-        public VarStmt(int offset, Expr variable, Expr? init)
+        public VarStmt(int offset, CallExpr type, AddressFrame name, Expr? init)
         {
             Offset = offset;
-            Variable = variable;
+            Type = type;
+            Name = name;
             Init = init;
         }
         public int Offset { get; }
-        public Expr Variable { get; }
+        public CallExpr Type { get; }
+        public AddressFrame Name { get; }
         public Expr? Init { get; }
 
         /// <summary>

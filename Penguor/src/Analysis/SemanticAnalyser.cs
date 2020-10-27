@@ -41,6 +41,17 @@ namespace Penguor.Compiler.Analysis
             return program.Accept(this);
         }
 
+        private void AddVarExpr(VarExpr expr)
+        {
+            builder.TableManager.AddSymbol(scopes[0], expr.Name);
+        }
+
+        private void AddVarExpr(VarExpr[] expr)
+        {
+            foreach (var e in expr)
+                builder.TableManager.AddSymbol(scopes[0], e.Name);
+        }
+
         public Decl Visit(BlockDecl decl)
         {
             foreach (var i in decl.Content) i.Accept(this);
@@ -77,9 +88,10 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(FunctionDecl decl)
         {
-            decl.Variable.Accept(this);
+            decl.Returns.Accept(this);
             foreach (var i in decl.Parameters) i.Accept(this);
-            scopes[0].Push(decl.Variable.Name);
+            scopes[0].Push(decl.Name);
+            AddVarExpr(decl.Parameters.ToArray());
             decl.Content.Accept(this);
             scopes[0].Pop();
 
@@ -122,7 +134,7 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(VarDecl decl)
         {
-            decl.Variable.Accept(this);
+            decl.Type.Accept(this);
             if (decl.Init is not null) decl.Init.Accept(this);
             return decl;
         }
@@ -283,7 +295,6 @@ namespace Penguor.Compiler.Analysis
         public Expr Visit(VarExpr expr)
         {
             expr.Type.Accept(this);
-            //TODO: sometimes the identifier may need to be added to the current table
             return expr;
         }
 

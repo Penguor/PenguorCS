@@ -107,6 +107,11 @@ namespace Penguor.Compiler
 
         public void CopyTo(Array array, int index) => addressFrames.CopyTo((AddressFrame[])array, index);
 
+        /// <summary>
+        /// push a single AddressFrame onto the top of the state
+        /// equivalent to State.Add()
+        /// </summary>
+        /// <param name="frame">the frame to add to the state</param>
         public void Push(AddressFrame frame) => addressFrames.Add(frame);
 
         /// <summary>

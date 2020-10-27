@@ -162,9 +162,9 @@ namespace Penguor.Compiler.Parsing
         {
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.FunctionDecl);
-            AddressFrame frame = variable.Name;
-            AddSymbol(frame);
-            state.Push(frame);
+            AddressFrame name = variable.Name;
+            AddSymbol(name);
+            state.Push(name);
             AddTable();
 
             Consume(LPAREN);
@@ -185,7 +185,7 @@ namespace Penguor.Compiler.Parsing
             Decl content = DeclContent();
 
             state.Pop();
-            return new FunctionDecl(offset, accessMod, nonAccessMods, variable, parameters, content);
+            return new FunctionDecl(offset, accessMod, nonAccessMods, variable.Type, name, parameters, content);
         }
 
         private VarDecl VarDecl(TokenType? accessMod, TokenType[] nonAccessMods)
@@ -193,7 +193,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.VarDecl);
             AddSymbol(variable.Name);
-            VarDecl dec = new VarDecl(offset, accessMod, nonAccessMods, variable, Match(ASSIGN) ? CondOrExpr() : null);
+            VarDecl dec = new VarDecl(offset, accessMod, nonAccessMods, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
             return dec;
         }
@@ -279,7 +279,8 @@ namespace Penguor.Compiler.Parsing
 
         private VarStmt VarStmt()
         {
-            VarStmt stmt = new VarStmt(GetCurrent().Offset, VarExpr(AddressType.VarStmt), Match(ASSIGN) ? CondOrExpr() : null);
+            var variable = VarExpr(AddressType.VarStmt);
+            VarStmt stmt = new VarStmt(GetCurrent().Offset, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
             return stmt;
         }
@@ -373,15 +374,9 @@ namespace Penguor.Compiler.Parsing
             int offset = GetPrevious().Offset;
             Expr? condition;
             if (GetPrevious().Type == CASE)
-            {
-                Consume(LPAREN);
                 condition = VarExpr(AddressType.VarExpr);
-                Consume(RPAREN);
-            }
             else
-            {
                 condition = null;
-            }
 
             Consume(COLON);
 
@@ -607,7 +602,6 @@ namespace Penguor.Compiler.Parsing
         /// <param name="type">the type to compare the current token with</param>
         /// <param name="n">look up using lookAhead</param>
         /// <param name="matchEnding">should Endings be consumed</param>
-        /// <returns></returns>
         private bool Check(TokenType type, int n = 0, bool matchEnding = true)
         {
             int endings = 0;
