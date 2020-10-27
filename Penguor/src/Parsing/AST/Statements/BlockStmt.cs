@@ -21,10 +21,12 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of BlockStmt
         /// </summary>
-        public BlockStmt(List<Stmt> content)
+        public BlockStmt(int offset, List<Stmt> content)
         {
+            Offset = offset;
             Content = content;
         }
+        public int Offset { get; }
         public List<Stmt> Content { get; }
 
         /// <summary>

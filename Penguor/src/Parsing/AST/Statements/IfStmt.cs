@@ -21,13 +21,15 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of IfStmt
         /// </summary>
-        public IfStmt(Expr condition, Stmt ifc, List<Stmt> elif, Stmt? elsec)
+        public IfStmt(int offset, Expr condition, Stmt ifc, List<Stmt> elif, Stmt? elsec)
         {
+            Offset = offset;
             Condition = condition;
             IfC = ifc;
             Elif = elif;
             ElseC = elsec;
         }
+        public int Offset { get; }
         public Expr Condition { get; }
         public Stmt IfC { get; }
         public List<Stmt> Elif { get; }

@@ -21,12 +21,6 @@ namespace Penguor.Compiler
         public string Symbol { get; init; }
 
         /// <summary>
-        /// the data type of the object
-        /// the AddressFrame is pointing to
-        /// </summary>
-        public State? DataType { get; init; }
-
-        /// <summary>
         /// The type of address
         /// </summary>
         public AddressType Type { get; init; }
@@ -37,20 +31,8 @@ namespace Penguor.Compiler
         public AddressFrame(string symbol, AddressType type)
         {
             Symbol = symbol;
-            DataType = null;
             Type = type;
         }
-
-        /// <summary>
-        /// create a new instance of AddressFrame
-        /// </summary>
-        public AddressFrame(string symbol, AddressType type, State dataType)
-        {
-            Symbol = symbol;
-            DataType = dataType;
-            Type = type;
-        }
-
 
         /// <summary>
         /// returns <c>Symbol</c>

@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 
 using Penguor.Compiler.Parsing.AST;
+using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Build;
 
 #pragma warning disable 1591
@@ -24,12 +25,10 @@ namespace Penguor.Compiler.Analysis
         private readonly ProgramDecl program;
 
         private readonly List<State> scopes;
-        private readonly State state;
 
         public SemanticAnalyser(ProgramDecl program, Builder builder)
         {
             this.program = program;
-            state = new();
             this.builder = builder;
 
             scopes = new();
@@ -37,6 +36,7 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Analyse()
         {
+            scopes.Add(new State());
             scopes.Add(new State());
             return program.Accept(this);
         }
@@ -49,22 +49,22 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(DataDecl decl)
         {
-            if (decl.Parent != null) decl.Parent.Accept(this);
+            decl.Parent?.Accept(this);
 
-            state.Push(decl.Name);
+            scopes[0].Push(decl.Name);
             decl.Content.Accept(this);
-            state.Pop();
+            scopes[0].Pop();
 
             return decl;
         }
 
         public Decl Visit(TypeDecl decl)
         {
-            if (decl.Parent != null) decl.Parent.Accept(this);
+            decl.Parent?.Accept(this);
 
-            state.Push(decl.Name);
+            scopes[0].Push(decl.Name);
             decl.Content.Accept(this);
-            state.Pop();
+            scopes[0].Pop();
 
             return decl;
         }
@@ -79,18 +79,18 @@ namespace Penguor.Compiler.Analysis
         {
             decl.Variable.Accept(this);
             foreach (var i in decl.Parameters) i.Accept(this);
-            state.Push(decl.Variable.Name);
+            scopes[0].Push(decl.Variable.Name);
             decl.Content.Accept(this);
-            state.Pop();
+            scopes[0].Pop();
 
             return decl;
         }
 
         public Decl Visit(LibraryDecl decl)
         {
-            state.Append(decl.Name);
+            scopes[0].Append(decl.Name);
             decl.Content.Accept(this);
-            state.Remove(decl.Name);
+            scopes[0].Remove(decl.Name);
             return decl;
         }
 
@@ -102,11 +102,11 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(SystemDecl decl)
         {
-            if (decl.Parent != null) decl.Parent.Accept(this);
+            decl.Parent?.Accept(this);
 
-            state.Push(decl.Name);
+            scopes[0].Push(decl.Name);
             decl.Content.Accept(this);
-            state.Pop();
+            scopes[0].Pop();
 
             return decl;
         }
@@ -158,7 +158,10 @@ namespace Penguor.Compiler.Analysis
                 stmt.Expr.Accept(this);
                 return stmt;
             }
-            else throw new System.Exception();
+            else
+            {
+                throw new System.Exception();
+            }
         }
 
         public Stmt Visit(ForStmt stmt)
@@ -203,7 +206,52 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(BinaryExpr expr)
         {
-            throw new System.NotImplementedException();
+            var lhs = expr.Lhs.Accept(this);
+            var rhs = expr.Rhs.Accept(this);
+
+            if (expr.Op == TokenType.EQUALS)
+            {
+                { if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value == expr2.Value); }
+                { if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value == expr2.Value); }
+                { if (lhs is StringExpr expr1 && rhs is StringExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value == expr2.Value); }
+                { if (lhs is NullExpr && rhs is NullExpr) return new BooleanExpr(expr.Offset, true); }
+            }
+            else if (expr.Op == TokenType.NEQUALS)
+            {
+                { if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value != expr2.Value); }
+                { if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value != expr2.Value); }
+                { if (lhs is StringExpr expr1 && rhs is StringExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value != expr2.Value); }
+                { if (lhs is NullExpr && rhs is NullExpr) return new BooleanExpr(expr.Offset, false); }
+            }
+            else if (expr.Op == TokenType.LESS)
+            {
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value < expr2.Value);
+                if (lhs is BooleanExpr && rhs is BooleanExpr) throw new System.Exception();
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.GREATER)
+            {
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value > expr2.Value);
+                if (lhs is BooleanExpr && rhs is BooleanExpr) throw new System.Exception();
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.LESS_EQUALS)
+            {
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value <= expr2.Value);
+                if (lhs is BooleanExpr && rhs is BooleanExpr) throw new System.Exception();
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.GREATER_EQUALS)
+            {
+                if (lhs is BooleanExpr && rhs is BooleanExpr) throw new System.Exception();
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value >= expr2.Value);
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            return expr;
         }
 
         public Expr Visit(BooleanExpr expr) => expr;
@@ -211,11 +259,15 @@ namespace Penguor.Compiler.Analysis
         public Expr Visit(CallExpr expr)
         {
             var e = State.FromCall(expr);
-            if (!builder.TableManager.FindSymbol(e, state, scopes.ToArray())) throw new System.Exception();
+            if (!builder.TableManager.FindSymbol(e, scopes.ToArray())) throw new System.Exception();
             return expr;
         }
 
-        public Expr Visit(GroupingExpr expr) => new GroupingExpr(expr.Content.Accept(this));
+        public Expr Visit(GroupingExpr expr)
+        {
+            expr.Content.Accept(this);
+            return expr;
+        }
 
         public Expr Visit(NullExpr expr) => expr;
 
@@ -225,13 +277,7 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(UnaryExpr expr)
         {
-            Expr rhs = expr.Rhs.Accept(this);
-
-            return expr.Op switch
-            {
-                null => expr.Rhs.Accept(this),
-                _ => new UnaryExpr(expr.Op, rhs),
-            };
+            throw new System.NotImplementedException();
         }
 
         public Expr Visit(VarExpr expr)

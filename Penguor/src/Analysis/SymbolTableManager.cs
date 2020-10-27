@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler
 {
     /// <summary>
-    /// Manages all the symbol tables during a build, 
+    /// Manages all the symbol tables during a build,
     /// ensuring that analysis is only started once all symbol tables are available
     /// </summary>
     public class SymbolTableManager
@@ -36,7 +36,6 @@ namespace Penguor.Compiler
         /// <param name="symbol">the Symbol to add</param>
         public bool AddSymbol(State scope, AddressFrame symbol)
         {
-
             if (tables.ContainsKey(scope))
             {
                 tables[scope].Insert(symbol);
@@ -53,15 +52,18 @@ namespace Penguor.Compiler
         /// </summary>
         /// <param name="scope">the scope in which the symbol exists</param>
         /// <param name="symbol">the symbol to look for</param>
-        public AddressFrame LookupSymbolInScope(State scope, AddressFrame symbol)
+        public Symbol LookupSymbolInScope(State scope, AddressFrame symbol)
         {
             bool exists = tables.ContainsKey(scope);
             if (exists)
             {
-                exists = tables[scope].Lookup(symbol.Symbol, out AddressFrame? outSym);
-                return exists ? (outSym ?? throw new System.Exception()) : throw new System.Exception();
+                exists = tables[scope].Lookup(symbol.Symbol, out Symbol? outSym);
+                return exists ? (outSym ?? throw new Exception()) : throw new System.Exception();
             }
-            else throw new System.Exception();
+            else
+            {
+                throw new Exception();
+            }
         }
 
         /// <summary>
@@ -71,15 +73,11 @@ namespace Penguor.Compiler
         /// <param name="symbol">the symbol to look for</param>
         /// <param name="outSymbol">the Symbol to put the output to</param>
         /// <returns></returns>
-        public bool TryLookupSymbolInScope(State scope, AddressFrame symbol, out AddressFrame? outSymbol)
+        public bool TryLookupSymbolInScope(State scope, AddressFrame symbol, out Symbol? outSymbol)
         {
             bool exists = tables.ContainsKey(scope);
             if (exists)
-            {
-                exists = tables[scope].Lookup(symbol.Symbol, out outSymbol);
-                if (!exists) return false;
-                return true;
-            }
+                return tables[scope].Lookup(symbol.Symbol, out outSymbol);
             outSymbol = null;
             return false;
         }
@@ -97,7 +95,7 @@ namespace Penguor.Compiler
             return false;
         }
 
-        public bool FindSymbol(AddressFrame symbol, params State[] scopes)
+        public bool FindSymbol(AddressFrame symbol, State[] scopes)
         {
             bool found;
             foreach (var i in scopes)
@@ -109,19 +107,16 @@ namespace Penguor.Compiler
         }
 
         public bool FindSymbol(State symbol, State scope) => FindSymbol(symbol.Pop(), scope + symbol);
-        public bool FindSymbol(State symbol, State currentScope, params State[] scopes)
-        {
-            var allScopes = new List<State>(scopes) { currentScope };
-            return FindSymbol(symbol, allScopes.ToArray());
-        }
-        public bool FindSymbol(State symbol, params State[] scopes)
+        public bool FindSymbol(State symbol, State[] scopes)
         {
             var frame = symbol.Pop();
-            var allScopes = new List<State>(scopes)
-            {
-                symbol
-            };
-            return FindSymbol(frame, allScopes.ToArray());
+            var array = (State[])scopes.Clone();
+
+            var allScopes = new State[array.Length + 1];
+            allScopes[0] = symbol;
+            array.CopyTo(allScopes, 1);
+
+            return FindSymbol(frame, allScopes);
         }
 
         public bool FindTable(State scope) => tables.ContainsKey(scope);
@@ -138,7 +133,6 @@ namespace Penguor.Compiler
 
             tables.Add(newState, new SymbolTable(scope.Count));
         }
-
 
         /// <summary>
         /// returns the AddressFrame described by the string a

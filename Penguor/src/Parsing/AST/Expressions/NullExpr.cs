@@ -21,9 +21,11 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of NullExpr
         /// </summary>
-        public NullExpr()
+        public NullExpr(int offset)
         {
+            Offset = offset;
         }
+        public int Offset { get; }
 
         /// <summary>
         /// returns Visit() of this instance

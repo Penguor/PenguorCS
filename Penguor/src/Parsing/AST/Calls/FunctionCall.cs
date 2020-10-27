@@ -21,11 +21,13 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of FunctionCall
         /// </summary>
-        public FunctionCall(AddressFrame name, List<Expr> args)
+        public FunctionCall(int offset, AddressFrame name, List<Expr> args)
         {
+            Offset = offset;
             Name = name;
             Args = args;
         }
+        public int Offset { get; }
         public AddressFrame Name { get; }
         public List<Expr> Args { get; }
 

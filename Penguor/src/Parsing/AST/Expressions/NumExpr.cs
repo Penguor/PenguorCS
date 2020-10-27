@@ -21,10 +21,12 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of NumExpr
         /// </summary>
-        public NumExpr(double value)
+        public NumExpr(int offset, double value)
         {
+            Offset = offset;
             Value = value;
         }
+        public int Offset { get; }
         public double Value { get; }
 
         /// <summary>

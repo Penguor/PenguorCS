@@ -21,10 +21,12 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of ExprStmt
         /// </summary>
-        public ExprStmt(Expr expr)
+        public ExprStmt(int offset, Expr expr)
         {
+            Offset = offset;
             Expr = expr;
         }
+        public int Offset { get; }
         public Expr Expr { get; }
 
         /// <summary>

@@ -21,12 +21,14 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of SwitchStmt
         /// </summary>
-        public SwitchStmt(Expr condition, List<Stmt> cases, Stmt? defaultcase)
+        public SwitchStmt(int offset, Expr condition, List<Stmt> cases, Stmt? defaultcase)
         {
+            Offset = offset;
             Condition = condition;
             Cases = cases;
             DefaultCase = defaultcase;
         }
+        public int Offset { get; }
         public Expr Condition { get; }
         public List<Stmt> Cases { get; }
         public Stmt? DefaultCase { get; }

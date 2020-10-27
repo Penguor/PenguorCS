@@ -60,7 +60,6 @@ namespace Penguor.Compiler.Parsing
         /// returns <c>type</c> as string
         /// </summary>
         /// <param name="type">the type which should be turned into a string</param>
-
         public static string ToString(TokenType type) => type switch
         {
             HASHTAG => "#",

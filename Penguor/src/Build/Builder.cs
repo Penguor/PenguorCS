@@ -46,13 +46,8 @@ namespace Penguor.Compiler.Build
         /// <summary>
         /// the source file this builder builds
         /// </summary>
-        /// <value></value>
         public string SourceFile { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <value></value>
         public string Input { get; set; }
 
         /// <summary>

@@ -21,11 +21,13 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of DoStmt
         /// </summary>
-        public DoStmt(Stmt content, Expr condition)
+        public DoStmt(int offset, Stmt content, Expr condition)
         {
+            Offset = offset;
             Content = content;
             Condition = condition;
         }
+        public int Offset { get; }
         public Stmt Content { get; }
         public Expr Condition { get; }
 

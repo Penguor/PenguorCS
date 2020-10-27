@@ -21,12 +21,14 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of BinaryExpr
         /// </summary>
-        public BinaryExpr(Expr lhs, TokenType op, Expr rhs)
+        public BinaryExpr(int offset, Expr lhs, TokenType op, Expr rhs)
         {
+            Offset = offset;
             Lhs = lhs;
             Op = op;
             Rhs = rhs;
         }
+        public int Offset { get; }
         public Expr Lhs { get; }
         public TokenType Op { get; }
         public Expr Rhs { get; }

@@ -11,13 +11,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using Penguor.Compiler.Parsing.AST;
 
 namespace Penguor.Compiler
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class State : IEnumerable<AddressFrame>, ICollection, ICollection<AddressFrame>
     {
         private List<AddressFrame> addressFrames;
@@ -32,9 +30,6 @@ namespace Penguor.Compiler
         /// </summary>
         public bool IsSynchronized => ((ICollection)addressFrames).IsSynchronized;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public object SyncRoot => ((ICollection)addressFrames).SyncRoot;
 
         public bool IsReadOnly => ((ICollection<AddressFrame>)addressFrames).IsReadOnly;
@@ -127,7 +122,10 @@ namespace Penguor.Compiler
                 addressFrames.RemoveAt(addressFrames.Count - 1);
                 return frame;
             }
-            else throw new InvalidOperationException();
+            else
+            {
+                throw new InvalidOperationException();
+            }
         }
 
         public static State operator +(State a, State b)
@@ -138,10 +136,9 @@ namespace Penguor.Compiler
 
         public static State operator -(State minuend, State subtrahend)
         {
-            while (true)
+            while (subtrahend.Count != 0 && minuend.Count != 0)
             {
-                if (subtrahend.Count == 0 || minuend.Count == 0) break;
-                else if (minuend[^1].Equals(subtrahend[^1])) minuend.Pop();
+                if (minuend[^1].Equals(subtrahend[^1])) minuend.Pop();
                 else break;
             }
             return minuend;
@@ -161,7 +158,7 @@ namespace Penguor.Compiler
             var state = (State)obj;
             for (int i = 0; i < addressFrames.Count; i++)
             {
-                if (!(addressFrames[i].Symbol == state[i].Symbol)) return false;
+                if (addressFrames[i].Symbol != state[i].Symbol) return false;
             }
             return true;
         }
@@ -198,5 +195,7 @@ namespace Penguor.Compiler
         {
             get => addressFrames[i];
         }
+
+        public override string ToString() => string.Join('.', addressFrames);
     }
 }

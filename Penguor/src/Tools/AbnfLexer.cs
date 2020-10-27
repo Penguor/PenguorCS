@@ -14,7 +14,6 @@ using System.Text;
 
 namespace Penguor.Compiler.Tools.Lexer
 {
-
     internal enum AbnfToken : byte
     {
         RULE,

@@ -21,10 +21,12 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of DeclStmt
         /// </summary>
-        public DeclStmt(Stmt stmt)
+        public DeclStmt(int offset, Stmt stmt)
         {
+            Offset = offset;
             Stmt = stmt;
         }
+        public int Offset { get; }
         public Stmt Stmt { get; }
 
         /// <summary>

@@ -21,10 +21,12 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of BooleanExpr
         /// </summary>
-        public BooleanExpr(bool value)
+        public BooleanExpr(int offset, bool value)
         {
+            Offset = offset;
             Value = value;
         }
+        public int Offset { get; }
         public bool Value { get; }
 
         /// <summary>

@@ -21,14 +21,16 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of SystemDecl
         /// </summary>
-        public SystemDecl(TokenType? accessmod, TokenType[] nonaccessmod, AddressFrame name, CallExpr? parent, BlockDecl content)
+        public SystemDecl(int offset, TokenType? accessmod, TokenType[] nonaccessmod, AddressFrame name, CallExpr? parent, BlockDecl content)
         {
+            Offset = offset;
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
             Name = name;
             Parent = parent;
             Content = content;
         }
+        public int Offset { get; }
         public TokenType? AccessMod { get; }
         public TokenType[] NonAccessMod { get; }
         public AddressFrame Name { get; }

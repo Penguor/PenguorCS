@@ -21,10 +21,12 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of StringExpr
         /// </summary>
-        public StringExpr(string value)
+        public StringExpr(int offset, string value)
         {
+            Offset = offset;
             Value = value;
         }
+        public int Offset { get; }
         public string Value { get; }
 
         /// <summary>

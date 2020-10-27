@@ -68,10 +68,6 @@ namespace Penguor.Compiler.Build
             }
         }
 
-        /// <summary>
-        /// build a single file from source
-        /// </summary>
-        /// <param name="file"></param>
         public static void BuildFile(ref SymbolTableManager manager, string file)
         {
             Builder builder = new Builder(ref manager, file);
