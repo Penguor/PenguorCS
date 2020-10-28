@@ -191,13 +191,32 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(IfStmt stmt)
         {
-            throw new System.NotImplementedException();
+            stmt.Condition.Accept(this);
+            if (stmt.Condition is BooleanExpr
+                || (stmt.Condition is CallExpr cExpr
+                    && builder.TableManager.GetSymbol(State.FromCall(cExpr), scopes.ToArray())?.DataType == new State(new AddressFrame[] { new AddressFrame("bool", AddressType.TypeDecl) }))
+                || (stmt.Condition is BinaryExpr bExpr && (bExpr.Op == TokenType.LESS
+                                                           || bExpr.Op == TokenType.GREATER
+                                                           || bExpr.Op == TokenType.LESS_EQUALS
+                                                           || bExpr.Op == TokenType.GREATER_EQUALS
+                                                           || bExpr.Op == TokenType.EQUALS
+                                                           || bExpr.Op == TokenType.NEQUALS
+                                                           || bExpr.Op == TokenType.AND
+                                                           || bExpr.Op == TokenType.OR
+                                                           || bExpr.Op == TokenType.XOR)))
+            {
+                stmt.IfC.Accept(this);
+                foreach (var i in stmt.Elif) i.Accept(this);
+                stmt.ElseC?.Accept(this);
+                return stmt;
+            }
+            else
+            {
+                throw new System.Exception();
+            }
         }
 
-        public Stmt Visit(CompilerStmt stmt)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Stmt Visit(CompilerStmt stmt) => stmt;
 
         public Stmt Visit(ReturnStmt stmt)
         {
@@ -272,6 +291,27 @@ namespace Penguor.Compiler.Analysis
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new System.Exception();
                 if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value >= expr2.Value);
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.AND)
+            {
+                if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value && expr2.Value);
+                if (lhs is NumExpr && rhs is NumExpr) throw new System.Exception();
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.OR)
+            {
+                if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value || expr2.Value);
+                if (lhs is NumExpr && rhs is NumExpr) throw new System.Exception();
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.XOR)
+            {
+                if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value != expr2.Value);
+                if (lhs is NumExpr && rhs is NumExpr) throw new System.Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
             }

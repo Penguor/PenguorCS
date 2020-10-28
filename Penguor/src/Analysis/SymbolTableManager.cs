@@ -82,6 +82,44 @@ namespace Penguor.Compiler
             return false;
         }
 
+        public Symbol? GetSymbol(AddressFrame symbol, State scope)
+        {
+            if (scope.Count == 0)
+            {
+                TryLookupSymbolInScope(scope, symbol, out Symbol? outSym);
+                return outSym;
+            }
+            for (int i = scope.Count - 1; i >= 0; i--)
+            {
+                TryLookupSymbolInScope(scope, symbol, out Symbol? outSym);
+                if (outSym != null) return outSym;
+                else if (scope[i].Type == AddressType.LibraryDecl) return null;
+                else scope.Pop();
+            }
+            return null;
+        }
+
+        public Symbol? GetSymbol(AddressFrame symbol, State[] scopes)
+        {
+            Symbol? outSym;
+            foreach (var i in scopes)
+                outSym = GetSymbol(symbol, i);
+            return null;
+        }
+
+        public Symbol? GetSymbol(State symbol, State scope) => GetSymbol(symbol.Pop(), scope + symbol);
+        public Symbol? GetSymbol(State symbol, State[] scopes)
+        {
+            var frame = symbol.Pop();
+            var array = (State[])scopes.Clone();
+
+            var allScopes = new State[array.Length + 1];
+            allScopes[0] = symbol;
+            array.CopyTo(allScopes, 1);
+
+            return GetSymbol(frame, allScopes);
+        }
+
         public bool FindSymbol(AddressFrame symbol, State scope)
         {
             if (scope.Count == 0) return TryLookupSymbolInScope(scope, symbol, out _);
