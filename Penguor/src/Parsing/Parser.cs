@@ -122,7 +122,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.SystemDecl);
             CallExpr? parent = GetParent();
-            AddSymbol(name);
+            AddSymbol(name, accessMod, nonAccessMods);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
@@ -135,7 +135,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.DataDecl);
             CallExpr? parent = GetParent();
-            AddSymbol(name);
+            AddSymbol(name, accessMod, nonAccessMods);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
@@ -148,7 +148,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.TypeDecl);
             CallExpr? parent = GetParent();
-            AddSymbol(name);
+            AddSymbol(name, accessMod, nonAccessMods);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
@@ -163,7 +163,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.FunctionDecl);
             AddressFrame name = variable.Name;
-            AddSymbol(name);
+            AddSymbol(name, accessMod, nonAccessMods);
             state.Push(name);
             AddTable();
 
@@ -562,6 +562,12 @@ namespace Penguor.Compiler.Parsing
         private void AddSymbol(AddressFrame frame)
         {
             bool succeeded = builder.TableManager.AddSymbol(state, frame);
+            if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
+        }
+
+        private void AddSymbol(AddressFrame frame, TokenType? accessMod, TokenType[]? nonAccessMods)
+        {
+            bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(frame.Symbol, frame.Type) { AccessMod = accessMod, NonAccessMods = nonAccessMods });
             if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
         }
 

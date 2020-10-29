@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler
 {
@@ -35,6 +36,24 @@ namespace Penguor.Compiler
         /// <param name="scope">the scope where the Symbol occurs</param>
         /// <param name="symbol">the Symbol to add</param>
         public bool AddSymbol(State scope, AddressFrame symbol)
+        {
+            if (tables.ContainsKey(scope))
+            {
+                tables[scope].Insert(symbol);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// add a symbol to a table
+        /// </summary>
+        /// <param name="scope">the scope where the Symbol occurs</param>
+        /// <param name="symbol">the Symbol to add</param>
+        public bool AddSymbol(State scope, Symbol symbol)
         {
             if (tables.ContainsKey(scope))
             {

@@ -52,6 +52,16 @@ namespace Penguor.Compiler
         }
 
         /// <summary>
+        /// insert a new Symbol into the symbol table
+        /// </summary>
+        /// <param name="symbol">the symbol to insert into the table</param>
+        public void Insert(Symbol symbol)
+        {
+            bool succeeded = Symbols.TryAdd(symbol.Name, symbol);
+            if (!succeeded) throw new PenguorCSException(1);
+        }
+
+        /// <summary>
         /// look up a value in the symbol table
         /// </summary>
         /// <param name="name">the identifier to search for</param>
