@@ -9,6 +9,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 
 namespace Penguor.Compiler.IR
 {
@@ -17,9 +18,14 @@ namespace Penguor.Compiler.IR
     /// </summary>
     public record IRProgram : IRStruct
     {
+        public List<IRStruct> Children { get; init; }
+
         /// <summary>
         /// Initialize a new instance of IRProgram
         /// </summary>
-        public IRProgram() : base(new State(Array.Empty<AddressFrame>())) { }
+        public IRProgram() : base(new State(Array.Empty<AddressFrame>()))
+        {
+            Children = new();
+        }
     }
 }

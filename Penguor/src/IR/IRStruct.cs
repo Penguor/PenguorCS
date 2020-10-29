@@ -17,10 +17,6 @@ namespace Penguor.Compiler.IR
     /// </summary>
     public abstract record IRStruct
     {
-        /// <summary>
-        /// Contains the children of the struct
-        /// </summary>
-        public List<IRStruct> Children { get; }
 
         /// <summary>
         /// the statements to execute when the struct gets called
@@ -38,7 +34,6 @@ namespace Penguor.Compiler.IR
         /// <param name="state">the state of this instance</param>
         public IRStruct(State state)
         {
-            Children = new();
             Statements = new();
 
             State = state;
