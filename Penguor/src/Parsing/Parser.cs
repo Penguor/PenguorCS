@@ -436,10 +436,8 @@ namespace Penguor.Compiler.Parsing
             return lhs;
         }
 
-        private Expr CondOrExpr() => Check(OR, 1) ? new BinaryExpr(GetCurrent().Offset, CondXorExpr(), Consume(OR).Type, CondOrExpr()) : CondXorExpr();
-        private Expr CondXorExpr() => Check(XOR, 1) ? new BinaryExpr(GetCurrent().Offset, CondAndExpr(), Consume(XOR).Type, CondXorExpr()) : CondAndExpr();
+        private Expr CondOrExpr() => Check(OR, 1) ? new BinaryExpr(GetCurrent().Offset, CondAndExpr(), Consume(OR).Type, CondOrExpr()) : CondAndExpr();
         private Expr CondAndExpr() => Check(AND, 1) ? new BinaryExpr(GetCurrent().Offset, BWOrExpr(), Consume(AND).Type, CondAndExpr()) : BWOrExpr();
-
         private Expr BWOrExpr() => Check(BW_OR, 1) ? new BinaryExpr(GetCurrent().Offset, BWXorExpr(), Consume(BW_OR).Type, BWOrExpr()) : BWXorExpr();
         private Expr BWXorExpr() => Check(BW_XOR, 1) ? new BinaryExpr(GetCurrent().Offset, BWAndExpr(), Consume(BW_XOR).Type, BWXorExpr()) : BWAndExpr();
         private Expr BWAndExpr() => Check(BW_AND, 1) ? new BinaryExpr(GetCurrent().Offset, EqualityExpr(), Consume(BW_AND).Type, BWAndExpr()) : EqualityExpr();

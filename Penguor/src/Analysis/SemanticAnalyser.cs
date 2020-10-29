@@ -214,8 +214,7 @@ namespace Penguor.Compiler.Analysis
                                                            || bExpr.Op == TokenType.EQUALS
                                                            || bExpr.Op == TokenType.NEQUALS
                                                            || bExpr.Op == TokenType.AND
-                                                           || bExpr.Op == TokenType.OR
-                                                           || bExpr.Op == TokenType.XOR)))
+                                                           || bExpr.Op == TokenType.OR)))
             {
                 stmt.IfC.Accept(this);
                 foreach (var i in stmt.Elif) i.Accept(this);
@@ -317,13 +316,6 @@ namespace Penguor.Compiler.Analysis
             else if (expr.Op == TokenType.OR)
             {
                 if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value || expr2.Value);
-                if (lhs is NumExpr && rhs is NumExpr) throw new System.Exception();
-                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
-                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
-            }
-            else if (expr.Op == TokenType.XOR)
-            {
-                if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value != expr2.Value);
                 if (lhs is NumExpr && rhs is NumExpr) throw new System.Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();

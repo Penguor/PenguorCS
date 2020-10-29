@@ -27,7 +27,7 @@ namespace Penguor.Compiler.Parsing
         , GREATER, LESS
         , GREATER_EQUALS, LESS_EQUALS
         , EQUALS, NEQUALS
-        , AND, OR, XOR // logical operations
+        , AND, OR // logical operations
         , BW_AND, BW_OR, BW_XOR, BW_NOT // bitwise operations
         , BS_LEFT, BS_RIGHT // bitshift operations
         , ASSIGN // assignment

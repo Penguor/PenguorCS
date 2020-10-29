@@ -94,7 +94,6 @@ namespace Penguor.Compiler.Parsing
             NEQUALS => "!=",
             AND => "&&",
             OR => "||",
-            XOR => "^^",
             BW_AND => "&",
             BW_OR => "|",
             BW_XOR => "^",

@@ -274,7 +274,7 @@ namespace Penguor.Compiler.Lexing
                         AddToken(Match('=') ? TokenType.BW_OR_ASSIGN : Match('|') ? TokenType.OR : TokenType.BW_OR);
                         break;
                     case '^':
-                        AddToken(Match('=') ? TokenType.BW_XOR_ASSIGN : Match('^') ? TokenType.XOR : TokenType.BW_XOR);
+                        AddToken(Match('=') ? TokenType.BW_XOR_ASSIGN : TokenType.BW_XOR);
                         break;
                     case '#':
                         AddToken(TokenType.HASHTAG);
