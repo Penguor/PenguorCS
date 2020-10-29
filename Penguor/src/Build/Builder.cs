@@ -48,6 +48,9 @@ namespace Penguor.Compiler.Build
         /// </summary>
         public string SourceFile { get; }
 
+        /// <summary>
+        /// the contents of <c>SourceFile</c>
+        /// </summary>
         public string Input { get; set; }
 
         /// <summary>
@@ -155,7 +158,8 @@ namespace Penguor.Compiler.Build
 
             SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(nameof(program)), this);
 
-            Decl analysed = analyser.Analyse();
+            analyser.Analyse(1);
+            Decl analysed = analyser.Analyse(2);
         }
 
         // Below this is the code for handling errors in the Penguor source code
@@ -163,7 +167,6 @@ namespace Penguor.Compiler.Build
         /// <summary>
         /// contains all caught exceptions
         /// </summary>
-        /// <value></value>
         public List<PenguorException> Exceptions { get; protected set; }
 
         /// <summary>

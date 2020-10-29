@@ -11,12 +11,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using Penguor.Compiler.Parsing.AST;
 
 namespace Penguor.Compiler
 {
-    public class State : IEnumerable<AddressFrame>, ICollection, ICollection<AddressFrame>
+    /// <summary>
+    /// represents an address in a Penguor program
+    /// </summary>
+    public class State : ICollection, ICollection<AddressFrame>
     {
         private List<AddressFrame> addressFrames;
 
@@ -30,8 +32,15 @@ namespace Penguor.Compiler
         /// </summary>
         public bool IsSynchronized => ((ICollection)addressFrames).IsSynchronized;
 
+        /// <summary>
+        /// Gets an object that can be used to synchronize access to the ICollection.
+        /// </summary>
+        /// <returns>An object that can be used to synchronize access to the ICollection.</returns>
         public object SyncRoot => ((ICollection)addressFrames).SyncRoot;
 
+        /// <summary>
+        /// Indicates whether the state is read-only
+        /// </summary>
         public bool IsReadOnly => ((ICollection<AddressFrame>)addressFrames).IsReadOnly;
 
         /// <summary>
@@ -105,6 +114,11 @@ namespace Penguor.Compiler
 
         IEnumerator IEnumerable.GetEnumerator() => addressFrames.GetEnumerator();
 
+        /// <summary>
+        /// copy the State to a new AddressFrame array
+        /// </summary>
+        /// <param name="array">the array to copy the State to</param>
+        /// <param name="index">the first index the elements will be copied to</param>
         public void CopyTo(Array array, int index) => addressFrames.CopyTo((AddressFrame[])array, index);
 
         /// <summary>
@@ -133,12 +147,18 @@ namespace Penguor.Compiler
             }
         }
 
+        /// <summary>
+        /// add two States together
+        /// </summary>
         public static State operator +(State a, State b)
         {
             a.addressFrames.AddRange(b);
             return a;
         }
 
+        /// <summary>
+        /// substract one State from another
+        /// </summary>
         public static State operator -(State minuend, State subtrahend)
         {
             while (subtrahend.Count != 0 && minuend.Count != 0)
@@ -180,8 +200,17 @@ namespace Penguor.Compiler
             }
             return hashCode;
         }
+
+        /// <summary>
+        /// Append multiple AddressFrames to the state
+        /// </summary>
+        /// <param name="item">an IEnumerable containing the AddressFrames to append</param>
         public void Append(IEnumerable<AddressFrame> item) => addressFrames.AddRange(item);
 
+        /// <summary>
+        /// adds an AddressFrame to the end of the State
+        /// </summary>
+        /// <param name="item">the AddressFrame to append to the end</param>
         public void Add(AddressFrame item) => addressFrames.Add(item);
 
         public void Clear() => addressFrames.Clear();

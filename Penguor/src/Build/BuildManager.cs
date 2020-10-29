@@ -23,7 +23,6 @@ namespace Penguor.Compiler.Build
     public static class BuildManager
     {
         private static SymbolTableManager tableManager;
-
         public static SymbolTableManager TableManager
         {
             get => tableManager;
@@ -41,7 +40,6 @@ namespace Penguor.Compiler.Build
         /// <param name="path">the file/project to build</param>
         public static void SmartBuild(string path)
         {
-            SymbolTableManager manager = new SymbolTableManager();
             if ((File.GetAttributes(path) & FileAttributes.Directory) != 0)
             {
                 if (path.Length == 0 || path == null) throw new PenguorCSException(1);
@@ -53,7 +51,7 @@ namespace Penguor.Compiler.Build
             }
             if (!File.Exists(path)) throw new PenguorException(5, 0, path, path);
 
-            if (Path.GetExtension(path) == ".pgr") BuildFile(ref manager, path);
+            if (Path.GetExtension(path) == ".pgr") BuildFile(path);
             else if (Path.GetExtension(path) == ".pgrp") BuildProject(path);
         }
 
@@ -61,16 +59,19 @@ namespace Penguor.Compiler.Build
         {
             string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories);
 
+            Builder[] builders = new Builder[files.Length];
             for (int i = 0; i < files.Length; i++)
-            {
-                var builder = new Builder(ref tableManager, files[i]);
-                builder.Build();
-            }
+                builders[i] = new Builder(ref tableManager, files[i]);
+
+            foreach (var b in builders)
+                b.Parse();
+            foreach (var b in builders)
+                b.Analyse();
         }
 
-        public static void BuildFile(ref SymbolTableManager manager, string file)
+        public static void BuildFile(string file)
         {
-            Builder builder = new Builder(ref manager, file);
+            Builder builder = new Builder(ref tableManager, file);
             builder.Build();
         }
 

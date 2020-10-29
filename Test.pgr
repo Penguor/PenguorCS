@@ -12,8 +12,8 @@ library Test
 
         void main()
         {
-            string test;
-            print("Hello World")
+            string test = "Hello World";
+            if(true || false) print(test)
         }
     }
 }

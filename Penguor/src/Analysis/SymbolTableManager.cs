@@ -165,6 +165,7 @@ namespace Penguor.Compiler
         /// <param name="scope">the scope the SymbolTable will be used for</param>
         public void AddTable(State scope)
         {
+            if (tables.ContainsKey(scope)) return;
             AddressFrame[] frames = new AddressFrame[scope.Count];
             scope.CopyTo(frames, 0);
             State newState = new State(frames);

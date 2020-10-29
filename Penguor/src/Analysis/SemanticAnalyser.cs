@@ -26,6 +26,8 @@ namespace Penguor.Compiler.Analysis
 
         private readonly List<State> scopes;
 
+        private byte pass;
+
         public SemanticAnalyser(ProgramDecl program, Builder builder)
         {
             this.program = program;
@@ -34,8 +36,9 @@ namespace Penguor.Compiler.Analysis
             scopes = new();
         }
 
-        public Decl Analyse()
+        public Decl Analyse(byte pass)
         {
+            this.pass = pass;
             scopes.Add(new State());
             scopes.Add(new State());
             return program.Accept(this);
@@ -50,6 +53,12 @@ namespace Penguor.Compiler.Analysis
         {
             foreach (var e in expr)
                 builder.TableManager.AddSymbol(scopes[0], e.Name);
+        }
+
+        private bool IsAccessable(TokenType accessMod, TokenType[] nonAccessMods, CallExpr call)
+        {
+            builder.TableManager.GetSymbol(State.FromCall(call), scopes.ToArray());
+            throw new System.NotImplementedException();
         }
 
         public Decl Visit(BlockDecl decl)
@@ -135,7 +144,10 @@ namespace Penguor.Compiler.Analysis
         public Decl Visit(VarDecl decl)
         {
             decl.Type.Accept(this);
-            if (decl.Init is not null) decl.Init.Accept(this);
+            if (decl.Init is not null)
+            {
+                decl.Init.Accept(this);
+            }
             return decl;
         }
 
@@ -244,6 +256,7 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(AssignExpr expr)
         {
+            expr.Lhs.Accept(this);
             throw new System.NotImplementedException();
         }
 
@@ -323,7 +336,7 @@ namespace Penguor.Compiler.Analysis
         public Expr Visit(CallExpr expr)
         {
             var e = State.FromCall(expr);
-            if (!builder.TableManager.FindSymbol(e, scopes.ToArray())) throw new System.Exception();
+            if (!builder.TableManager.FindSymbol(e, scopes.ToArray()) && pass > 1) throw new System.Exception();
             return expr;
         }
 
