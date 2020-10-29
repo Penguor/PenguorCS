@@ -18,7 +18,7 @@ namespace Penguor.Compiler.Debugging
     public class PenguorCSException : Exception
     {
         /// <summary>
-        ///
+        /// initialize a new instance of the PenguorCS exception
         /// </summary>
         /// <param name="msg">the number of the PGRCS error message</param>
         /// <param name="arg0"></param>

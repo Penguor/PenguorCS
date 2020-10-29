@@ -15,12 +15,17 @@ namespace Penguor.Compiler.Debugging
     /// </summary>
     public class LexingException : PenguorException
     {
+        /// <summary>
+        /// the character which was found
+        /// </summary>
         public string Found { get; }
 
         /// <summary>
         /// create a new LexingException
         /// </summary>
         /// <param name="msg">the error message number</param>
+        /// <param name="offset">the offset where the exception occurred</param>
+        /// <param name="found"></param>
         public LexingException(uint msg, int offset, string found) : base(msg, offset)
         {
             Found = found;

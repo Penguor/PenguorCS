@@ -19,9 +19,9 @@ namespace Penguor.Compiler.Debugging
     /// </summary>
     public class ParsingException : PenguorException
     {
-        /// <value>Gets the expected <c>TokenType</c>(s)</value>
+        /// <summary>Gets the expected <c>TokenType</c>(s)</summary>
         public TokenType[] ExpectedTypes { get; }
-        /// <value>Gets the found <c>Token</c></value>
+        /// <summary>Gets the found <c>Token</c></summary>
         public Token ActualToken { get; }
 
         /// <summary>

@@ -35,8 +35,8 @@ namespace Penguor.Compiler.Tools.Lexer
         private int current; // the location in the source code
         private int offset; // the offset where the token scanned atm began
 
-        private string source;
-        readonly List<(AbnfToken, string, int)> tokens;
+        private readonly string source;
+        private readonly List<(AbnfToken, string, int)> tokens;
 
         public AbnfLexer(string file)
         {
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Tools.Lexer
 
         public void Tokenize()
         {
-
             StringBuilder builder = new StringBuilder();
 
             while (!AtEnd())

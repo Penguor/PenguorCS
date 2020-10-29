@@ -82,6 +82,11 @@ namespace Penguor.Compiler
             return false;
         }
 
+        /// <summary>
+        /// Looks up a symbol and returns it
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scope">the scope to search in</param>
         public Symbol? GetSymbol(AddressFrame symbol, State scope)
         {
             if (scope.Count == 0)
@@ -99,6 +104,11 @@ namespace Penguor.Compiler
             return null;
         }
 
+        /// <summary>
+        /// Looks up a symbol and returns it
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scopes">the scopes to search in</param>
         public Symbol? GetSymbol(AddressFrame symbol, State[] scopes)
         {
             Symbol? outSym;
@@ -107,7 +117,17 @@ namespace Penguor.Compiler
             return null;
         }
 
+        /// <summary>
+        /// Looks up a symbol and returns it
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scope">the scope to search in</param>
         public Symbol? GetSymbol(State symbol, State scope) => GetSymbol(symbol.Pop(), scope + symbol);
+        /// <summary>
+        /// Looks up a symbol and returns it
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scopes">the scopes to search in</param>
         public Symbol? GetSymbol(State symbol, State[] scopes)
         {
             var frame = symbol.Pop();
@@ -120,6 +140,12 @@ namespace Penguor.Compiler
             return GetSymbol(frame, allScopes);
         }
 
+        /// <summary>
+        /// Search for a symbol
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scope">the scope to search in</param>
+        /// <returns>true if the Symbol was found, otherwise false</returns>
         public bool FindSymbol(AddressFrame symbol, State scope)
         {
             if (scope.Count == 0) return TryLookupSymbolInScope(scope, symbol, out _);
@@ -133,6 +159,12 @@ namespace Penguor.Compiler
             return false;
         }
 
+        /// <summary>
+        /// Search for a symbol
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scopes">the scopes to search in</param>
+        /// <returns>true if the Symbol was found, otherwise false</returns>
         public bool FindSymbol(AddressFrame symbol, State[] scopes)
         {
             bool found;
@@ -143,8 +175,19 @@ namespace Penguor.Compiler
             }
             return false;
         }
-
+        /// <summary>
+        /// Search for a symbol
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scope">the scope to search in</param>
+        /// <returns>true if the Symbol was found, otherwise false</returns>
         public bool FindSymbol(State symbol, State scope) => FindSymbol(symbol.Pop(), scope + symbol);
+        /// <summary>
+        /// Search for a symbol
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scopes">the scopes to search in</param>
+        /// <returns>true if the Symbol was found, otherwise false</returns>
         public bool FindSymbol(State symbol, State[] scopes)
         {
             var frame = symbol.Pop();
@@ -156,7 +199,11 @@ namespace Penguor.Compiler
 
             return FindSymbol(frame, allScopes);
         }
-
+        /// <summary>
+        /// Search for a SymbolTable
+        /// </summary>
+        /// <param name="scope">the State corresponding to the SymbolTable</param>
+        /// <returns>true if the table exists, otherwise false</returns>
         public bool FindTable(State scope) => tables.ContainsKey(scope);
 
         /// <summary>

@@ -23,6 +23,9 @@ namespace Penguor.Compiler.Build
     public static class BuildManager
     {
         private static SymbolTableManager tableManager;
+        /// <summary>
+        /// A SymbolTableManager for all files being built by this manager
+        /// </summary>
         public static SymbolTableManager TableManager
         {
             get => tableManager;
@@ -55,6 +58,10 @@ namespace Penguor.Compiler.Build
             else if (Path.GetExtension(path) == ".pgrp") BuildProject(path);
         }
 
+        /// <summary>
+        /// build a Penguor project (file ending .pgrp)
+        /// </summary>
+        /// <param name="project">the path of the project file</param>
         public static void BuildProject(string project)
         {
             string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories);
@@ -69,6 +76,10 @@ namespace Penguor.Compiler.Build
                 b.Analyse();
         }
 
+        /// <summary>
+        /// Build a single Penguor file
+        /// </summary>
+        /// <param name="file">the file to build</param>
         public static void BuildFile(string file)
         {
             Builder builder = new Builder(ref tableManager, file);

@@ -18,6 +18,9 @@ namespace Penguor.Compiler.IR
     /// </summary>
     public record IRProgram : IRStruct
     {
+        /// <summary>
+        /// The child declarations of the program
+        /// </summary>
         public List<IRStruct> Children { get; init; }
 
         /// <summary>

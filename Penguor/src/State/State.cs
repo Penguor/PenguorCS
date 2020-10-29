@@ -213,13 +213,33 @@ namespace Penguor.Compiler
         /// <param name="item">the AddressFrame to append to the end</param>
         public void Add(AddressFrame item) => addressFrames.Add(item);
 
+        /// <summary>
+        /// clear the contents of the State
+        /// </summary>
         public void Clear() => addressFrames.Clear();
-
+        /// <summary>
+        /// check whether the State contains a specific AddressFrame
+        /// </summary>
+        /// <param name="item">the AddressFrame which should be searched for</param>
+        /// <returns>true if the AddressFrame exists in the State, otherwise false</returns>
         public bool Contains(AddressFrame item) => addressFrames.Contains(item);
 
+        /// <summary>
+        /// copy the State to a new AddressFrame array
+        /// </summary>
+        /// <param name="array">the array to copy the State to</param>
+        /// <param name="arrayIndex">the first index the elements will be copied to</param>
         public void CopyTo(AddressFrame[] array, int arrayIndex) => addressFrames.CopyTo(array, arrayIndex);
 
+        /// <summary>
+        /// remove the specified AddressFrame from the State
+        /// </summary>
+        /// <param name="item">the AddressFrame to remove</param>
         public bool Remove(AddressFrame item) => addressFrames.Remove(item);
+        /// <summary>
+        /// Remove a State from the end of this State
+        /// </summary>
+        /// <param name="item">the State to substract from this instance</param>
         public void Remove(State item) => addressFrames = (this - item).addressFrames;
 
         /// <summary>
@@ -230,6 +250,9 @@ namespace Penguor.Compiler
             get => addressFrames[i];
         }
 
+        /// <summary>
+        /// convert the State to a string of the AddressFrames joined by dots
+        /// </summary>
         public override string ToString() => string.Join('.', addressFrames);
     }
 }

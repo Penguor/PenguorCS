@@ -13,9 +13,11 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.IR
 {
+    /// <summary>
+    /// an instruction in the Penguor intermediate representation
+    /// </summary>
     public enum OPCode
     {
-        
-    }
 
+    }
 }
