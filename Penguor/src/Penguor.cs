@@ -34,7 +34,8 @@ namespace Penguor.Compiler
             var buildCommand = new Command("build", "compile a Penguor file or project");
             buildCommand.AddOption(new Option<string>(new string[] { "--input", "-i" }, "the file or project to build"));
             buildCommand.AddOption(new Option("--benchmark", "when this option is set, the build time will be benchmarked"));
-            buildCommand.Handler = CommandHandler.Create<string, bool, string>(Build);
+            buildCommand.AddOption(new Option<string>(new string[] { "--stdlib" }, "the path of the standard library"));
+            buildCommand.Handler = CommandHandler.Create<string, bool, string, string>(Build);
             rootCommand.AddCommand(buildCommand);
 
             // with debug builds, the tools command provides access to several developer tools
@@ -58,12 +59,13 @@ namespace Penguor.Compiler
 
             return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
 
-            static void Build(string input, bool benchmark, string log)
+            static void Build(string input, bool benchmark, string log, string stdLib)
             {
+
                 if (log != null) Debug.EnableFileLogger(log);
                 if (input == null) input = Environment.CurrentDirectory;
                 if (benchmark) BuildManager.Benchmark(input);
-                else BuildManager.SmartBuild(input);
+                else BuildManager.SmartBuild(input, stdLib);
             }
         }
     }

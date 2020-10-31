@@ -14,6 +14,7 @@ using System.IO;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
 using Penguor.Compiler.Debugging;
+using System.Collections.Generic;
 
 namespace Penguor.Compiler.Build
 {
@@ -41,7 +42,8 @@ namespace Penguor.Compiler.Build
         /// automatically chooses whether to build a project or a file.
         /// </summary>
         /// <param name="path">the file/project to build</param>
-        public static void SmartBuild(string path)
+        /// <param name="stdLib">the path of the standard library</param>
+        public static void SmartBuild(string path, string? stdLib)
         {
             if ((File.GetAttributes(path) & FileAttributes.Directory) != 0)
             {
@@ -49,41 +51,34 @@ namespace Penguor.Compiler.Build
                 string[] files = Directory.GetFiles(path, "*.pgrp", SearchOption.AllDirectories);
                 if (files.Length > 1) throw new PenguorCSException(1);
                 else if (files.Length < 1) throw new PenguorCSException(1);
-                else BuildProject(files[0]);
+                else BuildProject(files[0], stdLib);
                 return;
             }
-            if (!File.Exists(path)) throw new PenguorException(5, 0, path, path);
+            if (!File.Exists(path) || !File.Exists(stdLib)) throw new PenguorException(5, 0, path, path);
 
-            if (Path.GetExtension(path) == ".pgr") BuildFile(path);
-            else if (Path.GetExtension(path) == ".pgrp") BuildProject(path);
+            if (Path.GetExtension(path) == ".pgr") BuildProject(path, stdLib, true);
+            else if (Path.GetExtension(path) == ".pgrp") BuildProject(path, stdLib);
         }
 
         /// <summary>
         /// build a Penguor project (file ending .pgrp)
         /// </summary>
         /// <param name="project">the path of the project file</param>
-        public static void BuildProject(string project)
+        /// <param name="stdLib">the path of the standard library</param>
+        /// <param name="singleFile">whether <paramref name="project"/> is a single file</param>
+        public static void BuildProject(string project, string? stdLib, bool singleFile = false)
         {
-            string[] files = Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories);
+            List<string> files = singleFile ? new(new string[] { project }) : new(Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories));
+            if (stdLib != null) files.AddRange(Directory.GetFiles(Path.GetDirectoryName(stdLib)!, "*.pgr", SearchOption.AllDirectories));
 
-            Builder[] builders = new Builder[files.Length];
-            for (int i = 0; i < files.Length; i++)
+            Builder[] builders = new Builder[files.Count];
+            for (int i = 0; i < files.Count; i++)
                 builders[i] = new Builder(ref tableManager, files[i]);
 
             foreach (var b in builders)
                 b.Parse();
             foreach (var b in builders)
                 b.Analyse();
-        }
-
-        /// <summary>
-        /// Build a single Penguor file
-        /// </summary>
-        /// <param name="file">the file to build</param>
-        public static void BuildFile(string file)
-        {
-            Builder builder = new Builder(ref tableManager, file);
-            builder.Build();
         }
 
         /// <summary>

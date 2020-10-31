@@ -1,6 +1,3 @@
-public type void {}
-public type string {}
-
 library Test
 {
     public system Hello
