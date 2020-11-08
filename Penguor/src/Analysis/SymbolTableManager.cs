@@ -128,7 +128,7 @@ namespace Penguor.Compiler
         /// </summary>
         /// <param name="symbol">the symbol to search for</param>
         /// <param name="scopes">the scopes to search in</param>
-        public Symbol? GetSymbol(AddressFrame symbol, State[] scopes)
+        public Symbol? GetSymbol(AddressFrame symbol, IEnumerable<State> scopes)
         {
             Symbol? outSym;
             foreach (var i in scopes)

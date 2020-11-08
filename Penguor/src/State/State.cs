@@ -52,6 +52,15 @@ namespace Penguor.Compiler
         }
 
         /// <summary>
+        /// create a new State with an AddressFrame
+        /// </summary>
+        /// <param name="frame"></param>
+        public State(AddressFrame frame)
+        {
+            addressFrames = new() { frame };
+        }
+
+        /// <summary>
         /// create a new State from a List
         /// </summary>
         /// <param name="frames"></param>
@@ -241,6 +250,53 @@ namespace Penguor.Compiler
         /// </summary>
         /// <param name="item">the State to substract from this instance</param>
         public void Remove(State item) => addressFrames = (this - item).addressFrames;
+
+        /// <summary>
+        /// check whether the State is a child of <paramref name="item"/>
+        /// </summary>
+        /// <param name="item">the State which should be compared to</param>
+        public bool IsChildOf(State item)
+        {
+            if (item.Count <= Count) return false;
+            for (int i = 0; i < Count; i++)
+            {
+                if (addressFrames[i] == item[i]) continue;
+                else return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// check whether the State is a parent of <paramref name="item"/>
+        /// </summary>
+        /// <param name="item">the State which should be compared to</param>
+        public bool IsParentOf(State item)
+        {
+            if (item.Count >= Count) return false;
+            for (int i = 0; i < item.Count; i++)
+            {
+                if (addressFrames[i] == item[i]) continue;
+                else return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// get the library of the State
+        /// </summary>
+        /// <returns></returns>
+        public State GetLibrary()
+        {
+            int num = 0;
+            foreach (var i in addressFrames)
+            {
+                num++;
+                if (i.Type != AddressType.LibraryDecl) break;
+            }
+            AddressFrame[] libraryFrames = new AddressFrame[num];
+            addressFrames.CopyTo(0, libraryFrames, 0, num);
+            return new State(libraryFrames);
+        }
 
         /// <summary>
         /// returns the AddressFrame at the index i

@@ -55,10 +55,41 @@ namespace Penguor.Compiler.Analysis
                 builder.TableManager.AddSymbol(scopes[0], e.Name);
         }
 
-        private bool IsAccessable(TokenType accessMod, TokenType[] nonAccessMods, CallExpr call)
+        private void IsAccessable(State callee, State called)
         {
-            builder.TableManager.GetSymbol(State.FromCall(call), scopes.ToArray());
-            throw new System.NotImplementedException();
+            bool accessable = false;
+            if (pass <= 1) accessable = true;
+            Symbol? calleeSymbol = builder.TableManager.GetSymbol(callee, scopes.ToArray());
+            Symbol? calledSymbol = builder.TableManager.GetSymbol(called, scopes.ToArray());
+
+            if (calleeSymbol != null && calledSymbol != null)
+            {
+                switch (calledSymbol.AccessMod)
+                {
+                    case TokenType.PUBLIC:
+                        accessable = true;
+                        break;
+                    case TokenType.PRIVATE:
+                        accessable = callee.IsChildOf(called);
+                        break;
+                    case TokenType.PROTECTED:
+                        accessable = calleeSymbol.Parent == callee;
+                        break;
+                    case TokenType.RESTRICTED:
+                        if (callee.Count == 0 && called.Count != 0) accessable = false;
+                        else if (callee.Count == 0 && called.Count == 0) accessable = false;
+                        else if (callee.Count != 0 && called.Count == 0) accessable = false;
+                        else accessable = callee[0].Symbol == called[0].Symbol;
+                        break;
+                }
+            }
+            if (!accessable) throw new System.Exception();
+        }
+
+        private void SetDataType(AddressFrame name, CallExpr type)
+        {
+            Symbol? e = builder.TableManager.GetSymbol(name, scopes);
+            if (e != null) e.DataType = State.FromCall((CallExpr)type.Accept(this));
         }
 
         public Decl Visit(BlockDecl decl)
@@ -69,7 +100,13 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(DataDecl decl)
         {
-            decl.Parent?.Accept(this);
+            if (decl.Parent != null)
+            {
+                var c = State.FromCall((CallExpr)decl.Parent.Accept(this));
+                var s = builder.TableManager.GetSymbol(c, scopes.ToArray())!;
+                s.Parent = c;
+                IsAccessable(scopes[0] + new State(decl.Name), c);
+            }
 
             scopes[0].Push(decl.Name);
             decl.Content.Accept(this);
@@ -80,7 +117,13 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(TypeDecl decl)
         {
-            decl.Parent?.Accept(this);
+            if (decl.Parent != null)
+            {
+                var c = State.FromCall((CallExpr)decl.Parent.Accept(this));
+                var s = builder.TableManager.GetSymbol(c, scopes.ToArray())!;
+                s.Parent = c;
+                IsAccessable(scopes[0] + new State(decl.Name), c);
+            }
 
             scopes[0].Push(decl.Name);
             decl.Content.Accept(this);
@@ -97,7 +140,7 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(FunctionDecl decl)
         {
-            decl.Returns.Accept(this);
+            SetDataType(decl.Name, decl.Returns);
             foreach (var i in decl.Parameters) i.Accept(this);
             scopes[0].Push(decl.Name);
             AddVarExpr(decl.Parameters.ToArray());
@@ -123,7 +166,13 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(SystemDecl decl)
         {
-            decl.Parent?.Accept(this);
+            if (decl.Parent != null)
+            {
+                var c = State.FromCall((CallExpr)decl.Parent.Accept(this));
+                var s = builder.TableManager.GetSymbol(c, scopes.ToArray())!;
+                s.Parent = c;
+                IsAccessable(scopes[0] + new State(decl.Name), c);
+            }
 
             scopes[0].Push(decl.Name);
             decl.Content.Accept(this);
@@ -143,7 +192,7 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(VarDecl decl)
         {
-            decl.Type.Accept(this);
+            SetDataType(decl.Name, decl.Type);
             if (decl.Init is not null)
             {
                 decl.Init.Accept(this);
@@ -242,7 +291,7 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(VarStmt stmt)
         {
-            stmt.Type.Accept(this);
+            SetDataType(stmt.Name, stmt.Type);
             builder.TableManager.AddSymbol(scopes[0], stmt.Name);
             stmt.Init?.Accept(this);
             return stmt;

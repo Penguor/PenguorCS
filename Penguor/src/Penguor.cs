@@ -61,7 +61,6 @@ namespace Penguor.Compiler
 
             static void Build(string input, bool benchmark, string log, string stdLib)
             {
-
                 if (log != null) Debug.EnableFileLogger(log);
                 if (input == null) input = Environment.CurrentDirectory;
                 if (benchmark) BuildManager.Benchmark(input);

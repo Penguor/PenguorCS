@@ -29,6 +29,10 @@ namespace Penguor.Compiler
         public TokenType[]? NonAccessMods { get; set; }
 
         /// <summary>
+        /// if the symbol is a declaration, this represents the parent declaration it inherits from
+        /// </summary>
+        public State? Parent { get; set; }
+        /// <summary>
         /// Initialize a new Instance of Symbol with the given values
         /// </summary>
         /// <param name="name">the name of the symbol</param>

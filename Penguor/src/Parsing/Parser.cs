@@ -565,7 +565,11 @@ namespace Penguor.Compiler.Parsing
 
         private void AddSymbol(AddressFrame frame, TokenType? accessMod, TokenType[]? nonAccessMods)
         {
-            bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(frame.Symbol, frame.Type) { AccessMod = accessMod, NonAccessMods = nonAccessMods });
+            bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(frame.Symbol, frame.Type)
+            {
+                AccessMod = accessMod,
+                NonAccessMods = nonAccessMods,
+            });
             if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
         }
 
