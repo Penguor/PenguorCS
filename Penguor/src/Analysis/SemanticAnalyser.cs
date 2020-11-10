@@ -18,7 +18,7 @@ using Penguor.Compiler.Build;
 
 namespace Penguor.Compiler.Analysis
 {
-    public class SemanticAnalyser : IDeclVisitor<Decl>, IStmtVisitor<Stmt>, IExprVisitor<Expr>, ICallVisitor<Call>
+    public class SemanticAnalyser : IDeclVisitor<Decl>, IStmtVisitor<Stmt>, IExprVisitor<Expr>
     {
         private readonly Builder builder;
 
@@ -256,14 +256,14 @@ namespace Penguor.Compiler.Analysis
             if (stmt.Condition is BooleanExpr
                 || (stmt.Condition is CallExpr cExpr
                     && builder.TableManager.GetSymbol(State.FromCall(cExpr), scopes.ToArray())?.DataType == new State(new AddressFrame[] { new AddressFrame("bool", AddressType.TypeDecl) }))
-                || (stmt.Condition is BinaryExpr bExpr && (bExpr.Op == TokenType.LESS
-                                                           || bExpr.Op == TokenType.GREATER
-                                                           || bExpr.Op == TokenType.LESS_EQUALS
-                                                           || bExpr.Op == TokenType.GREATER_EQUALS
-                                                           || bExpr.Op == TokenType.EQUALS
-                                                           || bExpr.Op == TokenType.NEQUALS
-                                                           || bExpr.Op == TokenType.AND
-                                                           || bExpr.Op == TokenType.OR)))
+                || (stmt.Condition is BinaryExpr bExpr && (bExpr.Op is TokenType.LESS
+                                                           or TokenType.GREATER
+                                                           or TokenType.LESS_EQUALS
+                                                           or TokenType.GREATER_EQUALS
+                                                           or TokenType.EQUALS
+                                                           or TokenType.NEQUALS
+                                                           or TokenType.AND
+                                                           or TokenType.OR)))
             {
                 stmt.IfC.Accept(this);
                 foreach (var i in stmt.Elif) i.Accept(this);
@@ -304,8 +304,10 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(AssignExpr expr)
         {
+            //todo: verify operators
             expr.Lhs.Accept(this);
-            throw new System.NotImplementedException();
+            expr.Value.Accept(this);
+            return expr;
         }
 
         public Expr Visit(BinaryExpr expr)
@@ -378,12 +380,13 @@ namespace Penguor.Compiler.Analysis
         {
             var e = State.FromCall(expr);
             if (!builder.TableManager.FindSymbol(e, scopes.ToArray()) && pass > 1) throw new System.Exception();
-            return expr;
+            else return expr;
         }
 
         public Expr Visit(GroupingExpr expr)
         {
             expr.Content.Accept(this);
+            if (expr.Content is UnaryExpr or CallExpr) return expr.Content;
             return expr;
         }
 
@@ -395,7 +398,11 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(UnaryExpr expr)
         {
-            throw new System.NotImplementedException();
+            Expr e = expr.Rhs.Accept(this);
+            if (expr.Op == null) return expr;
+            else if (e is NumExpr && expr.Op is TokenType.MINUS or TokenType.PLUS or TokenType.BW_NOT or TokenType.DPLUS or TokenType.DMINUS) return expr;
+            else if (e is BooleanExpr booleanExpr && expr.Op is TokenType.EXCL_MARK) return new BooleanExpr(expr.Offset, !booleanExpr.Value);
+            else throw new System.Exception();
         }
 
         public Expr Visit(VarExpr expr)
@@ -403,9 +410,5 @@ namespace Penguor.Compiler.Analysis
             expr.Type.Accept(this);
             return expr;
         }
-
-        public Call Visit(FunctionCall call) => throw new System.NotImplementedException();
-
-        public Call Visit(IdfCall call) => throw new System.NotImplementedException();
     }
 }
