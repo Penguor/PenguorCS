@@ -26,8 +26,8 @@ namespace Penguor.Compiler.Parsing.AST
             Offset = offset;
             Declarations = declarations;
         }
-        public int Offset { get; }
-        public List<Decl> Declarations { get; }
+        public int Offset { get; init; }
+        public List<Decl> Declarations { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

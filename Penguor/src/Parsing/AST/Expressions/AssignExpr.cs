@@ -28,10 +28,10 @@ namespace Penguor.Compiler.Parsing.AST
             Op = op;
             Value = value;
         }
-        public int Offset { get; }
-        public CallExpr Lhs { get; }
-        public TokenType Op { get; }
-        public Expr Value { get; }
+        public int Offset { get; init; }
+        public CallExpr Lhs { get; init; }
+        public TokenType Op { get; init; }
+        public Expr Value { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

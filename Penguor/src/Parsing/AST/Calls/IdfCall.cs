@@ -26,8 +26,8 @@ namespace Penguor.Compiler.Parsing.AST
             Offset = offset;
             Name = name;
         }
-        public int Offset { get; }
-        public AddressFrame Name { get; }
+        public int Offset { get; init; }
+        public AddressFrame Name { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

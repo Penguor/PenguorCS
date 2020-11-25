@@ -25,7 +25,7 @@ namespace Penguor.Compiler.Parsing.AST
         {
             Offset = offset;
         }
-        public int Offset { get; }
+        public int Offset { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

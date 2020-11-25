@@ -28,10 +28,10 @@ namespace Penguor.Compiler.Parsing.AST
             Vars = vars;
             Content = content;
         }
-        public int Offset { get; }
-        public VarExpr CurrentVar { get; }
-        public CallExpr Vars { get; }
-        public Stmt Content { get; }
+        public int Offset { get; init; }
+        public VarExpr CurrentVar { get; init; }
+        public CallExpr Vars { get; init; }
+        public Stmt Content { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

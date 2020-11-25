@@ -27,9 +27,9 @@ namespace Penguor.Compiler.Parsing.AST
             Content = content;
             Condition = condition;
         }
-        public int Offset { get; }
-        public Stmt Content { get; }
-        public Expr Condition { get; }
+        public int Offset { get; init; }
+        public Stmt Content { get; init; }
+        public Expr Condition { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

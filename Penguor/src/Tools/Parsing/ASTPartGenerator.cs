@@ -179,7 +179,7 @@ namespace Penguor.Compiler.Parsing.AST
 
                             for (int i = 0; i < types.Count; i++)
                             {
-                                writer.WriteLine($"        public {types[i]} {names[i].ToUppercase()} {{ get; }}");
+                                writer.WriteLine($"        public {types[i]} {names[i].ToUppercase()} {{ get; init; }}");
                             }
 
                             writer.Write(

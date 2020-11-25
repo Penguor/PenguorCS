@@ -29,11 +29,11 @@ namespace Penguor.Compiler.Parsing.AST
             Name = name;
             Content = content;
         }
-        public int Offset { get; }
-        public TokenType? AccessMod { get; }
-        public TokenType[] NonAccessMod { get; }
-        public State Name { get; }
-        public BlockDecl Content { get; }
+        public int Offset { get; init; }
+        public TokenType? AccessMod { get; init; }
+        public TokenType[] NonAccessMod { get; init; }
+        public State Name { get; init; }
+        public BlockDecl Content { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

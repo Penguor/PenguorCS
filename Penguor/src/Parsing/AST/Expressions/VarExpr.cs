@@ -27,9 +27,9 @@ namespace Penguor.Compiler.Parsing.AST
             Type = type;
             Name = name;
         }
-        public int Offset { get; }
-        public CallExpr Type { get; }
-        public AddressFrame Name { get; }
+        public int Offset { get; init; }
+        public CallExpr Type { get; init; }
+        public AddressFrame Name { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

@@ -27,9 +27,9 @@ namespace Penguor.Compiler.Parsing.AST
             Callee = callee;
             Postfix = postfix;
         }
-        public int Offset { get; }
-        public List<Call> Callee { get; }
-        public TokenType? Postfix { get; }
+        public int Offset { get; init; }
+        public List<Call> Callee { get; init; }
+        public TokenType? Postfix { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

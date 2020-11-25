@@ -29,11 +29,11 @@ namespace Penguor.Compiler.Parsing.AST
             Elif = elif;
             ElseC = elsec;
         }
-        public int Offset { get; }
-        public Expr Condition { get; }
-        public Stmt IfC { get; }
-        public List<Stmt> Elif { get; }
-        public Stmt? ElseC { get; }
+        public int Offset { get; init; }
+        public Expr Condition { get; init; }
+        public Stmt IfC { get; init; }
+        public List<Stmt> Elif { get; init; }
+        public Stmt? ElseC { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

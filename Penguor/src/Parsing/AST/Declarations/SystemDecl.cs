@@ -30,12 +30,12 @@ namespace Penguor.Compiler.Parsing.AST
             Parent = parent;
             Content = content;
         }
-        public int Offset { get; }
-        public TokenType? AccessMod { get; }
-        public TokenType[] NonAccessMod { get; }
-        public AddressFrame Name { get; }
-        public CallExpr? Parent { get; }
-        public BlockDecl Content { get; }
+        public int Offset { get; init; }
+        public TokenType? AccessMod { get; init; }
+        public TokenType[] NonAccessMod { get; init; }
+        public AddressFrame Name { get; init; }
+        public CallExpr? Parent { get; init; }
+        public BlockDecl Content { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

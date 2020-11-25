@@ -31,13 +31,13 @@ namespace Penguor.Compiler.Parsing.AST
             Parameters = parameters;
             Content = content;
         }
-        public int Offset { get; }
-        public TokenType? AccessMod { get; }
-        public TokenType[] NonAccessMod { get; }
-        public CallExpr Returns { get; }
-        public AddressFrame Name { get; }
-        public List<VarExpr> Parameters { get; }
-        public Decl Content { get; }
+        public int Offset { get; init; }
+        public TokenType? AccessMod { get; init; }
+        public TokenType[] NonAccessMod { get; init; }
+        public CallExpr Returns { get; init; }
+        public AddressFrame Name { get; init; }
+        public List<VarExpr> Parameters { get; init; }
+        public Decl Content { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

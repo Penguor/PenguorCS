@@ -27,9 +27,9 @@ namespace Penguor.Compiler.Parsing.AST
             Dir = dir;
             Val = val;
         }
-        public int Offset { get; }
-        public TokenType Dir { get; }
-        public Token[] Val { get; }
+        public int Offset { get; init; }
+        public TokenType Dir { get; init; }
+        public Token[] Val { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance

@@ -28,10 +28,10 @@ namespace Penguor.Compiler.Parsing.AST
             Cases = cases;
             DefaultCase = defaultcase;
         }
-        public int Offset { get; }
-        public Expr Condition { get; }
-        public List<Stmt> Cases { get; }
-        public Stmt? DefaultCase { get; }
+        public int Offset { get; init; }
+        public Expr Condition { get; init; }
+        public List<Stmt> Cases { get; init; }
+        public Stmt? DefaultCase { get; init; }
 
         /// <summary>
         /// returns Visit() of this instance
