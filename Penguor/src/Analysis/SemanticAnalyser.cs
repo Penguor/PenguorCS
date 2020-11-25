@@ -95,7 +95,7 @@ namespace Penguor.Compiler.Analysis
         {
             List<Decl> content = new(decl.Content.Count);
             foreach (var i in decl.Content) content.Add(i.Accept(this));
-            return new BlockDecl(decl.Offset, content);
+            return decl with { Content = content };
         }
 
         public Decl Visit(DataDecl decl)
@@ -109,10 +109,10 @@ namespace Penguor.Compiler.Analysis
             }
 
             scopes[0].Push(decl.Name);
-            decl.Content.Accept(this);
+            var content = decl.Content.Accept(this);
             scopes[0].Pop();
 
-            return decl;
+            return decl with { Content = (BlockDecl)content };
         }
 
         public Decl Visit(TypeDecl decl)
@@ -126,16 +126,13 @@ namespace Penguor.Compiler.Analysis
             }
 
             scopes[0].Push(decl.Name);
-            decl.Content.Accept(this);
+            var content = decl.Content.Accept(this);
             scopes[0].Pop();
 
-            return decl;
+            return decl with { Content = (BlockDecl)content };
         }
 
-        public Decl Visit(DeclStmt decl)
-        {
-            return new DeclStmt(decl.Offset, decl.Stmt.Accept(this));
-        }
+        public Decl Visit(DeclStmt decl) => decl with { Stmt = decl.Stmt.Accept(this) };
 
         public Decl Visit(FunctionDecl decl)
         {
@@ -146,23 +143,22 @@ namespace Penguor.Compiler.Analysis
             var content = decl.Content.Accept(this);
             scopes[0].Pop();
 
-            return new FunctionDecl(decl.Offset, decl.AccessMod, decl.NonAccessMod, decl.Returns, decl.Name, parameters, content);
+            return decl with { Parameters = parameters, Content = content };
         }
 
         public Decl Visit(LibraryDecl decl)
         {
             scopes[0].Append(decl.Name);
-            decl.Content.Accept(this);
+            var content = decl.Content.Accept(this);
             scopes[0].Remove(decl.Name);
-            return decl;
+            return decl with { Content = (BlockDecl)content };
         }
 
         public Decl Visit(ProgramDecl decl)
         {
             List<Decl> decls = new List<Decl>();
             foreach (var i in decl.Declarations) decls.Add(i.Accept(this));
-            program = new ProgramDecl(decl.Offset, decls);
-            return program;
+            return decl with { Declarations = decls };
         }
 
         public Decl Visit(SystemDecl decl)
@@ -176,10 +172,10 @@ namespace Penguor.Compiler.Analysis
             }
 
             scopes[0].Push(decl.Name);
-            decl.Content.Accept(this);
+            var content = decl.Content.Accept(this);
             scopes[0].Pop();
 
-            return decl;
+            return decl with { Content = (BlockDecl)content };
         }
 
         public Decl Visit(UsingDecl decl)
@@ -195,18 +191,19 @@ namespace Penguor.Compiler.Analysis
         {
             SetDataType(decl.Name, decl.Type);
             if (decl.Init is not null)
-                return new VarDecl(decl.Offset, decl.AccessMod, decl.NonAccessMod, decl.Type, decl.Name, decl.Init.Accept(this));
-            return decl;
+                return decl with { Init = decl.Init.Accept(this) };
+            else return decl;
         }
 
         public Stmt Visit(BlockStmt stmt)
         {
             scopes[0].Push(new AddressFrame(".block", AddressType.BlockStmt));
             builder.TableManager.AddTable(scopes[0]);
+            List<Stmt> content = new List<Stmt>();
             foreach (var i in stmt.Content)
-                i.Accept(this);
+                content.Add(i.Accept(this));
             scopes[0].Pop();
-            return stmt;
+            return stmt with { Content = content };
         }
 
         public Stmt Visit(CaseStmt stmt)
@@ -220,7 +217,7 @@ namespace Penguor.Compiler.Analysis
             builder.TableManager.AddTable(scopes[0]);
             var content = stmt.Content.Accept(this);
             scopes[0].Pop();
-            return new DoStmt(stmt.Offset, content, stmt.Condition.Accept(this));
+            return stmt with { Content = content, Condition = stmt.Condition.Accept(this) };
         }
 
         public Stmt Visit(ElifStmt stmt)
@@ -231,7 +228,7 @@ namespace Penguor.Compiler.Analysis
         public Stmt Visit(ExprStmt stmt)
         {
             if (stmt.Expr is AssignExpr or CallExpr)
-                return new ExprStmt(stmt.Offset, stmt.Expr.Accept(this));
+                return stmt with { Expr = stmt.Expr.Accept(this) };
             else
                 throw new System.Exception();
         }
@@ -246,7 +243,7 @@ namespace Penguor.Compiler.Analysis
             var content = stmt.Content.Accept(this);
             scopes[0].Pop();
 
-            return new ForStmt(stmt.Offset, (VarExpr)currentVar, (CallExpr)vars, content);
+            return stmt with { CurrentVar = (VarExpr)currentVar, Vars = (CallExpr)vars, Content = content };
         }
 
         public Stmt Visit(IfStmt stmt)
@@ -277,11 +274,7 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(CompilerStmt stmt) => stmt;
 
-        public Stmt Visit(ReturnStmt stmt)
-        {
-            stmt.Value?.Accept(this);
-            return stmt;
-        }
+        public Stmt Visit(ReturnStmt stmt) => stmt with { Value = stmt.Value?.Accept(this) };
 
         public Stmt Visit(SwitchStmt stmt)
         {
