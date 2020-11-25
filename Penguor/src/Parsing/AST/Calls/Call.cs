@@ -15,13 +15,12 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// Base class for penguor Call
     /// </summary>
-    public abstract class Call
+    public abstract record Call
     {
         /// <summary>
         /// <c>Accept</c> returns the visit method for the Call
         /// </summary>
         /// <param name="visitor">the visitor which visits this instance of Call</param>
-        /// <returns></returns>
         public abstract T Accept<T>(ICallVisitor<T> visitor);
     }
 }

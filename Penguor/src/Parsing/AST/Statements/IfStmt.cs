@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A IfStmt Stmt
     /// </summary>
-    public sealed class IfStmt : Stmt
+    public sealed record IfStmt : Stmt
     {
         /// <summary>
         /// creates a new instance of IfStmt
@@ -54,7 +54,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a IfStmt
         /// </summary>
-        /// <returns></returns>
         T Visit(IfStmt stmt);
     }
 }

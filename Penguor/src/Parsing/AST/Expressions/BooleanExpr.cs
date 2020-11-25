@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A BooleanExpr Expr
     /// </summary>
-    public sealed class BooleanExpr : Expr
+    public sealed record BooleanExpr : Expr
     {
         /// <summary>
         /// creates a new instance of BooleanExpr
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a BooleanExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(BooleanExpr expr);
     }
 }

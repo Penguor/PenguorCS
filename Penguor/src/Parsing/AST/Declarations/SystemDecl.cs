@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A SystemDecl Decl
     /// </summary>
-    public sealed class SystemDecl : Decl
+    public sealed record SystemDecl : Decl
     {
         /// <summary>
         /// creates a new instance of SystemDecl
@@ -56,7 +56,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a SystemDecl
         /// </summary>
-        /// <returns></returns>
         T Visit(SystemDecl decl);
     }
 }

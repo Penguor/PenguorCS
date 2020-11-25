@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A SwitchStmt Stmt
     /// </summary>
-    public sealed class SwitchStmt : Stmt
+    public sealed record SwitchStmt : Stmt
     {
         /// <summary>
         /// creates a new instance of SwitchStmt
@@ -52,7 +52,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a SwitchStmt
         /// </summary>
-        /// <returns></returns>
         T Visit(SwitchStmt stmt);
     }
 }

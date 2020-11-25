@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A DeclStmt Decl
     /// </summary>
-    public sealed class DeclStmt : Decl
+    public sealed record DeclStmt : Decl
     {
         /// <summary>
         /// creates a new instance of DeclStmt
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a DeclStmt
         /// </summary>
-        /// <returns></returns>
         T Visit(DeclStmt decl);
     }
 }

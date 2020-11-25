@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A NumExpr Expr
     /// </summary>
-    public sealed class NumExpr : Expr
+    public sealed record NumExpr : Expr
     {
         /// <summary>
         /// creates a new instance of NumExpr
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a NumExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(NumExpr expr);
     }
 }

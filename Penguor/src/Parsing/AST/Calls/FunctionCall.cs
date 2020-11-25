@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A FunctionCall Call
     /// </summary>
-    public sealed class FunctionCall : Call
+    public sealed record FunctionCall : Call
     {
         /// <summary>
         /// creates a new instance of FunctionCall
@@ -50,7 +50,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a FunctionCall
         /// </summary>
-        /// <returns></returns>
         T Visit(FunctionCall call);
     }
 }

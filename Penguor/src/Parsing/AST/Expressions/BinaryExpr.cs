@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A BinaryExpr Expr
     /// </summary>
-    public sealed class BinaryExpr : Expr
+    public sealed record BinaryExpr : Expr
     {
         /// <summary>
         /// creates a new instance of BinaryExpr
@@ -52,7 +52,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a BinaryExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(BinaryExpr expr);
     }
 }

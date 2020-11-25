@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A UnaryExpr Expr
     /// </summary>
-    public sealed class UnaryExpr : Expr
+    public sealed record UnaryExpr : Expr
     {
         /// <summary>
         /// creates a new instance of UnaryExpr
@@ -50,7 +50,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a UnaryExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(UnaryExpr expr);
     }
 }

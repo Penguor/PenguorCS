@@ -15,13 +15,12 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// Base class for penguor Decl
     /// </summary>
-    public abstract class Decl
+    public abstract record Decl
     {
         /// <summary>
         /// <c>Accept</c> returns the visit method for the Decl
         /// </summary>
         /// <param name="visitor">the visitor which visits this instance of Decl</param>
-        /// <returns></returns>
         public abstract T Accept<T>(IDeclVisitor<T> visitor);
     }
 }

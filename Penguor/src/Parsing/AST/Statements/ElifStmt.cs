@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A ElifStmt Stmt
     /// </summary>
-    public sealed class ElifStmt : Stmt
+    public sealed record ElifStmt : Stmt
     {
         /// <summary>
         /// creates a new instance of ElifStmt
@@ -50,7 +50,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a ElifStmt
         /// </summary>
-        /// <returns></returns>
         T Visit(ElifStmt stmt);
     }
 }

@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A LibraryDecl Decl
     /// </summary>
-    public sealed class LibraryDecl : Decl
+    public sealed record LibraryDecl : Decl
     {
         /// <summary>
         /// creates a new instance of LibraryDecl
@@ -54,7 +54,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a LibraryDecl
         /// </summary>
-        /// <returns></returns>
         T Visit(LibraryDecl decl);
     }
 }

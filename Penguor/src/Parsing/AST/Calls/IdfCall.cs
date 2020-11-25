@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A IdfCall Call
     /// </summary>
-    public sealed class IdfCall : Call
+    public sealed record IdfCall : Call
     {
         /// <summary>
         /// creates a new instance of IdfCall
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a IdfCall
         /// </summary>
-        /// <returns></returns>
         T Visit(IdfCall call);
     }
 }

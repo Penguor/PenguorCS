@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A BlockDecl Decl
     /// </summary>
-    public sealed class BlockDecl : Decl
+    public sealed record BlockDecl : Decl
     {
         /// <summary>
         /// creates a new instance of BlockDecl
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a BlockDecl
         /// </summary>
-        /// <returns></returns>
         T Visit(BlockDecl decl);
     }
 }

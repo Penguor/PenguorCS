@@ -77,13 +77,12 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// Base class for penguor {mode}
     /// </summary>
-    public abstract class {mode}
+    public abstract record {mode}
     {{
         /// <summary>
         /// <c>Accept</c> returns the visit method for the {mode}
         /// </summary>
         /// <param name=""visitor"">the visitor which visits this instance of {mode}</param>
-        /// <returns></returns>
         public abstract T Accept<T>(I{mode.ToUppercase()}Visitor<T> visitor);
     }}
 }}
@@ -151,7 +150,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A {name.ToUppercase()} {mode}
     /// </summary>
-    public sealed class {name.ToUppercase()} : {mode}
+    public sealed record {name.ToUppercase()} : {mode}
     {{
         /// <summary>
         /// creates a new instance of {name.ToUppercase()}
@@ -204,7 +203,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a {name.ToUppercase()}
         /// </summary>
-        /// <returns></returns>
         T Visit({name.ToUppercase()} {mode!.ToLower()});
     }}
 }}

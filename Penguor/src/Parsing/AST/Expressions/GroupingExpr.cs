@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A GroupingExpr Expr
     /// </summary>
-    public sealed class GroupingExpr : Expr
+    public sealed record GroupingExpr : Expr
     {
         /// <summary>
         /// creates a new instance of GroupingExpr
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a GroupingExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(GroupingExpr expr);
     }
 }

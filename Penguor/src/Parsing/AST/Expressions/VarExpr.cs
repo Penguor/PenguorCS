@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A VarExpr Expr
     /// </summary>
-    public sealed class VarExpr : Expr
+    public sealed record VarExpr : Expr
     {
         /// <summary>
         /// creates a new instance of VarExpr
@@ -50,7 +50,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a VarExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(VarExpr expr);
     }
 }

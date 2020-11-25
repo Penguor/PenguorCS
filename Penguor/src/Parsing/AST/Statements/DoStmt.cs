@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A DoStmt Stmt
     /// </summary>
-    public sealed class DoStmt : Stmt
+    public sealed record DoStmt : Stmt
     {
         /// <summary>
         /// creates a new instance of DoStmt
@@ -50,7 +50,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a DoStmt
         /// </summary>
-        /// <returns></returns>
         T Visit(DoStmt stmt);
     }
 }

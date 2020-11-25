@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A BlockStmt Stmt
     /// </summary>
-    public sealed class BlockStmt : Stmt
+    public sealed record BlockStmt : Stmt
     {
         /// <summary>
         /// creates a new instance of BlockStmt
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a BlockStmt
         /// </summary>
-        /// <returns></returns>
         T Visit(BlockStmt stmt);
     }
 }

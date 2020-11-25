@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A UsingDecl Decl
     /// </summary>
-    public sealed class UsingDecl : Decl
+    public sealed record UsingDecl : Decl
     {
         /// <summary>
         /// creates a new instance of UsingDecl
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a UsingDecl
         /// </summary>
-        /// <returns></returns>
         T Visit(UsingDecl decl);
     }
 }

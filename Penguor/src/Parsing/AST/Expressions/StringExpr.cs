@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A StringExpr Expr
     /// </summary>
-    public sealed class StringExpr : Expr
+    public sealed record StringExpr : Expr
     {
         /// <summary>
         /// creates a new instance of StringExpr
@@ -48,7 +48,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a StringExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(StringExpr expr);
     }
 }

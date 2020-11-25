@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A CallExpr Expr
     /// </summary>
-    public sealed class CallExpr : Expr
+    public sealed record CallExpr : Expr
     {
         /// <summary>
         /// creates a new instance of CallExpr
@@ -50,7 +50,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a CallExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(CallExpr expr);
     }
 }

@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A VarDecl Decl
     /// </summary>
-    public sealed class VarDecl : Decl
+    public sealed record VarDecl : Decl
     {
         /// <summary>
         /// creates a new instance of VarDecl
@@ -56,7 +56,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a VarDecl
         /// </summary>
-        /// <returns></returns>
         T Visit(VarDecl decl);
     }
 }

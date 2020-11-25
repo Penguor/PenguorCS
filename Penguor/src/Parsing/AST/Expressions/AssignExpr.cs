@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A AssignExpr Expr
     /// </summary>
-    public sealed class AssignExpr : Expr
+    public sealed record AssignExpr : Expr
     {
         /// <summary>
         /// creates a new instance of AssignExpr
@@ -52,7 +52,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a AssignExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(AssignExpr expr);
     }
 }

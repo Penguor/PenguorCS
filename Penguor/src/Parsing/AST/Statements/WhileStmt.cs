@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A WhileStmt Stmt
     /// </summary>
-    public sealed class WhileStmt : Stmt
+    public sealed record WhileStmt : Stmt
     {
         /// <summary>
         /// creates a new instance of WhileStmt
@@ -50,7 +50,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a WhileStmt
         /// </summary>
-        /// <returns></returns>
         T Visit(WhileStmt stmt);
     }
 }

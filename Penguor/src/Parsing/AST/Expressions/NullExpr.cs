@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A NullExpr Expr
     /// </summary>
-    public sealed class NullExpr : Expr
+    public sealed record NullExpr : Expr
     {
         /// <summary>
         /// creates a new instance of NullExpr
@@ -46,7 +46,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a NullExpr
         /// </summary>
-        /// <returns></returns>
         T Visit(NullExpr expr);
     }
 }

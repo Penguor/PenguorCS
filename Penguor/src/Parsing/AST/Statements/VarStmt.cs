@@ -16,7 +16,7 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A VarStmt Stmt
     /// </summary>
-    public sealed class VarStmt : Stmt
+    public sealed record VarStmt : Stmt
     {
         /// <summary>
         /// creates a new instance of VarStmt
@@ -52,7 +52,6 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// visit a VarStmt
         /// </summary>
-        /// <returns></returns>
         T Visit(VarStmt stmt);
     }
 }
