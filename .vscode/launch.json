@@ -11,7 +11,7 @@
       "preLaunchTask": "build",
       // If you have changed target frameworks, make sure to update the program path.
       "program": "${workspaceFolder}/Penguor/bin/Debug/net5.0/Penguor.dll",
-      "args": "build -i \"${input:buildFile}\"",
+      "args": "build -i \"${input:buildFile}\" --stdlib \"${input:stdLib}\"",
       "cwd": "${workspaceFolder}/Penguor",
       // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
       "console": "internalConsole",
@@ -30,6 +30,11 @@
       "type": "promptString",
       "default": "../Test.pgr",
       "description": "The Penguor file to build"
+    },
+    {
+      "id": "stdLib",
+      "type": "promptString",
+      "description": "the path to the standard library"
     }
   ]
 }

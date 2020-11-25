@@ -79,6 +79,8 @@ namespace Penguor.Compiler.Build
                 b.Parse();
             foreach (var b in builders)
                 b.Analyse();
+            foreach (var b in builders)
+                b.GenerateIR();
         }
 
         /// <summary>

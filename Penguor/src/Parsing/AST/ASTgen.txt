@@ -1,5 +1,5 @@
 ; Expr "Penguor\src\Parsing\AST\Expressions"
-AssignExpr Expr lhs TokenType op Expr value
+AssignExpr CallExpr lhs TokenType op Expr value
 BinaryExpr Expr lhs TokenType op Expr rhs
 UnaryExpr TokenType? op Expr rhs
 CallExpr List<Call> callee TokenType? postfix

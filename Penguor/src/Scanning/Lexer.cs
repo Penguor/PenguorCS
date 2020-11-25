@@ -67,6 +67,9 @@ namespace Penguor.Compiler.Lexing
 
                     switch (idf)
                     {
+                        case "asm":
+                            AddToken(TokenType.ASM);
+                            continue;
                         case "null":
                             AddToken(TokenType.NULL);
                             continue;

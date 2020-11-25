@@ -18,7 +18,7 @@ namespace Penguor.Compiler
     /// <summary>
     /// represents an address in a Penguor program
     /// </summary>
-    public class State : ICollection, ICollection<AddressFrame>
+    public class State : ICollection, ICollection<AddressFrame>, ICloneable
     {
         private List<AddressFrame> addressFrames;
 
@@ -84,10 +84,11 @@ namespace Penguor.Compiler
         /// <param name="call">the CallExpr to create the state from</param>
         public static State FromCall(CallExpr call)
         {
+            var callees = (Call[])call.Callee.ToArray().Clone();
             List<AddressFrame> frames = new List<AddressFrame>(call.Callee.Count);
             for (int i = 0; i < call.Callee.Count; i++)
             {
-                Call c = call.Callee[i];
+                Call c = callees[i];
                 frames.Add(c switch
                 {
                     IdfCall a => a.Name,
@@ -161,8 +162,21 @@ namespace Penguor.Compiler
         /// </summary>
         public static State operator +(State a, State b)
         {
-            a.addressFrames.AddRange(b);
-            return a;
+            AddressFrame[] frames = new AddressFrame[a.Count + b.Count];
+            a.CopyTo(frames, 0);
+            b.CopyTo(frames, a.Count - 1);
+            return new State(frames);
+        }
+
+        /// <summary>
+        /// add two States together
+        /// </summary>
+        public static State operator +(State a, AddressFrame b)
+        {
+            AddressFrame[] frames = new AddressFrame[a.Count + 1];
+            a.CopyTo(frames, 0);
+            frames[^1] = b;
+            return new State(frames);
         }
 
         /// <summary>
@@ -170,6 +184,7 @@ namespace Penguor.Compiler
         /// </summary>
         public static State operator -(State minuend, State subtrahend)
         {
+            //todo: this doesn't work the way it should
             while (subtrahend.Count != 0 && minuend.Count != 0)
             {
                 if (minuend[^1].Equals(subtrahend[^1])) minuend.Pop();
@@ -310,5 +325,12 @@ namespace Penguor.Compiler
         /// convert the State to a string of the AddressFrames joined by dots
         /// </summary>
         public override string ToString() => string.Join('.', addressFrames);
+
+        public object Clone()
+        {
+            var list = new List<AddressFrame>(addressFrames.Count);
+            addressFrames.ForEach((item) => list.Add(item with { }));
+            return new State(list);
+        }
     }
 }

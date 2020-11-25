@@ -18,6 +18,7 @@ using Penguor.Compiler.Lexing;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Analysis;
+using Penguor.Compiler.IR;
 
 namespace Penguor.Compiler.Build
 {
@@ -86,6 +87,7 @@ namespace Penguor.Compiler.Build
             Lex();
             Parse();
             Analyse();
+            GenerateIR();
             return ExitCode;
         }
 
@@ -111,6 +113,7 @@ namespace Penguor.Compiler.Build
                 Exit(1);
             }
             lexerFinished = true;
+            Debug.Log("lexing finished.", LogLevel.Info);
         }
 
         /// <summary>
@@ -145,6 +148,7 @@ namespace Penguor.Compiler.Build
                 Exit(1);
             }
             parserFinished = true;
+            Debug.Log("parsing finished.", LogLevel.Info);
             return program ?? throw new NullReferenceException();
         }
 
@@ -159,10 +163,18 @@ namespace Penguor.Compiler.Build
             SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(nameof(program)), this);
 
             analyser.Analyse(1);
-            Decl analysed = analyser.Analyse(2);
+            program = (ProgramDecl)analyser.Analyse(2);
+            Debug.Log("Semantic analysis finished.", LogLevel.Info);
         }
 
-        // Below this is the code for handling errors in the Penguor source code
+        public void GenerateIR()
+        {
+            IRGenerator generator = new IRGenerator(program ?? throw new ArgumentNullException(nameof(program)), this);
+            var ir = generator.Generate();
+            Debug.Log("IR Generation finished.", LogLevel.Info);
+        }
+
+        // code for handling errors in the Penguor source code
 
         /// <summary>
         /// contains all caught exceptions

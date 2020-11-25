@@ -130,10 +130,10 @@ namespace Penguor.Compiler
         /// <param name="scopes">the scopes to search in</param>
         public Symbol? GetSymbol(AddressFrame symbol, IEnumerable<State> scopes)
         {
-            Symbol? outSym;
+            Symbol? outSym = null;
             foreach (var i in scopes)
                 outSym = GetSymbol(symbol, i);
-            return null;
+            return outSym;
         }
 
         /// <summary>
@@ -149,31 +149,102 @@ namespace Penguor.Compiler
         /// <param name="scopes">the scopes to search in</param>
         public Symbol? GetSymbol(State symbol, State[] scopes)
         {
-            var frame = symbol.Pop();
+            var symbolArray = (State)symbol.Clone();
+            var frame = symbolArray.Pop();
             var array = (State[])scopes.Clone();
 
             var allScopes = new State[array.Length + 1];
-            allScopes[0] = symbol;
+            allScopes[0] = symbolArray;
             array.CopyTo(allScopes, 1);
 
             return GetSymbol(frame, allScopes);
         }
 
         /// <summary>
-        /// Search for a symbol
+        /// Looks up a symbol and returns the full state
         /// </summary>
         /// <param name="symbol">the symbol to search for</param>
         /// <param name="scope">the scope to search in</param>
+        public State? GetStateBySymbol(AddressFrame symbol, State scope)
+        {
+            State clonedScope = (State)scope.Clone();
+            if (clonedScope.Count == 0)
+            {
+                TryLookupSymbolInScope(clonedScope, symbol, out Symbol? outSym);
+                if (outSym != null) return clonedScope + new AddressFrame(outSym.Name, outSym.AdType);
+                else return null;
+            }
+            for (int i = clonedScope.Count - 1; i >= 0; i--)
+            {
+                TryLookupSymbolInScope(clonedScope, symbol, out Symbol? outSym);
+                if (outSym != null) return clonedScope + new AddressFrame(outSym.Name, outSym.AdType);
+                else if (clonedScope[i].Type == AddressType.LibraryDecl) return null;
+                else clonedScope.Pop();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Looks up a symbol and returns the full state
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scopes">the scopes to search in</param>
+        public State? GetStateBySymbol(AddressFrame symbol, IEnumerable<State> scopes)
+        {
+            State? outSym = null;
+            foreach (var i in scopes)
+            {
+                outSym = GetStateBySymbol(symbol, i);
+                if (outSym != null) break;
+            }
+            return outSym;
+        }
+
+        /// <summary>
+        /// Looks up a symbol and returns the full state
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scope">the scope to search in</param>
+        public State? GetStateBySymbol(State symbol, State scope)
+        {
+            var symbolArray = (State)symbol.Clone();
+            return GetStateBySymbol(symbolArray.Pop(), scope + symbol);
+        }
+
+        /// <summary>
+        /// Looks up a symbol and returns the full state
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="scopes">the scopes to search in</param>
+        public State? GetStateBySymbol(State symbol, State[] scopes)
+        {
+            var symbolArray = (State)symbol.Clone();
+            var frame = symbolArray.Pop();
+            var array = (State[])scopes.Clone();
+
+            var allScopes = new State[array.Length + 1];
+            allScopes[0] = symbolArray;
+            array.CopyTo(allScopes, 1);
+
+            return GetStateBySymbol(frame, allScopes);
+        }
+
+        /// <summary>
+        /// Search for a symbol
+        /// </summary>
+        /// <param name="symbol">the symbol to search for</param>
+        /// <param name="clonedScope">the scope to search in</param>
         /// <returns>true if the Symbol was found, otherwise false</returns>
         public bool FindSymbol(AddressFrame symbol, State scope)
         {
-            if (scope.Count == 0) return TryLookupSymbolInScope(scope, symbol, out _);
-            for (int i = scope.Count - 1; i >= 0; i--)
+            State clonedScope = (State)scope.Clone();
+            if (clonedScope.Count == 0) return TryLookupSymbolInScope(clonedScope, symbol, out _);
+            for (int i = clonedScope.Count - 1; i >= 0; i--)
             {
-                bool found = TryLookupSymbolInScope(scope, symbol, out _);
+                bool found = TryLookupSymbolInScope(clonedScope, symbol, out _);
                 if (found) return true;
-                else if (scope[i].Type == AddressType.LibraryDecl) return false;
-                else scope.Pop();
+                else if (clonedScope[i].Type == AddressType.LibraryDecl) return false;
+                else clonedScope.Pop();
             }
             return false;
         }
@@ -209,11 +280,13 @@ namespace Penguor.Compiler
         /// <returns>true if the Symbol was found, otherwise false</returns>
         public bool FindSymbol(State symbol, State[] scopes)
         {
-            var frame = symbol.Pop();
+            var symbolArray = (State)symbol.Clone();
+            var frame = symbolArray.Pop();
+
             var array = (State[])scopes.Clone();
 
             var allScopes = new State[array.Length + 1];
-            allScopes[0] = symbol;
+            allScopes[0] = symbolArray;
             array.CopyTo(allScopes, 1);
 
             return FindSymbol(frame, allScopes);

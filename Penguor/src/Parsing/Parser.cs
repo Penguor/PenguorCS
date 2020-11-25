@@ -174,7 +174,6 @@ namespace Penguor.Compiler.Parsing
                 while (true)
                 {
                     VarExpr var = VarExpr(AddressType.VarExpr);
-                    AddSymbol(var.Name);
                     parameters.Add(var);
                     if (Match(COMMA)) continue;
                     Consume(RPAREN);
@@ -430,7 +429,10 @@ namespace Penguor.Compiler.Parsing
                       BW_OR_ASSIGN,
                       BW_XOR_ASSIGN))
             {
-                return new AssignExpr(offset, lhs, GetPrevious().Type, CondOrExpr());
+                if (lhs is CallExpr e)
+                    return new AssignExpr(offset, e, GetPrevious().Type, CondOrExpr());
+                else
+                    throw new Exception();
             }
 
             return lhs;
@@ -516,6 +518,7 @@ namespace Penguor.Compiler.Parsing
                 else if (Match(DPLUS, DMINUS, ARRAY))
                 {
                     postfix = GetPrevious().Type;
+                    callee.Add(new IdfCall(idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall)));
                 }
                 else
                 {

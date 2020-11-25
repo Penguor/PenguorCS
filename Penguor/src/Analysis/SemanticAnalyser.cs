@@ -22,7 +22,7 @@ namespace Penguor.Compiler.Analysis
     {
         private readonly Builder builder;
 
-        private readonly ProgramDecl program;
+        private ProgramDecl program;
 
         private readonly List<State> scopes;
 
@@ -39,7 +39,6 @@ namespace Penguor.Compiler.Analysis
         public Decl Analyse(byte pass)
         {
             this.pass = pass;
-            scopes.Add(new State());
             scopes.Add(new State());
             return program.Accept(this);
         }
@@ -94,8 +93,9 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(BlockDecl decl)
         {
-            foreach (var i in decl.Content) i.Accept(this);
-            return decl;
+            List<Decl> content = new(decl.Content.Count);
+            foreach (var i in decl.Content) content.Add(i.Accept(this));
+            return new BlockDecl(decl.Offset, content);
         }
 
         public Decl Visit(DataDecl decl)
@@ -134,20 +134,19 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(DeclStmt decl)
         {
-            decl.Stmt.Accept(this);
-            return decl;
+            return new DeclStmt(decl.Offset, decl.Stmt.Accept(this));
         }
 
         public Decl Visit(FunctionDecl decl)
         {
             SetDataType(decl.Name, decl.Returns);
-            foreach (var i in decl.Parameters) i.Accept(this);
+            List<VarExpr> parameters = new(decl.Parameters.Count);
+            foreach (var i in decl.Parameters) parameters.Add((VarExpr)i.Accept(this));
             scopes[0].Push(decl.Name);
-            AddVarExpr(decl.Parameters.ToArray());
-            decl.Content.Accept(this);
+            var content = decl.Content.Accept(this);
             scopes[0].Pop();
 
-            return decl;
+            return new FunctionDecl(decl.Offset, decl.AccessMod, decl.NonAccessMod, decl.Returns, decl.Name, parameters, content);
         }
 
         public Decl Visit(LibraryDecl decl)
@@ -160,8 +159,10 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(ProgramDecl decl)
         {
-            foreach (var i in decl.Declarations) i.Accept(this);
-            return decl;
+            List<Decl> decls = new List<Decl>();
+            foreach (var i in decl.Declarations) decls.Add(i.Accept(this));
+            program = new ProgramDecl(decl.Offset, decls);
+            return program;
         }
 
         public Decl Visit(SystemDecl decl)
@@ -194,9 +195,7 @@ namespace Penguor.Compiler.Analysis
         {
             SetDataType(decl.Name, decl.Type);
             if (decl.Init is not null)
-            {
-                decl.Init.Accept(this);
-            }
+                return new VarDecl(decl.Offset, decl.AccessMod, decl.NonAccessMod, decl.Type, decl.Name, decl.Init.Accept(this));
             return decl;
         }
 
@@ -217,7 +216,11 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(DoStmt stmt)
         {
-            throw new System.NotImplementedException();
+            scopes[0].Push(new AddressFrame(".do", AddressType.Control));
+            builder.TableManager.AddTable(scopes[0]);
+            var content = stmt.Content.Accept(this);
+            scopes[0].Pop();
+            return new DoStmt(stmt.Offset, content, stmt.Condition.Accept(this));
         }
 
         public Stmt Visit(ElifStmt stmt)
@@ -227,27 +230,23 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(ExprStmt stmt)
         {
-            if (stmt.Expr is AssignExpr || stmt.Expr is CallExpr)
-            {
-                stmt.Expr.Accept(this);
-                return stmt;
-            }
+            if (stmt.Expr is AssignExpr or CallExpr)
+                return new ExprStmt(stmt.Offset, stmt.Expr.Accept(this));
             else
-            {
                 throw new System.Exception();
-            }
         }
 
         public Stmt Visit(ForStmt stmt)
         {
-            stmt.CurrentVar.Accept(this);
-            stmt.Vars.Accept(this);
+            var currentVar = stmt.CurrentVar.Accept(this);
+            var vars = stmt.Vars.Accept(this);
             scopes[0].Push(new AddressFrame(".for", AddressType.Control));
             builder.TableManager.AddTable(scopes[0]);
             AddVarExpr(stmt.CurrentVar);
-            stmt.Content.Accept(this);
+            var content = stmt.Content.Accept(this);
             scopes[0].Pop();
-            return stmt;
+
+            return new ForStmt(stmt.Offset, (VarExpr)currentVar, (CallExpr)vars, content);
         }
 
         public Stmt Visit(IfStmt stmt)
@@ -368,6 +367,34 @@ namespace Penguor.Compiler.Analysis
             {
                 if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value || expr2.Value);
                 if (lhs is NumExpr && rhs is NumExpr) throw new System.Exception();
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.PLUS)
+            {
+                if (lhs is BooleanExpr && rhs is BooleanExpr) throw new System.Exception();
+                { if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Offset, expr1.Value + expr2.Value); }
+                { if (lhs is StringExpr expr1 && rhs is StringExpr expr2) return new StringExpr(expr1.Offset, expr1.Value + expr2.Value); }
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.MINUS)
+            {
+                if (lhs is BooleanExpr && rhs is BooleanExpr) throw new System.Exception();
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Offset, expr1.Value - expr2.Value);
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.MUL)
+            {
+                if (lhs is BooleanExpr && rhs is BooleanExpr) throw new System.Exception();
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Offset, expr1.Value * expr2.Value);
+                if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
+            }
+            else if (expr.Op == TokenType.DIV)
+            {
+                if (lhs is BooleanExpr && rhs is BooleanExpr) throw new System.Exception();
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Offset, expr1.Value / expr2.Value);
                 if (lhs is StringExpr && rhs is StringExpr) throw new System.Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new System.Exception();
             }

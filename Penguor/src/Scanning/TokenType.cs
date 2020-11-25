@@ -14,6 +14,7 @@ namespace Penguor.Compiler.Parsing
     public enum TokenType : byte
     {
         HASHTAG
+        , ASM
         , SAFETY // pp directives 
         , PUBLIC, PRIVATE, PROTECTED, RESTRICTED // access modifiers
         , STATIC, DYNAMIC // non-access modifiers
