@@ -233,7 +233,7 @@ namespace Penguor.Compiler
         /// Search for a symbol
         /// </summary>
         /// <param name="symbol">the symbol to search for</param>
-        /// <param name="clonedScope">the scope to search in</param>
+        /// <param name="scope">the scope to search in</param>
         /// <returns>true if the Symbol was found, otherwise false</returns>
         public bool FindSymbol(AddressFrame symbol, State scope)
         {
