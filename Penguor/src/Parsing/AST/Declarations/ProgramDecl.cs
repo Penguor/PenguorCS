@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A ProgramDecl Decl
+    /// A Program Decl
     /// </summary>
     public sealed record ProgramDecl : Decl
     {
@@ -29,6 +29,9 @@ namespace Penguor.Compiler.Parsing.AST
         public int Offset { get; init; }
         public List<Decl> Declarations { get; init; }
 
+
+        public override string ToString() => "program declaration";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -41,7 +44,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Decl
+    /// Contains methods to visit all Declarations
     /// </summary>
     public partial interface IDeclVisitor<T>
     {

@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A FunctionCall Call
+    /// A Function Call
     /// </summary>
     public sealed record FunctionCall : Call
     {
@@ -31,6 +31,9 @@ namespace Penguor.Compiler.Parsing.AST
         public AddressFrame Name { get; init; }
         public List<Expr> Args { get; init; }
 
+
+        public override string ToString() => "function call";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -43,7 +46,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Call
+    /// Contains methods to visit all Calls
     /// </summary>
     public partial interface ICallVisitor<T>
     {

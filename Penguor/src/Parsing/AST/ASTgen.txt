@@ -32,7 +32,7 @@ Function TokenType? accessMod TokenType[] nonAccessMod CallExpr returns AddressF
 Library TokenType? accessMod TokenType[] nonAccessMod State name BlockDecl content
 Var TokenType? accessMod TokenType[] nonAccessMod CallExpr type AddressFrame name Expr? init
 Block List<Decl> content
-Decl Stmt stmt
+Stmt Stmt stmt
 ; Call Call "Penguor\src\Parsing\AST\Calls"
 Function AddressFrame name List<Expr> args
 Idf AddressFrame name

@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A CaseStmt Stmt
+    /// A Case Stmt
     /// </summary>
     public sealed record CaseStmt : Stmt
     {
@@ -31,6 +31,9 @@ namespace Penguor.Compiler.Parsing.AST
         public Expr? Condition { get; init; }
         public List<Stmt> Content { get; init; }
 
+
+        public override string ToString() => "case statement";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -43,7 +46,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Stmt
+    /// Contains methods to visit all Statements
     /// </summary>
     public partial interface IStmtVisitor<T>
     {

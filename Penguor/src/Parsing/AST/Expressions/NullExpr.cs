@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A NullExpr Expr
+    /// A Null Expr
     /// </summary>
     public sealed record NullExpr : Expr
     {
@@ -26,6 +26,9 @@ namespace Penguor.Compiler.Parsing.AST
             Offset = offset;
         }
         public int Offset { get; init; }
+
+
+        public override string ToString() => "null expression";
 
         /// <summary>
         /// returns Visit() of this instance
@@ -39,7 +42,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Expr
+    /// Contains methods to visit all Expressions
     /// </summary>
     public partial interface IExprVisitor<T>
     {

@@ -132,7 +132,7 @@ namespace Penguor.Compiler.Analysis
             return decl with { Content = (BlockDecl)content };
         }
 
-        public Decl Visit(DeclStmt decl) => decl with { Stmt = decl.Stmt.Accept(this) };
+        public Decl Visit(StmtDecl decl) => decl with { Stmt = decl.Stmt.Accept(this) };
 
         public Decl Visit(FunctionDecl decl)
         {

@@ -136,7 +136,7 @@ namespace Penguor.Compiler.Parsing.AST
                             names.Add(tmp);
                             tmp = "";
                         }
-                        using (StreamWriter writer = new StreamWriter(Path.Combine(folder!, name.ToUppercase()) + ".cs"))
+                        using (StreamWriter writer = new StreamWriter(Path.Combine(folder!, name.ToUppercase()) + mode + ".cs"))
                         {
                             writer.AutoFlush = true;
 
@@ -194,7 +194,7 @@ namespace Penguor.Compiler.Parsing.AST
                             writer.Write(
                 $@"
 
-        public override string ToString() => ""{name} {longMode}""
+        public override string ToString() => ""{name.ToLower()} {longMode!.ToLower()}"";
 
         /// <summary>
         /// returns Visit() of this instance
@@ -208,14 +208,14 @@ namespace Penguor.Compiler.Parsing.AST
     }}
 
     /// <summary>
-    /// Contains methods to visit all {mode}
+    /// Contains methods to visit all {longMode}s
     /// </summary>
     public partial interface I{mode!.ToUppercase()}Visitor<T>
     {{
         /// <summary>
-        /// visit a {name.ToUppercase()}
+        /// visit a {name.ToUppercase()}{mode}
         /// </summary>
-        T Visit({name.ToUppercase()} {mode!.ToLower()});
+        T Visit({name.ToUppercase()}{mode} {mode!.ToLower()});
     }}
 }}
 ");

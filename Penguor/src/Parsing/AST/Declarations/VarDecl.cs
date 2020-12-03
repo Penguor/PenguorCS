@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A VarDecl Decl
+    /// A Var Decl
     /// </summary>
     public sealed record VarDecl : Decl
     {
@@ -37,6 +37,9 @@ namespace Penguor.Compiler.Parsing.AST
         public AddressFrame Name { get; init; }
         public Expr? Init { get; init; }
 
+
+        public override string ToString() => "var declaration";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -49,7 +52,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Decl
+    /// Contains methods to visit all Declarations
     /// </summary>
     public partial interface IDeclVisitor<T>
     {

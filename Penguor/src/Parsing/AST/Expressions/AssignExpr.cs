@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A AssignExpr Expr
+    /// A Assign Expr
     /// </summary>
     public sealed record AssignExpr : Expr
     {
@@ -33,6 +33,9 @@ namespace Penguor.Compiler.Parsing.AST
         public TokenType Op { get; init; }
         public Expr Value { get; init; }
 
+
+        public override string ToString() => "assign expression";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -45,7 +48,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Expr
+    /// Contains methods to visit all Expressions
     /// </summary>
     public partial interface IExprVisitor<T>
     {

@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A CompilerStmt Stmt
+    /// A Compiler Stmt
     /// </summary>
     public sealed record CompilerStmt : Stmt
     {
@@ -31,6 +31,9 @@ namespace Penguor.Compiler.Parsing.AST
         public TokenType Dir { get; init; }
         public Token[] Val { get; init; }
 
+
+        public override string ToString() => "compiler statement";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -43,7 +46,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Stmt
+    /// Contains methods to visit all Statements
     /// </summary>
     public partial interface IStmtVisitor<T>
     {

@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A ForStmt Stmt
+    /// A For Stmt
     /// </summary>
     public sealed record ForStmt : Stmt
     {
@@ -33,6 +33,9 @@ namespace Penguor.Compiler.Parsing.AST
         public CallExpr Vars { get; init; }
         public Stmt Content { get; init; }
 
+
+        public override string ToString() => "for statement";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -45,7 +48,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Stmt
+    /// Contains methods to visit all Statements
     /// </summary>
     public partial interface IStmtVisitor<T>
     {

@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A VarStmt Stmt
+    /// A Var Stmt
     /// </summary>
     public sealed record VarStmt : Stmt
     {
@@ -33,6 +33,9 @@ namespace Penguor.Compiler.Parsing.AST
         public AddressFrame Name { get; init; }
         public Expr? Init { get; init; }
 
+
+        public override string ToString() => "var statement";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -45,7 +48,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Stmt
+    /// Contains methods to visit all Statements
     /// </summary>
     public partial interface IStmtVisitor<T>
     {

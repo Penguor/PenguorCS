@@ -54,7 +54,7 @@ namespace Penguor.Compiler.Parsing
             return new ProgramDecl(GetCurrent().Offset, declarations);
         }
 
-        private Decl Declaration(bool allowDeclStmt = false)
+        private Decl Declaration(bool allowStmtDecl = false)
         {
             TokenType? accessMod = null;
             bool hasAccessMod = false;
@@ -88,16 +88,16 @@ namespace Penguor.Compiler.Parsing
                 if (Match(DATA)) return DataDecl(null, Array.Empty<TokenType>());
                 if (Match(TYPE)) return TypeDecl(null, Array.Empty<TokenType>());
                 if (Match(LIBRARY)) return LibraryDecl(null, Array.Empty<TokenType>());
-                if (Match(HASHTAG)) return new DeclStmt(GetPrevious().Offset, CompilerStmt());
+                if (Match(HASHTAG)) return new StmtDecl(GetPrevious().Offset, CompilerStmt());
                 if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
                     return FunctionDecl(null, Array.Empty<TokenType>());
                 else if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(null, Array.Empty<TokenType>());
-                if (!allowDeclStmt)
+                if (!allowStmtDecl)
                 {
-                    DeclStmt decl = DeclStmt();
+                    StmtDecl decl = StmtDecl();
                     return Except(decl, 6, decl.Stmt.ToString(), state[^1].Type.ToString());
                 }
-                return DeclStmt();
+                return StmtDecl();
             }
             else
             {
@@ -111,11 +111,11 @@ namespace Penguor.Compiler.Parsing
                 if (Match(HASHTAG))
                 {
                     CompilerStmt stmt = CompilerStmt();
-                    return Except(new DeclStmt(stmt.Offset, stmt), 13, stmt.ToString());
+                    return Except(new StmtDecl(stmt.Offset, stmt), 13, stmt.ToString());
                 }
                 else
                 {
-                    DeclStmt decl = DeclStmt();
+                    StmtDecl decl = StmtDecl();
                     return Except(decl, 6, decl.Stmt.ToString(), state[^1].Type.ToString());
                 }
             }
@@ -225,12 +225,12 @@ namespace Penguor.Compiler.Parsing
             return new LibraryDecl(offset, accessMod, nonAccessMods, name, content);
         }
 
-        // returns either a DeclStmt or a BlockDecl
+        // returns either a StmtDecl or a BlockDecl
         private Decl DeclContent()
         {
             if (Check(LBRACE)) return BlockDecl(true);
-            if (Check(COLON)) return DeclStmt();
-            return Except(new DeclStmt(GetCurrent().Offset, null!), 12);
+            if (Check(COLON)) return StmtDecl();
+            return Except(new StmtDecl(GetCurrent().Offset, null!), 12);
         }
 
         private BlockDecl BlockDecl(bool allowStmt = false)
@@ -243,7 +243,7 @@ namespace Penguor.Compiler.Parsing
             return new BlockDecl(offset, declarations);
         }
 
-        private DeclStmt DeclStmt() => new DeclStmt(GetCurrent().Offset, Statement());
+        private StmtDecl StmtDecl() => new StmtDecl(GetCurrent().Offset, Statement());
 
         private Stmt Statement()
         {

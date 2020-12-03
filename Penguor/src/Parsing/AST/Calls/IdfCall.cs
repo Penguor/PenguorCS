@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A IdfCall Call
+    /// A Idf Call
     /// </summary>
     public sealed record IdfCall : Call
     {
@@ -29,6 +29,9 @@ namespace Penguor.Compiler.Parsing.AST
         public int Offset { get; init; }
         public AddressFrame Name { get; init; }
 
+
+        public override string ToString() => "idf call";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -41,7 +44,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Call
+    /// Contains methods to visit all Calls
     /// </summary>
     public partial interface ICallVisitor<T>
     {

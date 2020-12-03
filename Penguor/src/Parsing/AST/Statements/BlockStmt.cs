@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A BlockStmt Stmt
+    /// A Block Stmt
     /// </summary>
     public sealed record BlockStmt : Stmt
     {
@@ -29,6 +29,9 @@ namespace Penguor.Compiler.Parsing.AST
         public int Offset { get; init; }
         public List<Stmt> Content { get; init; }
 
+
+        public override string ToString() => "block statement";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -41,7 +44,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Stmt
+    /// Contains methods to visit all Statements
     /// </summary>
     public partial interface IStmtVisitor<T>
     {

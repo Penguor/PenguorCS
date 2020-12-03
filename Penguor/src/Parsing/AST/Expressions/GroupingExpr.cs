@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A GroupingExpr Expr
+    /// A Grouping Expr
     /// </summary>
     public sealed record GroupingExpr : Expr
     {
@@ -29,6 +29,9 @@ namespace Penguor.Compiler.Parsing.AST
         public int Offset { get; init; }
         public Expr Content { get; init; }
 
+
+        public override string ToString() => "grouping expression";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -41,7 +44,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Expr
+    /// Contains methods to visit all Expressions
     /// </summary>
     public partial interface IExprVisitor<T>
     {

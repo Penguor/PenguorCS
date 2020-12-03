@@ -89,7 +89,7 @@ namespace Penguor.Compiler.IR
             return 0;
         }
 
-        public int Visit(DeclStmt decl) => decl.Stmt.Accept(this);
+        public int Visit(StmtDecl decl) => decl.Stmt.Accept(this);
 
         public int Visit(FunctionDecl decl)
         {

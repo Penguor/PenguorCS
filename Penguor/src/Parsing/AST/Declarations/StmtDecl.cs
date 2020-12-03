@@ -14,20 +14,23 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A DeclStmt Decl
+    /// A Stmt Decl
     /// </summary>
-    public sealed record DeclStmt : Decl
+    public sealed record StmtDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of DeclStmt
+        /// creates a new instance of StmtDecl
         /// </summary>
-        public DeclStmt(int offset, Stmt stmt)
+        public StmtDecl(int offset, Stmt stmt)
         {
             Offset = offset;
             Stmt = stmt;
         }
         public int Offset { get; init; }
         public Stmt Stmt { get; init; }
+
+
+        public override string ToString() => "stmt declaration";
 
         /// <summary>
         /// returns Visit() of this instance
@@ -41,13 +44,13 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Decl
+    /// Contains methods to visit all Declarations
     /// </summary>
     public partial interface IDeclVisitor<T>
     {
         /// <summary>
-        /// visit a DeclStmt
+        /// visit a StmtDecl
         /// </summary>
-        T Visit(DeclStmt decl);
+        T Visit(StmtDecl decl);
     }
 }

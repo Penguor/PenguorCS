@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A SystemDecl Decl
+    /// A System Decl
     /// </summary>
     public sealed record SystemDecl : Decl
     {
@@ -37,6 +37,9 @@ namespace Penguor.Compiler.Parsing.AST
         public CallExpr? Parent { get; init; }
         public BlockDecl Content { get; init; }
 
+
+        public override string ToString() => "system declaration";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -49,7 +52,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Decl
+    /// Contains methods to visit all Declarations
     /// </summary>
     public partial interface IDeclVisitor<T>
     {

@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A VarExpr Expr
+    /// A Var Expr
     /// </summary>
     public sealed record VarExpr : Expr
     {
@@ -31,6 +31,9 @@ namespace Penguor.Compiler.Parsing.AST
         public CallExpr Type { get; init; }
         public AddressFrame Name { get; init; }
 
+
+        public override string ToString() => "var expression";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -43,7 +46,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Expr
+    /// Contains methods to visit all Expressions
     /// </summary>
     public partial interface IExprVisitor<T>
     {

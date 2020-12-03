@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A FunctionDecl Decl
+    /// A Function Decl
     /// </summary>
     public sealed record FunctionDecl : Decl
     {
@@ -39,6 +39,9 @@ namespace Penguor.Compiler.Parsing.AST
         public List<VarExpr> Parameters { get; init; }
         public Decl Content { get; init; }
 
+
+        public override string ToString() => "function declaration";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -51,7 +54,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Decl
+    /// Contains methods to visit all Declarations
     /// </summary>
     public partial interface IDeclVisitor<T>
     {

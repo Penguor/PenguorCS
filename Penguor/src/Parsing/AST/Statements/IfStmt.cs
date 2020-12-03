@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A IfStmt Stmt
+    /// A If Stmt
     /// </summary>
     public sealed record IfStmt : Stmt
     {
@@ -35,6 +35,9 @@ namespace Penguor.Compiler.Parsing.AST
         public List<Stmt> Elif { get; init; }
         public Stmt? ElseC { get; init; }
 
+
+        public override string ToString() => "if statement";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -47,7 +50,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Stmt
+    /// Contains methods to visit all Statements
     /// </summary>
     public partial interface IStmtVisitor<T>
     {

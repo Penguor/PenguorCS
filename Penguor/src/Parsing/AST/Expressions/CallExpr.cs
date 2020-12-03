@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A CallExpr Expr
+    /// A Call Expr
     /// </summary>
     public sealed record CallExpr : Expr
     {
@@ -31,6 +31,9 @@ namespace Penguor.Compiler.Parsing.AST
         public List<Call> Callee { get; init; }
         public TokenType? Postfix { get; init; }
 
+
+        public override string ToString() => "call expression";
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
@@ -43,7 +46,7 @@ namespace Penguor.Compiler.Parsing.AST
     }
 
     /// <summary>
-    /// Contains methods to visit all Expr
+    /// Contains methods to visit all Expressions
     /// </summary>
     public partial interface IExprVisitor<T>
     {
