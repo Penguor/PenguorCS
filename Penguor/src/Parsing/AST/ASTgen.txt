@@ -1,38 +1,38 @@
-; Expr "Penguor\src\Parsing\AST\Expressions"
-AssignExpr CallExpr lhs TokenType op Expr value
-BinaryExpr Expr lhs TokenType op Expr rhs
-UnaryExpr TokenType? op Expr rhs
-CallExpr List<Call> callee TokenType? postfix
-BooleanExpr bool value
-NullExpr
-GroupingExpr Expr content
-VarExpr CallExpr type AddressFrame name
-NumExpr double value
-StringExpr string value
-; Stmt "Penguor\src\Parsing\AST\Statements"
-CompilerStmt TokenType dir Token[] val
-BlockStmt List<Stmt> content
-VarStmt CallExpr type AddressFrame name Expr? init
-IfStmt Expr condition Stmt ifC List<Stmt> elif Stmt? elseC
-ElifStmt Expr condition Stmt content
-WhileStmt Expr condition Stmt content
-DoStmt Stmt content Expr condition
-ForStmt VarExpr currentVar CallExpr vars Stmt content
-SwitchStmt Expr condition List<Stmt> cases Stmt? defaultCase
-CaseStmt Expr? condition List<Stmt> content
-ReturnStmt Expr? value
-ExprStmt Expr expr
-; Decl "Penguor\src\Parsing\AST\Declarations"
-ProgramDecl List<Decl> declarations
-UsingDecl CallExpr lib
-SystemDecl TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
-DataDecl TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
-TypeDecl TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
-FunctionDecl TokenType? accessMod TokenType[] nonAccessMod CallExpr returns AddressFrame name List<VarExpr> parameters Decl content
-LibraryDecl TokenType? accessMod TokenType[] nonAccessMod State name BlockDecl content
-VarDecl TokenType? accessMod TokenType[] nonAccessMod CallExpr type AddressFrame name Expr? init
-BlockDecl List<Decl> content
-DeclStmt Stmt stmt
-; Call "Penguor\src\Parsing\AST\Calls"
-FunctionCall AddressFrame name List<Expr> args
-IdfCall AddressFrame name
+; Expression Expr "Penguor\src\Parsing\AST\Expressions"
+Assign CallExpr lhs TokenType op Expr value
+Binary Expr lhs TokenType op Expr rhs
+Unary TokenType? op Expr rhs
+Call List<Call> callee TokenType? postfix
+Boolean bool value
+Null
+Grouping Expr content
+Var CallExpr type AddressFrame name
+Num double value
+String string value
+; Statement Stmt "Penguor\src\Parsing\AST\Statements"
+Compiler TokenType dir Token[] val
+Block List<Stmt> content
+Var CallExpr type AddressFrame name Expr? init
+If Expr condition Stmt ifC List<Stmt> elif Stmt? elseC
+Elif Expr condition Stmt content
+While Expr condition Stmt content
+Do Stmt content Expr condition
+For VarExpr currentVar CallExpr vars Stmt content
+Switch Expr condition List<Stmt> cases Stmt? defaultCase
+Case Expr? condition List<Stmt> content
+Return Expr? value
+Expr Expr expr
+; Declaration Decl "Penguor\src\Parsing\AST\Declarations"
+Program List<Decl> declarations
+Using CallExpr lib
+System TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
+Data TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
+Type TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
+Function TokenType? accessMod TokenType[] nonAccessMod CallExpr returns AddressFrame name List<VarExpr> parameters Decl content
+Library TokenType? accessMod TokenType[] nonAccessMod State name BlockDecl content
+Var TokenType? accessMod TokenType[] nonAccessMod CallExpr type AddressFrame name Expr? init
+Block List<Decl> content
+Decl Stmt stmt
+; Call Call "Penguor\src\Parsing\AST\Calls"
+Function AddressFrame name List<Expr> args
+Idf AddressFrame name

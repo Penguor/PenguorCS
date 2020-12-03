@@ -22,6 +22,7 @@ namespace Penguor.Compiler.Tools
         public void Generate(string file)
         {
             reader = new StreamReader(file);
+            string? longMode = null;
             string? mode = null;
             string? folder = null;
             while (!reader.EndOfStream)
@@ -40,6 +41,14 @@ namespace Penguor.Compiler.Tools
                 switch (mode)
                 {
                     case "groupHead":
+                        tmp = "";
+                        while (char.IsWhiteSpace(current)) Advance();
+                        while (!char.IsWhiteSpace(current))
+                        {
+                            tmp += current;
+                            Advance();
+                        }
+                        longMode = tmp;
                         tmp = "";
                         while (char.IsWhiteSpace(current)) Advance();
                         while (!char.IsWhiteSpace(current))
@@ -150,12 +159,12 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// A {name.ToUppercase()} {mode}
     /// </summary>
-    public sealed record {name.ToUppercase()} : {mode}
+    public sealed record {name.ToUppercase()}{mode} : {mode}
     {{
         /// <summary>
-        /// creates a new instance of {name.ToUppercase()}
+        /// creates a new instance of {name.ToUppercase()}{mode}
         /// </summary>
-        public {name.ToUppercase()}(");
+        public {name.ToUppercase()}{mode}(");
 
                             for (int i = 0; i < types.Count; i++)
                             {
@@ -184,6 +193,9 @@ namespace Penguor.Compiler.Parsing.AST
 
                             writer.Write(
                 $@"
+
+        public override string ToString() => ""{name} {longMode}""
+
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>

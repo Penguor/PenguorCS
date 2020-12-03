@@ -39,7 +39,6 @@ namespace Penguor.Compiler.Parsing
         {
             this.builder = builder;
             this.tokens = tokens;
-
             state = new State();
         }
 
@@ -93,7 +92,11 @@ namespace Penguor.Compiler.Parsing
                 if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
                     return FunctionDecl(null, Array.Empty<TokenType>());
                 else if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(null, Array.Empty<TokenType>());
-                if (!allowDeclStmt) throw new ParsingException(1, GetCurrent(), Array.Empty<TokenType>());
+                if (!allowDeclStmt)
+                {
+                    DeclStmt decl = DeclStmt();
+                    return Except(decl, 6, decl.Stmt.ToString(), state[^1].Type.ToString());
+                }
                 return DeclStmt();
             }
             else
@@ -104,8 +107,17 @@ namespace Penguor.Compiler.Parsing
                 if (Match(LIBRARY)) return LibraryDecl(accessMod, nonAccessMods);
                 if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
                     return FunctionDecl(accessMod, nonAccessMods);
-                else if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(accessMod, nonAccessMods);
-                else return Error(DeclStmt, 1, GetCurrent(), SYSTEM, DATA, TYPE, LIBRARY, IDF);
+                if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(accessMod, nonAccessMods);
+                if (Match(HASHTAG))
+                {
+                    CompilerStmt stmt = CompilerStmt();
+                    return Except(new DeclStmt(stmt.Offset, stmt), 13, stmt.ToString());
+                }
+                else
+                {
+                    DeclStmt decl = DeclStmt();
+                    return Except(decl, 6, decl.Stmt.ToString(), state[^1].Type.ToString());
+                }
             }
         }
 
@@ -218,7 +230,7 @@ namespace Penguor.Compiler.Parsing
         {
             if (Check(LBRACE)) return BlockDecl(true);
             if (Check(COLON)) return DeclStmt();
-            return Error(new DeclStmt(GetCurrent().Offset, null!), 1, GetCurrent(), LBRACE, COLON);
+            return Except(new DeclStmt(GetCurrent().Offset, null!), 12);
         }
 
         private BlockDecl BlockDecl(bool allowStmt = false)
@@ -256,11 +268,11 @@ namespace Penguor.Compiler.Parsing
                 case SAFETY:
                     val = new Token[1];
                     val[0] = Consume(NUM);
-                    if (Convert.ToInt32(val[0].Name) < 0 || Convert.ToInt32(val[0].Name) > 2) Error(1, val[0], NUM);
+                    if (Convert.ToInt32(val[0].Name) < 0 || Convert.ToInt32(val[0].Name) > 2) Except(1);
                     break;
                 default:
                     val = Array.Empty<Token>();
-                    Error(8, dir, SAFETY);
+                    Except(1);
                     break;
             }
             GetEnding();
@@ -563,7 +575,7 @@ namespace Penguor.Compiler.Parsing
         private void AddSymbol(AddressFrame frame)
         {
             bool succeeded = builder.TableManager.AddSymbol(state, frame);
-            if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
+            if (!succeeded) throw new PenguorCSException(1);
         }
 
         private void AddSymbol(AddressFrame frame, TokenType? accessMod, TokenType[]? nonAccessMods)
@@ -573,7 +585,7 @@ namespace Penguor.Compiler.Parsing
                 AccessMod = accessMod,
                 NonAccessMods = nonAccessMods,
             });
-            if (!succeeded) throw new PenguorException(1, GetCurrent().Offset);
+            if (!succeeded) throw new PenguorCSException(1);
         }
 
         /// <summary>
@@ -602,7 +614,7 @@ namespace Penguor.Compiler.Parsing
         private Token Consume(TokenType type)
         {
             if (Check(type)) return Advance();
-            Error(6, GetCurrent(), type);
+            Except(11, GetCurrent().ToTTypeString(), LookAhead(1).ToTTypeString());
             var tmp = Advance();
             return new Token(type, "", tmp.Offset, tmp.Length);
         }
@@ -668,7 +680,7 @@ namespace Penguor.Compiler.Parsing
                 Advance();
                 return true;
             }
-            Error(6, GetCurrent(), SEMICOLON, ENDING);
+            Except(5);
             return false;
         }
 
@@ -682,19 +694,17 @@ namespace Penguor.Compiler.Parsing
             return false;
         }
 
-        // Report compile errors to the builder
+        private void Except(uint msg, params string[] args) => Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
 
-        private void Error(uint msg, Token actual, params TokenType[] expected) => builder.Exceptions.Add(new ParsingException(msg, actual, expected));
-
-        private T Error<T>(T recover, uint msg, Token actual, params TokenType[] expected)
+        private T Except<T>(T recover, uint msg, params string[] args)
         {
-            builder.Exceptions.Add(new ParsingException(msg, actual, expected));
+            Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
             return recover;
         }
 
-        private T Error<T>(Func<T> recover, uint msg, Token actual, params TokenType[] expected)
+        private T Except<T>(Func<T> recover, uint msg, params string[] args)
         {
-            builder.Exceptions.Add(new ParsingException(msg, actual, expected));
+            Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
             return recover();
         }
     }

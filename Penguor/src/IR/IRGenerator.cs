@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Build;
+using Penguor.Compiler.Debugging;
 
 #pragma warning disable 1591
 
@@ -69,7 +70,7 @@ namespace Penguor.Compiler.IR
             }
             finally
             {
-                Debugging.Debug.Log(new IRProgram(statements).ToString(), Debugging.LogLevel.Debug);
+                Logger.Log(new IRProgram(statements).ToString(), LogLevel.Debug);
             }
             return new IRProgram(statements);
         }
@@ -148,8 +149,19 @@ namespace Penguor.Compiler.IR
 
             if (decl.Init != null)
             {
-                decl.Init.Accept(this);
-                AddStmt(OPCode.DEF, scopes[0].ToString(), $"({statements[^1].Number})");
+                if (decl.Init is NumExpr numE)
+                {
+                    AddStmt(OPCode.DEFINT, scopes[0].ToString(), numE.Value.ToString());
+                }
+                else if (decl.Init is StringExpr strE)
+                {
+                    AddStmt(OPCode.DEFSTR, scopes[0].ToString(), '"' + strE.Value + '"');
+                }
+                else
+                {
+                    decl.Init.Accept(this);
+                    AddStmt(OPCode.DEF, scopes[0].ToString(), $"({statements[^1].Number})");
+                }
             }
             else
             {

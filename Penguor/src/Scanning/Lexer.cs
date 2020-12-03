@@ -286,7 +286,7 @@ namespace Penguor.Compiler.Lexing
                         AddToken(Match('=') ? TokenType.EQUALS : TokenType.ASSIGN);
                         break;
                     default:
-                        builder.Exceptions.Add(new LexingException(7, offset, c.ToString()));
+                        Logger.Log(new Notification(builder.SourceFile, offset, 7, MsgType.PGR, c.ToString()));
                         break;
                 }
             }
@@ -309,7 +309,7 @@ namespace Penguor.Compiler.Lexing
         private char Advance()
         {
             current++;
-            if (current > source.Length) throw new LexingException(9, current, "");
+            if (current > source.Length) Logger.Log(new Notification(builder.SourceFile, offset, 9, MsgType.PGR));
             return source[current - 1];
         }
 

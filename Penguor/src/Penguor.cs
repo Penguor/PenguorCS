@@ -49,7 +49,7 @@ namespace Penguor.Compiler
             };
             ASTGenTool.Handler = CommandHandler.Create((string file, string log) =>
             {
-                if (log is not null) Debug.EnableFileLogger(log);
+                if (log is not null) Logger.EnableFileLogger(log);
                 new ASTPartGenerator().Generate(file);
             });
             toolsCommand.AddCommand(ASTGenTool);
@@ -61,7 +61,7 @@ namespace Penguor.Compiler
 
             static void Build(string input, bool benchmark, string log, string stdLib)
             {
-                if (log != null) Debug.EnableFileLogger(log);
+                if (log != null) Logger.EnableFileLogger(log);
                 if (input == null) input = Environment.CurrentDirectory;
                 if (benchmark) BuildManager.Benchmark(input);
                 else BuildManager.SmartBuild(input, stdLib);

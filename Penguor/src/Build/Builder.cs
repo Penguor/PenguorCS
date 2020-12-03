@@ -19,6 +19,7 @@ using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Analysis;
 using Penguor.Compiler.IR;
+using Penguor.Compiler.Assembly;
 
 namespace Penguor.Compiler.Build
 {
@@ -34,6 +35,7 @@ namespace Penguor.Compiler.Build
 
         private List<Token>? tokens;
         private ProgramDecl? program;
+        private IRProgram? ir;
 
         /// <summary>
         /// has the lexer run?
@@ -67,15 +69,17 @@ namespace Penguor.Compiler.Build
         public Builder(ref SymbolTableManager tableManager, string file)
         {
             TableManager = tableManager;
-            Exceptions = new List<PenguorException>();
             try
             {
-                Input = File.ReadAllText(file);
-                SourceFile = file;
+                SourceFile = Path.GetFullPath(file);
+                Input = File.ReadAllText(SourceFile);
             }
             catch (FileNotFoundException)
             {
-                throw new PenguorCSException(6, file);
+                Logger.Log(new Notification(file, 0, 6, MsgType.PGR, file));
+                SourceFile = null!;
+                Input = null!;
+                Exit(1);
             }
         }
 
@@ -98,22 +102,10 @@ namespace Penguor.Compiler.Build
         public void Lex()
         {
             Lexer lexer = new Lexer(this);
-            try
-            {
-                tokens = lexer.Tokenize();
-                SubmitAllExceptions();
-            }
-            catch (LexingException e)
-            {
-                e.Log(SourceFile);
-                Exit(1);
-            }
-            catch (PenguorCSException)
-            {
-                Exit(1);
-            }
+
+            tokens = lexer.Tokenize();
             lexerFinished = true;
-            Debug.Log("lexing finished.", LogLevel.Info);
+            Logger.Log("lexing finished.", LogLevel.Info);
         }
 
         /// <summary>
@@ -137,18 +129,10 @@ namespace Penguor.Compiler.Build
             if (tokens == null) throw new PenguorCSException(1);
             Parser parser = new Parser(tokens, this);
 
-            try
-            {
-                program = parser.Parse();
-                SubmitAllExceptions();
-            }
-            catch (ParsingException e)
-            {
-                e.Log(SourceFile);
-                Exit(1);
-            }
+            program = parser.Parse();
+
             parserFinished = true;
-            Debug.Log("parsing finished.", LogLevel.Info);
+            Logger.Log("parsing finished.", LogLevel.Info);
             return program ?? throw new NullReferenceException();
         }
 
@@ -164,42 +148,26 @@ namespace Penguor.Compiler.Build
 
             analyser.Analyse(1);
             program = (ProgramDecl)analyser.Analyse(2);
-            Debug.Log("Semantic analysis finished.", LogLevel.Info);
+            Logger.Log("Semantic analysis finished.", LogLevel.Info);
         }
 
+        /// <summary>
+        /// Generate IR code from the ast
+        /// </summary>
         public void GenerateIR()
         {
             IRGenerator generator = new IRGenerator(program ?? throw new ArgumentNullException(nameof(program)), this);
-            var ir = generator.Generate();
-            Debug.Log("IR Generation finished.", LogLevel.Info);
-        }
-
-        // code for handling errors in the Penguor source code
-
-        /// <summary>
-        /// contains all caught exceptions
-        /// </summary>
-        public List<PenguorException> Exceptions { get; protected set; }
-
-        /// <summary>
-        /// submit a single exception
-        /// </summary>
-        public void SubmitException()
-        {
-            if (Exceptions.Count == 0) return;
-            PenguorException p = Exceptions[0];
-            Exceptions.RemoveAt(0);
-            p.Log(SourceFile);
+            ir = generator.Generate();
+            Logger.Log("IR Generation finished.", LogLevel.Info);
         }
 
         /// <summary>
-        /// submit all exceptions
+        /// generate assembly from ir code
         /// </summary>
-        public void SubmitAllExceptions()
+        public void GenerateAsm()
         {
-            foreach (var e in Exceptions)
-                e.Log(SourceFile);
-            Exceptions.Clear();
+            AssemblyGeneratorWin generator = new AssemblyGeneratorWin(ir ?? throw new ArgumentNullException(nameof(program)), this);
+            generator.Generate();
         }
 
         /// <summary>
@@ -208,9 +176,7 @@ namespace Penguor.Compiler.Build
         /// <param name="exitCode"></param>
         public void Exit(int exitCode = 0)
         {
-            SubmitAllExceptions();
             ExitCode = exitCode;
-
             Environment.Exit(exitCode);
         }
     }

@@ -1,22 +1,14 @@
-int a = 5 * 4 + 2
 
-// void print(string a)
-// {
+void print(string a)
+{
 
-// }
+}
 
-// void main()
-// {
-//     string test = "Hello World"
-//     test = "hello"
-//     bool a = 0 + 1 * 5
-//     int i = 0
-//     do
-//     {
-//         print(test)
-//         i ++
-//     } while(i < 5)
-// }
+void main()
+{
+    string test = "Hello World"
+    print(test)
+}
 
 // data HelloData
 // {

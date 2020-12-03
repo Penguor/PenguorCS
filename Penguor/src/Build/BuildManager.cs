@@ -15,6 +15,7 @@ using Stopwatch = System.Diagnostics.Stopwatch;
 
 using Penguor.Compiler.Debugging;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Penguor.Compiler.Build
 {
@@ -54,7 +55,11 @@ namespace Penguor.Compiler.Build
                 else BuildProject(files[0], stdLib);
                 return;
             }
-            if (!File.Exists(path) || !File.Exists(stdLib)) throw new PenguorException(5, 0, path, path);
+            if (!File.Exists(path) || !File.Exists(stdLib))
+            {
+                Logger.Log(new Notification(path, 0, 10, MsgType.PGR, path));
+                Environment.Exit(1);
+            }
 
             if (Path.GetExtension(path) == ".pgr") BuildProject(path, stdLib, true);
             else if (Path.GetExtension(path) == ".pgrp") BuildProject(path, stdLib);
@@ -81,6 +86,8 @@ namespace Penguor.Compiler.Build
                 b.Analyse();
             foreach (var b in builders)
                 b.GenerateIR();
+            foreach (var b in builders)
+                b.GenerateAsm();
         }
 
         /// <summary>
@@ -109,13 +116,13 @@ namespace Penguor.Compiler.Build
             totalWatch.Stop();
             var totalTime = totalWatch.Elapsed;
 
-            Debug.Log("Results", LogLevel.Info);
-            Debug.Log("-------", LogLevel.Info);
-            Debug.Log($"file: {file}", LogLevel.Info);
-            Debug.Log($"lexing time: {lexTime.Minutes}m  {lexTime.Seconds}s {lexTime.Milliseconds}ms", LogLevel.Info);
-            Debug.Log($"parsing time: {parseTime.Minutes}m  {parseTime.Seconds}s {parseTime.Milliseconds}ms", LogLevel.Info);
-            Debug.Log($"analysing time: {analyseTime.Minutes}m  {analyseTime.Seconds}s {analyseTime.Milliseconds}ms", LogLevel.Info);
-            Debug.Log($"total time: {totalTime.Minutes}m  {totalTime.Seconds}s {totalTime.Milliseconds}ms", LogLevel.Info);
+            Logger.Log("Results", LogLevel.Info);
+            Logger.Log("-------", LogLevel.Info);
+            Logger.Log($"file: {file}", LogLevel.Info);
+            Logger.Log($"lexing time: {lexTime.Minutes}m  {lexTime.Seconds}s {lexTime.Milliseconds}ms", LogLevel.Info);
+            Logger.Log($"parsing time: {parseTime.Minutes}m  {parseTime.Seconds}s {parseTime.Milliseconds}ms", LogLevel.Info);
+            Logger.Log($"analysing time: {analyseTime.Minutes}m  {analyseTime.Seconds}s {analyseTime.Milliseconds}ms", LogLevel.Info);
+            Logger.Log($"total time: {totalTime.Minutes}m  {totalTime.Seconds}s {totalTime.Milliseconds}ms", LogLevel.Info);
         }
     }
 }

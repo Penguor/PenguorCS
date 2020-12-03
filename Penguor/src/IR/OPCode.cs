@@ -20,7 +20,7 @@ namespace Penguor.Compiler.IR
         LABEL, LIB,
         USE,
         LOAD, LOADARG, LOADPARAM,
-        DEF, DFE, ASSIGN, // define, define empty, assign
+        DEF, DFE, ASSIGN, DEFINT, DEFSTR, // define, define empty, assign
         CALL,
         RETURN,
         ADD, SUB, MUL, DIV,

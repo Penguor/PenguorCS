@@ -23,6 +23,9 @@ namespace Penguor.Compiler.Assembly
 
         public Builder Builder { get; }
 
+        /// <summary>
+        /// Generate the Assembly
+        /// </summary>
         public void Generate();
     }
 }
