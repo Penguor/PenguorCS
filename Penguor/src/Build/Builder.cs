@@ -105,7 +105,6 @@ namespace Penguor.Compiler.Build
 
             tokens = lexer.Tokenize();
             lexerFinished = true;
-            Logger.Log("lexing finished.", LogLevel.Info);
         }
 
         /// <summary>
@@ -132,7 +131,6 @@ namespace Penguor.Compiler.Build
             program = parser.Parse();
 
             parserFinished = true;
-            Logger.Log("parsing finished.", LogLevel.Info);
             return program ?? throw new NullReferenceException();
         }
 
@@ -148,7 +146,6 @@ namespace Penguor.Compiler.Build
 
             analyser.Analyse(1);
             program = (ProgramDecl)analyser.Analyse(2);
-            Logger.Log("Semantic analysis finished.", LogLevel.Info);
         }
 
         /// <summary>
@@ -158,7 +155,6 @@ namespace Penguor.Compiler.Build
         {
             IRGenerator generator = new IRGenerator(program ?? throw new ArgumentNullException(nameof(program)), this);
             ir = generator.Generate();
-            Logger.Log("IR Generation finished.", LogLevel.Info);
         }
 
         /// <summary>

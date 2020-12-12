@@ -277,7 +277,25 @@ namespace Penguor.Compiler.IR
 
         public int Visit(CallExpr expr)
         {
-            AddStmt(OPCode.CALL, builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray())?.ToString() ?? throw new System.Exception());
+            for (int i = 0; i < expr.Callee.Count; i++)
+            {
+                switch (expr.Callee[i])
+                {
+                    case FunctionCall call:
+                        foreach (var arg in call.Args)
+                        {
+                            arg.Accept(this);
+                            AddStmt(OPCode.LOADARG, $"({statements[^1].Number})");
+                        }
+                        AddStmt(OPCode.CALL, builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray())?.ToString() ?? throw new System.Exception());
+                        break;
+                    case IdfCall call:
+                        AddStmt(OPCode.LOAD, builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray())?.ToString() ?? throw new System.Exception());
+                        break;
+                    default: throw new System.Exception();
+                }
+            }
+
             if (expr.Postfix == TokenType.DPLUS)
                 AddStmt(OPCode.ADD, $"({statements[^1].Number})", "1");
             else if (expr.Postfix == TokenType.DMINUS)

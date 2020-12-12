@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
@@ -11,17 +12,24 @@ namespace Penguor.Compiler.Assembly
 
         public Builder Builder { get; }
 
+        readonly StringBuilder pre = new StringBuilder();
+        readonly StringBuilder text = new StringBuilder();
+        readonly StringBuilder data = new StringBuilder();
+
+        int i = 0;
+        List<IRStatement> stmts;
         public AssemblyGeneratorWin(IRProgram program, Builder builder)
         {
             Program = program;
             Builder = builder;
+            stmts = program.Statements;
         }
 
         /// <inheritdoc/>
         public void Generate()
         {
-            StringBuilder text = new StringBuilder();
-            StringBuilder data = new StringBuilder();
+            pre.AppendLine("global main");
+            pre.AppendLine("extern printf");
 
             foreach (var i in Program.Statements)
             {
@@ -31,34 +39,40 @@ namespace Penguor.Compiler.Assembly
                         data.Append(i.Operands[0]).Append(" dd ").Append(i.Operands[1]);
                         break;
                     case OPCode.DEFSTR:
-                        data.Append(i.Operands[0]).Append(" db ").Append(i.Operands[1]).Append(" 0");
+                        data.Append(i.Operands[0]).Append(" db ").Append(i.Operands[1]).Append(", 0");
                         break;
                     default: continue;
                 }
                 data.AppendLine();
             }
 
-            foreach (var i in Program.Statements)
+            for (i = 0; i < stmts.Count; i++)
             {
-                switch (i.Code)
+                switch (stmts[i].Code)
                 {
                     case OPCode.LABEL:
-                        text.Append(i.Operands[0]).Append(':');
+                        text.Append(stmts[i].Operands[0]).AppendLine(":");
+                        if (stmts[i].Operands[0] == "print")
+                            text.Append("CALL printf");
                         break;
                     case OPCode.LIB:
-                        text.Append("; ").Append(i.Operands[0]);
+                        text.Append("; ").Append(stmts[i].Operands[0]);
                         break;
                     case OPCode.USE:
                         break;
                     case OPCode.LOAD:
-                        text.Append("MOV r10 ").AppendJoin(' ', i.Operands);
+                        text.Append("MOV rax, ").AppendJoin(' ', stmts[i].Operands);
                         break;
-                    case OPCode.LOADARG:
                     case OPCode.LOADPARAM:
                     case OPCode.DEF:
                     case OPCode.DFE:
                     case OPCode.ASSIGN:
+                        break;
                     case OPCode.CALL:
+                        GenericCall();
+                        break;
+                    case OPCode.LOADARG:
+                        CallFunction();
                         break;
                     case OPCode.RETURN:
                         text.Append("RET");
@@ -75,8 +89,49 @@ namespace Penguor.Compiler.Assembly
                 text.AppendLine();
             }
 
-            string final = "\nsection .data\n\n" + data.ToString() + "\nsection .text\n\n" + text.ToString();
+            string final = "\n" + pre.ToString() + "\nsection .data\n\n" + data.ToString() + "\nsection .text\n\n" + text.ToString();
             Logger.Log(final, LogLevel.Debug);
+        }
+
+        private void GenericCall()
+        {
+
+        }
+
+        private void CallFunction()
+        {
+            int count = 0;
+            while (true)
+            {
+                switch (stmts[i].Code)
+                {
+                    case OPCode.LOADARG:
+                        count++;
+                        text.AppendLine(
+                            count switch
+                            {
+                                1 => "MOV rcx, rax",
+                                _ => "PUSH rax"
+                            }
+                        );
+                        break;
+                    case OPCode.LOAD:
+                        text.AppendLine("MOV rax, ").AppendLine(stmts[i].Operands[0]);
+                        break;
+                    case OPCode.CALL:
+                        text.Append("CALL ").AppendLine(stmts[i].Operands[0]);
+                        return;
+                    default:
+                        throw new System.Exception();
+                }
+                i++;
+            }
+        }
+
+        private void Advance()
+        {
+            if (i < stmts.Count) i++;
+            else throw new System.Exception();
         }
     }
 }
