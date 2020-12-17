@@ -15,7 +15,8 @@ using Stopwatch = System.Diagnostics.Stopwatch;
 
 using Penguor.Compiler.Debugging;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Text;
+using System.Diagnostics;
 
 namespace Penguor.Compiler.Build
 {
@@ -34,9 +35,18 @@ namespace Penguor.Compiler.Build
             set => tableManager = value;
         }
 
+        public static StringBuilder asmPre;
+        public static StringBuilder asmText;
+        public static StringBuilder asmData;
+
+        private static bool run = true;
+
         static BuildManager()
         {
             tableManager = new SymbolTableManager();
+            asmPre = new StringBuilder("global main\nextern printf");
+            asmText = new();
+            asmData = new();
         }
 
         /// <summary>
@@ -88,6 +98,37 @@ namespace Penguor.Compiler.Build
                 b.GenerateIR();
             foreach (var b in builders)
                 b.GenerateAsm();
+
+            string buildPath = Path.Combine(Path.GetDirectoryName(project) ?? throw new Exception(), "build");
+            Directory.CreateDirectory(buildPath);
+
+            string asm = asmPre.ToString() + "\nsection .data\n\n" + asmData.ToString() + "\nsection .text\n\n" + asmText.ToString();
+
+            File.WriteAllText(Path.Combine(buildPath, "out.asm"), asm);
+
+            if (OperatingSystem.IsWindows())
+            {
+                Process.Start("nasm", $" -fwin64 {Path.Combine(buildPath, "out.asm")}").WaitForExit();
+                Process.Start("gcc", $"{Path.Combine(buildPath, "out.obj")} -o {Path.Combine(buildPath, "out.exe")}").WaitForExit();
+                if (run)
+                {
+                    using Process process = new Process();
+                    process.StartInfo.FileName = ".\\build\\out.exe";
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.StartInfo.CreateNoWindow = true;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.Start();
+
+                    StreamReader reader = process.StandardOutput;
+
+                    string output = reader.ReadToEnd();
+
+                    Console.WriteLine(output);
+
+                    process.WaitForExit();
+                }
+            }
         }
 
         /// <summary>

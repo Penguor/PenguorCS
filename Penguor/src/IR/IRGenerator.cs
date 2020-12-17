@@ -242,7 +242,21 @@ namespace Penguor.Compiler.IR
         public int Visit(AssignExpr expr)
         {
             expr.Value.Accept(this);
-            if (expr.Op != TokenType.ASSIGN) throw new System.Exception();
+            if (expr.Op != TokenType.ASSIGN)
+            {
+                AddStmt(
+                expr.Op switch
+                {
+                    TokenType.ADD_ASSIGN => OPCode.ADD,
+                    TokenType.SUB_ASSIGN => OPCode.SUB,
+                    TokenType.MUL_ASSIGN => OPCode.MUL,
+                    TokenType.DIV_ASSIGN => OPCode.DIV,
+                    _ => throw new System.Exception(),
+                },
+                builder.TableManager.GetStateBySymbol(State.FromCall(expr.Lhs), scopes.ToArray())?.ToString() ?? throw new System.Exception(),
+                $"({statements[^1].Number})");
+            }
+
             AddStmt(
                 OPCode.ASSIGN,
                 builder.TableManager.GetStateBySymbol(State.FromCall(expr.Lhs), scopes.ToArray())?.ToString() ?? throw new System.Exception(),

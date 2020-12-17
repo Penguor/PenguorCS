@@ -20,6 +20,7 @@ using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Analysis;
 using Penguor.Compiler.IR;
 using Penguor.Compiler.Assembly;
+using System.CommandLine.Invocation;
 
 namespace Penguor.Compiler.Build
 {
@@ -164,6 +165,7 @@ namespace Penguor.Compiler.Build
         {
             AssemblyGeneratorWin generator = new AssemblyGeneratorWin(ir ?? throw new ArgumentNullException(nameof(program)), this);
             generator.Generate();
+
         }
 
         /// <summary>

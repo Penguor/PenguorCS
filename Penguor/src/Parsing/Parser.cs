@@ -444,7 +444,7 @@ namespace Penguor.Compiler.Parsing
                 if (lhs is CallExpr e)
                     return new AssignExpr(offset, e, GetPrevious().Type, CondOrExpr());
                 else
-                    throw new Exception();
+                    return Except(new BinaryExpr(offset, lhs, GetPrevious().Type, CondOrExpr()), 14, lhs.ToString());
             }
 
             return lhs;
