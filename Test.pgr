@@ -1,25 +1,69 @@
-
-void print(string a)
+public system Fibonacci
 {
+    void print(string a)
+    {
 
+    }
+
+    void printLn()
+    {
+        string a = "\n"
+        print(a)
+    }
+
+    void pow(int a, int b)
+    {
+        int i = 0;
+        int result = a;
+        while(i < b)
+            result *= a
+        return result
+    }
+
+    public void main()
+    {
+        print(getFibonacci(0))
+        int i = 0
+        while(i <= 10)
+        {
+            print(", " + getFibonacci(i))
+            i++
+        }
+
+        printLn()
+        print(fibMoivreBinet(0))
+
+        i = 0
+        while(i <= 10)
+        {
+            print(", " + getFibonacci(i))
+            i++
+        }
+    }
+
+    // returns the fibonacci number at n
+    private int getFibonacci(int n)
+    {
+        if(n == 0)
+            return 0
+        elif(n == 1)
+            return 1
+        else
+            return getFibonacci(n - 1) + getFibonacci(n - 2)
+    }
+
+    // like the one above, but using a different algorithm
+    private int fibMoivreBinet(int n)
+    {
+        return (
+            (1 / 5) * (
+                (pow(
+                    (1 + sqrt(5)
+                ) / 2, n))
+                 -
+                (pow(
+                    (1 - sqrt(5)
+                ) / 2, n))
+            ))
+    }
 }
-
-void main()
-{
-    string test = "Hello World"
-    print(test)
-}
-
-// data HelloData
-// {
-//     string n1
-//     string n2
-//     string n3
-
-//     public void HelloData()
-//     {
-//         n1 = "Test"
-//         n2 = "Frank"
-//         n3 = "Anna"
-//     }
-// }

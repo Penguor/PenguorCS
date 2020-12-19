@@ -38,6 +38,7 @@ namespace Penguor.Compiler.Build
         public static StringBuilder asmPre;
         public static StringBuilder asmText;
         public static StringBuilder asmData;
+        public static StringBuilder asmBss;
 
         private static bool run = true;
 
@@ -47,6 +48,7 @@ namespace Penguor.Compiler.Build
             asmPre = new StringBuilder("global main\nextern printf");
             asmText = new();
             asmData = new();
+            asmBss = new();
         }
 
         /// <summary>
@@ -102,7 +104,7 @@ namespace Penguor.Compiler.Build
             string buildPath = Path.Combine(Path.GetDirectoryName(project) ?? throw new Exception(), "build");
             Directory.CreateDirectory(buildPath);
 
-            string asm = asmPre.ToString() + "\nsection .data\n\n" + asmData.ToString() + "\nsection .text\n\n" + asmText.ToString();
+            string asm = asmPre.ToString() + "\nsection .data\n\n" + asmData.ToString() + "\nsection .bss\n\n" + asmBss.ToString() + "\nsection .text\n\n" + asmText.ToString();
 
             File.WriteAllText(Path.Combine(buildPath, "out.asm"), asm);
 

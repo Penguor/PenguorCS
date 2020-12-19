@@ -22,7 +22,7 @@ namespace Penguor.Compiler.Parsing
     /// <summary>
     /// The Penguor parser
     /// </summary>
-    public class Parser
+    public class Parser : IExceptionHandler
     {
         private readonly Builder builder;  // the builder which is holding the Lexer
         private readonly List<Token> tokens;
@@ -187,6 +187,7 @@ namespace Penguor.Compiler.Parsing
                 {
                     VarExpr var = VarExpr(AddressType.VarExpr);
                     parameters.Add(var);
+                    AddSymbol(var.Name);
                     if (Match(COMMA)) continue;
                     Consume(RPAREN);
                     break;
@@ -694,15 +695,14 @@ namespace Penguor.Compiler.Parsing
             return false;
         }
 
-        private void Except(uint msg, params string[] args) => Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
+        void Except(uint msg, params string[] args) => Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
 
-        private T Except<T>(T recover, uint msg, params string[] args)
+        T Except<T>(T recover, uint msg, params string[] args)
         {
             Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
             return recover;
         }
-
-        private T Except<T>(Func<T> recover, uint msg, params string[] args)
+        T Except<T>(Func<T> recover, uint msg, params string[] args)
         {
             Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
             return recover();

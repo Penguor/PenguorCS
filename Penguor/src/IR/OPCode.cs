@@ -22,9 +22,13 @@ namespace Penguor.Compiler.IR
         LOAD, LOADARG, LOADPARAM,
         DEF, DFE, ASSIGN, DEFINT, DEFSTR, // define, define empty, assign
         CALL,
-        RETURN,
+        RET, RETN,
         ADD, SUB, MUL, DIV,
-        LESS, GREATER,
-        JTR // jump if true
+        LESS, GREATER, LESS_EQUALS, GREATER_EQUALS,
+        EQUALS,
+        JTR, // jump if true
+        JFL, // jump if false
+        GOTO,
+        ERR // invalid opcode, returned on error
     }
 }

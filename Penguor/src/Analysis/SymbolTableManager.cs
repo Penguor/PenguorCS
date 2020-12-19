@@ -108,17 +108,18 @@ namespace Penguor.Compiler
         /// <param name="scope">the scope to search in</param>
         public Symbol? GetSymbol(AddressFrame symbol, State scope)
         {
-            if (scope.Count == 0)
+            var localScope = (State)scope.Clone();
+            if (localScope.Count == 0)
             {
-                TryLookupSymbolInScope(scope, symbol, out Symbol? outSym);
+                TryLookupSymbolInScope(localScope, symbol, out Symbol? outSym);
                 return outSym;
             }
-            for (int i = scope.Count - 1; i >= 0; i--)
+            for (int i = localScope.Count - 1; i >= 0; i--)
             {
-                TryLookupSymbolInScope(scope, symbol, out Symbol? outSym);
+                TryLookupSymbolInScope(localScope, symbol, out Symbol? outSym);
                 if (outSym != null) return outSym;
-                else if (scope[i].Type == AddressType.LibraryDecl) return null;
-                else scope.Pop();
+                else if (localScope[i].Type == AddressType.LibraryDecl) return null;
+                else localScope.Pop();
             }
             return null;
         }
@@ -132,7 +133,10 @@ namespace Penguor.Compiler
         {
             Symbol? outSym = null;
             foreach (var i in scopes)
+            {
                 outSym = GetSymbol(symbol, i);
+                if (outSym != null) return outSym;
+            }
             return outSym;
         }
 
@@ -167,19 +171,19 @@ namespace Penguor.Compiler
         /// <param name="scope">the scope to search in</param>
         public State? GetStateBySymbol(AddressFrame symbol, State scope)
         {
-            State clonedScope = (State)scope.Clone();
-            if (clonedScope.Count == 0)
+            State localScope = (State)scope.Clone();
+            if (localScope.Count == 0)
             {
-                TryLookupSymbolInScope(clonedScope, symbol, out Symbol? outSym);
-                if (outSym != null) return clonedScope + new AddressFrame(outSym.Name, outSym.AdType);
+                TryLookupSymbolInScope(localScope, symbol, out Symbol? outSym);
+                if (outSym != null) return localScope + new AddressFrame(outSym.Name, outSym.AdType);
                 else return null;
             }
-            for (int i = clonedScope.Count - 1; i >= 0; i--)
+            for (int i = localScope.Count - 1; i >= 0; i--)
             {
-                TryLookupSymbolInScope(clonedScope, symbol, out Symbol? outSym);
-                if (outSym != null) return clonedScope + new AddressFrame(outSym.Name, outSym.AdType);
-                else if (clonedScope[i].Type == AddressType.LibraryDecl) return null;
-                else clonedScope.Pop();
+                TryLookupSymbolInScope(localScope, symbol, out Symbol? outSym);
+                if (outSym != null) return localScope + new AddressFrame(outSym.Name, outSym.AdType);
+                else if (localScope[i].Type == AddressType.LibraryDecl) return null;
+                else localScope.Pop();
             }
             return null;
         }

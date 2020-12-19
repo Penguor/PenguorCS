@@ -14,12 +14,13 @@ using Penguor.Compiler.Parsing.AST;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
+using System;
 
 #pragma warning disable 1591
 
 namespace Penguor.Compiler.IR
 {
-    public class IRGenerator : IDeclVisitor<int>, IStmtVisitor<int>, IExprVisitor<int>
+    public class IRGenerator : IExceptionHandler, IDeclVisitor<int>, IStmtVisitor<int>, IExprVisitor<int>
     {
 
         private readonly Builder builder;
@@ -45,6 +46,7 @@ namespace Penguor.Compiler.IR
             this.builder = builder;
             scopes = new();
             scopes.Add(new State());
+            scopes.Add(new State());
         }
 
         private uint AddStmt(OPCode code, params string[] operands)
@@ -58,6 +60,24 @@ namespace Penguor.Compiler.IR
 
         private uint AddNumLabel() => AddStmt(OPCode.LABEL, LabelNum);
 
+        void Except(uint msg, int offset, params string[] args) => Logger.Log(new Notification(builder.SourceFile, offset, msg, MsgType.PGR, args));
+
+        T Except<T>(T recover, uint msg, int offset, params string[] args)
+        {
+            Logger.Log(new Notification(builder.SourceFile, offset, msg, MsgType.PGR, args));
+            return recover;
+        }
+        T Except<T>(T recover, Notification notification)
+        {
+            Logger.Log(notification);
+            return recover;
+        }
+        T Except<T>(Func<T> recover, uint msg, int offset, params string[] args)
+        {
+            Logger.Log(new Notification(builder.SourceFile, offset, msg, MsgType.PGR, args));
+            return recover();
+        }
+
         /// <summary>
         /// Generates ir from an ast (program node)
         /// </summary>
@@ -70,7 +90,7 @@ namespace Penguor.Compiler.IR
             }
             finally
             {
-                Logger.Log(new IRProgram(statements).ToString(), LogLevel.Debug);
+                if (statements.Count != 0) Logger.Log(new IRProgram(statements).ToString(), LogLevel.Debug);
             }
             return new IRProgram(statements);
         }
@@ -99,7 +119,7 @@ namespace Penguor.Compiler.IR
                 AddStmt(OPCode.LOADPARAM, (scopes[0] + i.Name).ToString());
             var length = statements.Count;
             decl.Content.Accept(this);
-            if (statements[^1].Code != OPCode.RETURN) AddStmt(OPCode.RETURN);
+            if (statements[^1].Code != OPCode.RET) AddStmt(OPCode.RET);
             scopes[0].Pop();
             return 0;
         }
@@ -165,7 +185,7 @@ namespace Penguor.Compiler.IR
             }
             else
             {
-                AddStmt(OPCode.DFE, scopes[0].ToString());
+                AddStmt(OPCode.DFE, scopes[0].ToString(), builder.TableManager.GetSymbol(scopes[0], scopes.ToArray())?.DataType?.ToString() ?? throw new System.Exception());
             }
             scopes[0].Pop();
 
@@ -216,12 +236,25 @@ namespace Penguor.Compiler.IR
 
         public int Visit(IfStmt stmt)
         {
-            throw new System.NotImplementedException();
+            stmt.Condition.Accept(this);
+            uint num = AddStmt(OPCode.JFL, $"({statements[^1].Number})");
+            stmt.IfC.Accept(this);
+            statements[(int)num] = statements[(int)num] with
+            {
+                Operands = new string[] { statements[(int)num].Operands[0], $"({statements[^1].Number})" }
+            };
+            foreach (var i in stmt.Elif)
+                i.Accept(this);
+            stmt.ElseC?.Accept(this);
+            return 0;
         }
 
         public int Visit(ReturnStmt stmt)
         {
-            throw new System.NotImplementedException();
+            stmt.Value?.Accept(this);
+            if (stmt.Value != null) AddStmt(OPCode.RET, $"({statements[^1].Number})");
+            else AddStmt(OPCode.RETN);
+            return 0;
         }
 
         public int Visit(SwitchStmt stmt)
@@ -236,7 +269,11 @@ namespace Penguor.Compiler.IR
 
         public int Visit(WhileStmt stmt)
         {
-            throw new System.NotImplementedException();
+            stmt.Condition.Accept(this);
+            uint label = AddLabel();
+            stmt.Content.Accept(this);
+            AddStmt(OPCode.JTR, $"({statements[^1].Number})", $"L{label}");
+            return 0;
         }
 
         public int Visit(AssignExpr expr)
@@ -278,7 +315,10 @@ namespace Penguor.Compiler.IR
                 TokenType.DIV => OPCode.DIV,
                 TokenType.GREATER => OPCode.GREATER,
                 TokenType.LESS => OPCode.LESS,
-                _ => throw new System.Exception()
+                TokenType.GREATER_EQUALS => OPCode.GREATER_EQUALS,
+                TokenType.LESS_EQUALS => OPCode.LESS_EQUALS,
+                TokenType.EQUALS => OPCode.EQUALS,
+                TokenType a => Except(OPCode.ERR, new Notification(builder.SourceFile, expr.Offset, 9, MsgType.PGRCS, Token.ToString(a))),
             }, $"({num1})", $"({num2})");
             return 0;
         }
@@ -319,7 +359,8 @@ namespace Penguor.Compiler.IR
 
         public int Visit(GroupingExpr expr)
         {
-            throw new System.NotImplementedException();
+            expr.Content.Accept(this);
+            return 0;
         }
 
         public int Visit(NullExpr expr)

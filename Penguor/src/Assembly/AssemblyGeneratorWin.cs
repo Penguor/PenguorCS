@@ -6,11 +6,13 @@ using Penguor.Compiler.IR;
 
 namespace Penguor.Compiler.Assembly
 {
-    public sealed class AssemblyGeneratorWin : IAssemblyGenerator
+    /// <summary>
+    /// generate assembly code for windows
+    /// </summary>
+    public sealed class AssemblyGeneratorWin : AssemblyGenerator
     {
-        public IRProgram Program { get; }
 
-        public Builder Builder { get; }
+        private readonly Builder builder;
 
         private readonly StringBuilder pre = new StringBuilder();
         private readonly StringBuilder text = new StringBuilder();
@@ -19,15 +21,20 @@ namespace Penguor.Compiler.Assembly
 
         int i = 0;
         private readonly List<IRStatement> stmts;
-        public AssemblyGeneratorWin(IRProgram program, Builder builder)
+
+        /// <summary>
+        /// create a new instance of the AssemblyGenerator for windows
+        /// </summary>
+        /// <param name="program">the input ir program</param>
+        /// <param name="builder">the builder which compiles this unit</param>
+        public AssemblyGeneratorWin(IRProgram program, Builder builder) : base(program)
         {
-            Program = program;
-            Builder = builder;
+            this.builder = builder;
             stmts = program.Statements;
         }
 
         /// <inheritdoc/>
-        public void Generate()
+        public override void Generate()
         {
             pre.AppendLine("global main");
             pre.AppendLine("extern printf");
@@ -57,8 +64,26 @@ namespace Penguor.Compiler.Assembly
                         break;
                     case OPCode.LOADPARAM:
                     case OPCode.DEF:
+                        break;
                     case OPCode.DFE:
+                        bss.Append(stmts[i].Operands[0]).Append(": ");
+                        bss.Append(stmts[i].Operands[1] switch
+                        {
+                            "byte" => "resb",
+                            "short" => "resw",
+                            "int" => "resd",
+                            "long" => "resq",
+                            "float" => "resd",
+                            "double" => "resq",
+                            "char" => "resb",
+                            // "string" => "",
+                            // "bool" => "resb",
+                            // "void" => "",
+                            _ => throw new System.Exception(),
+                        }).AppendLine(" 1");
+                        break;
                     case OPCode.ASSIGN:
+                        text.Append("MOV [").Append(stmts[i].Operands[0]).AppendLine("], rax");
                         break;
                     case OPCode.CALL:
                         GenericCall();
@@ -66,13 +91,15 @@ namespace Penguor.Compiler.Assembly
                     case OPCode.LOADARG:
                         CallFunction();
                         break;
-                    case OPCode.RETURN:
+                    case OPCode.RET:
                         text.AppendLine("RET");
                         break;
                     case OPCode.ADD:
                         text.Append("ADD [").Append(stmts[i].Operands[0]).AppendLine("], rax");
                         break;
                     case OPCode.SUB:
+                        text.Append("SUB [").Append(stmts[i].Operands[0]).AppendLine("], rax");
+                        break;
                     case OPCode.MUL:
                     case OPCode.DIV:
                     case OPCode.LESS:
@@ -82,9 +109,10 @@ namespace Penguor.Compiler.Assembly
                 }
             }
             string final = "\n" + pre.ToString() + "\nsection .data\n\n" + data.ToString() + "\nsection .bss\n\n" + bss.ToString() + "\nsection .text\n\n" + text.ToString();
-            Logger.Log(final, LogLevel.Debug);
+            if (!(data.Length == 0 && bss.Length == 0 && text.Length == 0)) Logger.Log(final, LogLevel.Debug);
             BuildManager.asmData.Append(data);
             BuildManager.asmText.Append(text);
+            BuildManager.asmBss.Append(bss);
         }
 
         private void GenericCall()

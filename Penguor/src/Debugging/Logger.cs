@@ -62,9 +62,10 @@ namespace Penguor.Compiler.Debugging
             {3, (LogLevel.Debug, "Debug")},
             {4, (LogLevel.Info, "Info")},
             {5, (LogLevel.Error, "The compiler is out of memory")},
-            {6, (LogLevel.Error, "Source file '{0}' not found")},
-            {7, (LogLevel.Error, "Parser.tokens is null")},
-            {8, (LogLevel.Error, "trying to access active file, but there is none")},
+            {6, (LogLevel.Error, "Parser.tokens is null")},
+            {7, (LogLevel.Error, "Could not insert symbol into symbol table")},
+            {8, (LogLevel.Error, "Trying to access active file, but there is none")},
+            {9, (LogLevel.Error, "Token {0} is not valid for binary expressions")},
         };
 
         private static readonly Dictionary<uint, (LogLevel, string)> pgrMessages = new Dictionary<uint, (LogLevel, string)>
@@ -81,7 +82,8 @@ namespace Penguor.Compiler.Debugging
             {11, (LogLevel.Error, "Expecting '{0}', but found '{1}'")},
             {12, (LogLevel.Error, "Expecting a code block (with curly braces) or a colon followed by a statement")},
             {13, (LogLevel.Error, "{0}s must not have modifiers")},
-            {14, (LogLevel.Error, "Values cannot be assigned to {0}s, expecting a call")}
+            {14, (LogLevel.Error, "Values cannot be assigned to {0}s, expecting a call")},
+            {15, (LogLevel.Error, "Only assign expressions and call expressions may be statements")}
         };
 
         /// <summary>
