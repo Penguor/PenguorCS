@@ -21,11 +21,13 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of GroupingExpr
         /// </summary>
-        public GroupingExpr(int offset, Expr content)
+        public GroupingExpr(int id, int offset, Expr content)
         {
+            Id = id;
             Offset = offset;
             Content = content;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public Expr Content { get; init; }
 

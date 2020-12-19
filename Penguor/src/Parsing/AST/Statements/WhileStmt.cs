@@ -21,12 +21,14 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of WhileStmt
         /// </summary>
-        public WhileStmt(int offset, Expr condition, Stmt content)
+        public WhileStmt(int id, int offset, Expr condition, Stmt content)
         {
+            Id = id;
             Offset = offset;
             Condition = condition;
             Content = content;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public Expr Condition { get; init; }
         public Stmt Content { get; init; }

@@ -21,8 +21,9 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of TypeDecl
         /// </summary>
-        public TypeDecl(int offset, TokenType? accessmod, TokenType[] nonaccessmod, AddressFrame name, CallExpr? parent, BlockDecl content)
+        public TypeDecl(int id, int offset, TokenType? accessmod, TokenType[] nonaccessmod, AddressFrame name, CallExpr? parent, BlockDecl content)
         {
+            Id = id;
             Offset = offset;
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
@@ -30,6 +31,7 @@ namespace Penguor.Compiler.Parsing.AST
             Parent = parent;
             Content = content;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public TokenType? AccessMod { get; init; }
         public TokenType[] NonAccessMod { get; init; }

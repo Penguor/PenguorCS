@@ -21,13 +21,15 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of ForStmt
         /// </summary>
-        public ForStmt(int offset, VarExpr currentvar, CallExpr vars, Stmt content)
+        public ForStmt(int id, int offset, VarExpr currentvar, CallExpr vars, Stmt content)
         {
+            Id = id;
             Offset = offset;
             CurrentVar = currentvar;
             Vars = vars;
             Content = content;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public VarExpr CurrentVar { get; init; }
         public CallExpr Vars { get; init; }

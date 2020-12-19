@@ -21,12 +21,14 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of CompilerStmt
         /// </summary>
-        public CompilerStmt(int offset, TokenType dir, Token[] val)
+        public CompilerStmt(int id, int offset, TokenType dir, Token[] val)
         {
+            Id = id;
             Offset = offset;
             Dir = dir;
             Val = val;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public TokenType Dir { get; init; }
         public Token[] Val { get; init; }

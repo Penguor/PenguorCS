@@ -30,8 +30,6 @@ namespace Penguor.Compiler.Analysis
 
         private byte pass;
 
-        private uint _instrNum;
-        private uint InstNum { get => _instrNum++; }
 
         public SemanticAnalyser(ProgramDecl program, Builder builder)
         {
@@ -232,7 +230,7 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(DoStmt stmt)
         {
-            scopes[0].Push(new AddressFrame($".do{InstNum}", AddressType.Control));
+            scopes[0].Push(new AddressFrame($".do{stmt.Id}", AddressType.Control));
             builder.TableManager.AddTable(scopes[0]);
             var content = stmt.Content.Accept(this);
             scopes[0].Pop();
@@ -254,7 +252,7 @@ namespace Penguor.Compiler.Analysis
                                                            or TokenType.AND
                                                            or TokenType.OR)))
             {
-                scopes[0].Push(new AddressFrame($".elif{InstNum}", AddressType.Control));
+                scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt content = stmt.Content.Accept(this);
                 scopes[0].Pop();
@@ -278,7 +276,7 @@ namespace Penguor.Compiler.Analysis
         {
             var currentVar = stmt.CurrentVar.Accept(this);
             var vars = stmt.Vars.Accept(this);
-            scopes[0].Push(new AddressFrame($".for{InstNum}", AddressType.Control));
+            scopes[0].Push(new AddressFrame($".for{stmt.Id}", AddressType.Control));
             builder.TableManager.AddTable(scopes[0]);
             AddVarExpr(stmt.CurrentVar);
             var content = stmt.Content.Accept(this);
@@ -302,13 +300,13 @@ namespace Penguor.Compiler.Analysis
                                                            or TokenType.AND
                                                            or TokenType.OR)))
             {
-                scopes[0].Push(new AddressFrame($".if{InstNum}", AddressType.Control));
+                scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt ifC = stmt.IfC.Accept(this);
                 scopes[0].Pop();
                 List<Stmt> elif = new List<Stmt>(stmt.Elif.Count);
                 foreach (var i in stmt.Elif) elif.Add(i.Accept(this));
-                scopes[0].Push(new AddressFrame($".else{InstNum}", AddressType.Control));
+                scopes[0].Push(new AddressFrame($".else{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt? elseC = stmt.ElseC?.Accept(this);
                 scopes[0].Pop();
@@ -352,7 +350,7 @@ namespace Penguor.Compiler.Analysis
                                                            or TokenType.AND
                                                            or TokenType.OR)))
             {
-                scopes[0].Push(new AddressFrame($".while{InstNum}", AddressType.Control));
+                scopes[0].Push(new AddressFrame($".while{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
                 var content = stmt.Content.Accept(this);
                 scopes[0].Pop();
@@ -379,35 +377,35 @@ namespace Penguor.Compiler.Analysis
 
             if (expr.Op == TokenType.EQUALS)
             {
-                { if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value == expr2.Value); }
-                { if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value == expr2.Value); }
-                { if (lhs is StringExpr expr1 && rhs is StringExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value == expr2.Value); }
-                { if (lhs is NullExpr && rhs is NullExpr) return new BooleanExpr(expr.Offset, true); }
+                { if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value == expr2.Value); }
+                { if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value == expr2.Value); }
+                { if (lhs is StringExpr expr1 && rhs is StringExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value == expr2.Value); }
+                { if (lhs is NullExpr expr1 && rhs is NullExpr) return new BooleanExpr(expr1.Id, expr.Offset, true); }
             }
             else if (expr.Op == TokenType.NEQUALS)
             {
-                { if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value != expr2.Value); }
-                { if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value != expr2.Value); }
-                { if (lhs is StringExpr expr1 && rhs is StringExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value != expr2.Value); }
-                { if (lhs is NullExpr && rhs is NullExpr) return new BooleanExpr(expr.Offset, false); }
+                { if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value != expr2.Value); }
+                { if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value != expr2.Value); }
+                { if (lhs is StringExpr expr1 && rhs is StringExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value != expr2.Value); }
+                { if (lhs is NullExpr expr1 && rhs is NullExpr) return new BooleanExpr(expr1.Id, expr.Offset, false); }
             }
             else if (expr.Op == TokenType.LESS)
             {
-                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value < expr2.Value);
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value < expr2.Value);
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
             }
             else if (expr.Op == TokenType.GREATER)
             {
-                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value > expr2.Value);
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value > expr2.Value);
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
             }
             else if (expr.Op == TokenType.LESS_EQUALS)
             {
-                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value <= expr2.Value);
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value <= expr2.Value);
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
@@ -415,20 +413,20 @@ namespace Penguor.Compiler.Analysis
             else if (expr.Op == TokenType.GREATER_EQUALS)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
-                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value >= expr2.Value);
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value >= expr2.Value);
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
             }
             else if (expr.Op == TokenType.AND)
             {
-                if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value && expr2.Value);
+                if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value && expr2.Value);
                 if (lhs is NumExpr && rhs is NumExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
             }
             else if (expr.Op == TokenType.OR)
             {
-                if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr.Offset, expr1.Value || expr2.Value);
+                if (lhs is BooleanExpr expr1 && rhs is BooleanExpr expr2) return new BooleanExpr(expr1.Id, expr.Offset, expr1.Value || expr2.Value);
                 if (lhs is NumExpr && rhs is NumExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
@@ -436,28 +434,28 @@ namespace Penguor.Compiler.Analysis
             else if (expr.Op == TokenType.PLUS)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
-                { if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Offset, expr1.Value + expr2.Value); }
-                { if (lhs is StringExpr expr1 && rhs is StringExpr expr2) return new StringExpr(expr1.Offset, expr1.Value + expr2.Value); }
+                { if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Id, expr1.Offset, expr1.Value + expr2.Value); }
+                { if (lhs is StringExpr expr1 && rhs is StringExpr expr2) return new StringExpr(expr1.Id, expr1.Offset, expr1.Value + expr2.Value); }
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
             }
             else if (expr.Op == TokenType.MINUS)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
-                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Offset, expr1.Value - expr2.Value);
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Id, expr1.Offset, expr1.Value - expr2.Value);
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
             }
             else if (expr.Op == TokenType.MUL)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
-                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Offset, expr1.Value * expr2.Value);
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Id, expr1.Offset, expr1.Value * expr2.Value);
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
             }
             else if (expr.Op == TokenType.DIV)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
-                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Offset, expr1.Value / expr2.Value);
+                if (lhs is NumExpr expr1 && rhs is NumExpr expr2) return new NumExpr(expr1.Id, expr1.Offset, expr1.Value / expr2.Value);
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
             }
@@ -491,7 +489,7 @@ namespace Penguor.Compiler.Analysis
             Expr e = expr.Rhs.Accept(this);
             if (expr.Op == null) return expr;
             else if (e is NumExpr && expr.Op is TokenType.MINUS or TokenType.PLUS or TokenType.BW_NOT or TokenType.DPLUS or TokenType.DMINUS) return expr;
-            else if (e is BooleanExpr booleanExpr && expr.Op is TokenType.EXCL_MARK) return new BooleanExpr(expr.Offset, !booleanExpr.Value);
+            else if (e is BooleanExpr booleanExpr && expr.Op is TokenType.EXCL_MARK) return booleanExpr with { Value = !booleanExpr.Value };
             else throw new Exception();
         }
 

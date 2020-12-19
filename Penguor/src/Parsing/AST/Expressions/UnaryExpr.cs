@@ -21,12 +21,14 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of UnaryExpr
         /// </summary>
-        public UnaryExpr(int offset, TokenType? op, Expr rhs)
+        public UnaryExpr(int id, int offset, TokenType? op, Expr rhs)
         {
+            Id = id;
             Offset = offset;
             Op = op;
             Rhs = rhs;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public TokenType? Op { get; init; }
         public Expr Rhs { get; init; }

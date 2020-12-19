@@ -21,12 +21,14 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of VarExpr
         /// </summary>
-        public VarExpr(int offset, CallExpr type, AddressFrame name)
+        public VarExpr(int id, int offset, CallExpr type, AddressFrame name)
         {
+            Id = id;
             Offset = offset;
             Type = type;
             Name = name;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public CallExpr Type { get; init; }
         public AddressFrame Name { get; init; }

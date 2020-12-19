@@ -106,6 +106,8 @@ namespace Penguor.Compiler.Parsing.AST
                         names = new List<string>();
 
                         types.Add("int");
+                        names.Add("id");
+                        types.Add("int");
                         names.Add("offset");
 
                         while (char.IsWhiteSpace(current)) Advance();

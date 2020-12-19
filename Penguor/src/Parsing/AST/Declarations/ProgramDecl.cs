@@ -21,11 +21,13 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of ProgramDecl
         /// </summary>
-        public ProgramDecl(int offset, List<Decl> declarations)
+        public ProgramDecl(int id, int offset, List<Decl> declarations)
         {
+            Id = id;
             Offset = offset;
             Declarations = declarations;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public List<Decl> Declarations { get; init; }
 

@@ -21,11 +21,13 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of BlockDecl
         /// </summary>
-        public BlockDecl(int offset, List<Decl> content)
+        public BlockDecl(int id, int offset, List<Decl> content)
         {
+            Id = id;
             Offset = offset;
             Content = content;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public List<Decl> Content { get; init; }
 

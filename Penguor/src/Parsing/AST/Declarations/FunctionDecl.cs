@@ -21,8 +21,9 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of FunctionDecl
         /// </summary>
-        public FunctionDecl(int offset, TokenType? accessmod, TokenType[] nonaccessmod, CallExpr returns, AddressFrame name, List<VarExpr> parameters, Decl content)
+        public FunctionDecl(int id, int offset, TokenType? accessmod, TokenType[] nonaccessmod, CallExpr returns, AddressFrame name, List<VarExpr> parameters, Decl content)
         {
+            Id = id;
             Offset = offset;
             AccessMod = accessmod;
             NonAccessMod = nonaccessmod;
@@ -31,6 +32,7 @@ namespace Penguor.Compiler.Parsing.AST
             Parameters = parameters;
             Content = content;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public TokenType? AccessMod { get; init; }
         public TokenType[] NonAccessMod { get; init; }

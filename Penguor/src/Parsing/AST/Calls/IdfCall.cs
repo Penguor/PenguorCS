@@ -21,11 +21,13 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of IdfCall
         /// </summary>
-        public IdfCall(int offset, AddressFrame name)
+        public IdfCall(int id, int offset, AddressFrame name)
         {
+            Id = id;
             Offset = offset;
             Name = name;
         }
+        public int Id { get; init; }
         public int Offset { get; init; }
         public AddressFrame Name { get; init; }
 

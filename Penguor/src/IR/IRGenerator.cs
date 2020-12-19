@@ -211,9 +211,11 @@ namespace Penguor.Compiler.IR
 
         public int Visit(DoStmt stmt)
         {
+            scopes[0].Push(new AddressFrame($".do{stmt.Id}", AddressType.Control));
             var num = AddNumLabel();
             stmt.Content.Accept(this);
             stmt.Condition.Accept(this);
+            scopes[0].Pop();
             AddStmt(OPCode.JTR, $"({statements[^1].Number})", $"({num})");
             return 0;
         }
@@ -238,7 +240,9 @@ namespace Penguor.Compiler.IR
         {
             stmt.Condition.Accept(this);
             uint num = AddStmt(OPCode.JFL, $"({statements[^1].Number})");
+            scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
             stmt.IfC.Accept(this);
+            scopes[0].Pop();
             statements[(int)num] = statements[(int)num] with
             {
                 Operands = new string[] { statements[(int)num].Operands[0], $"({statements[^1].Number})" }
