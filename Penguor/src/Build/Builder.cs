@@ -118,7 +118,7 @@ namespace Penguor.Compiler.Build
         public Decl Parse()
         {
             if (!lexerFinished) Lex();
-            if (tokens == null) throw new PenguorCSException(1);
+            if (tokens == null) throw new PenguorCSException();
             Parser parser = new Parser(tokens, this);
 
             program = parser.Parse();

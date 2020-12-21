@@ -23,7 +23,6 @@ namespace Penguor.Compiler.Parsing.AST
         public int Offset { get; init; }
         public List<Decl> Declarations { get; init; }
 
-
         public override string ToString() => "program declaration";
 
         /// <summary>

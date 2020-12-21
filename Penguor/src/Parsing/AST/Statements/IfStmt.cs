@@ -29,7 +29,6 @@ namespace Penguor.Compiler.Parsing.AST
         public List<Stmt> Elif { get; init; }
         public Stmt? ElseC { get; init; }
 
-
         public override string ToString() => "if statement";
 
         /// <summary>

@@ -27,7 +27,6 @@ namespace Penguor.Compiler.Parsing.AST
         public TokenType Op { get; init; }
         public Expr Rhs { get; init; }
 
-
         public override string ToString() => "binary expression";
 
         /// <summary>

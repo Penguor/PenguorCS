@@ -21,7 +21,6 @@ namespace Penguor.Compiler.Parsing.AST
         public int Id { get; init; }
         public int Offset { get; init; }
 
-
         public override string ToString() => "null expression";
 
         /// <summary>

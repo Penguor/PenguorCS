@@ -1,7 +1,3 @@
-
-
-using System;
-
 namespace Penguor.Compiler.Debugging
 {
     /// <summary>
@@ -9,7 +5,5 @@ namespace Penguor.Compiler.Debugging
     /// </summary>
     public interface IExceptionHandler
     {
-
-
     }
 }

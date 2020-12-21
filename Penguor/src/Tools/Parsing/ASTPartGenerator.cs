@@ -170,7 +170,6 @@ namespace Penguor.Compiler.Parsing.AST
 
                             writer.Write(
                 $@"
-
         public override string ToString() => ""{name.ToLower()} {longMode!.ToLower()}"";
 
         /// <summary>

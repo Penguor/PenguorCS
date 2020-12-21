@@ -1,5 +1,3 @@
-
-
 using System.Collections.Generic;
 
 using Penguor.Compiler.Parsing.AST;
@@ -21,7 +19,6 @@ namespace Penguor.Compiler.Analysis
         private readonly List<State> scopes;
 
         private byte pass;
-
 
         public SemanticAnalyser(ProgramDecl program, Builder builder)
         {

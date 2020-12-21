@@ -1,5 +1,3 @@
-
-
 using System.Collections.Generic;
 
 using Penguor.Compiler.Parsing.AST;
@@ -14,9 +12,7 @@ namespace Penguor.Compiler.IR
 {
     public class IRGenerator : IExceptionHandler, IDeclVisitor<int>, IStmtVisitor<int>, IExprVisitor<int>
     {
-
         private readonly Builder builder;
-
         private readonly ProgramDecl program;
 
         private readonly List<State> scopes;

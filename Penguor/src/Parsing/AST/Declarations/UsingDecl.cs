@@ -23,7 +23,6 @@ namespace Penguor.Compiler.Parsing.AST
         public int Offset { get; init; }
         public CallExpr Lib { get; init; }
 
-
         public override string ToString() => "using declaration";
 
         /// <summary>

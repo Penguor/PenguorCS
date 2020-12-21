@@ -1,8 +1,6 @@
 
-
 using System;
 using System.Collections.Generic;
-using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler
 {
@@ -93,6 +91,11 @@ namespace Penguor.Compiler
             return false;
         }
 
+        /// <summary>
+        /// looks up the symbol of a scope
+        /// </summary>
+        /// <param name="symbol">the scope whose symbol to get</param>
+        /// <returns>the symbol of the scope</returns>
         public Symbol GetSymbol(State symbol)
         {
             var localSymbol = (State)symbol.Clone();

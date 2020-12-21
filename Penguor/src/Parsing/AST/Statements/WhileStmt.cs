@@ -25,7 +25,6 @@ namespace Penguor.Compiler.Parsing.AST
         public Expr Condition { get; init; }
         public Stmt Content { get; init; }
 
-
         public override string ToString() => "while statement";
 
         /// <summary>

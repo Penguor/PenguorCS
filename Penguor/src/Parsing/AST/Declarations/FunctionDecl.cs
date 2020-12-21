@@ -33,7 +33,6 @@ namespace Penguor.Compiler.Parsing.AST
         public List<VarExpr> Parameters { get; init; }
         public Decl Content { get; init; }
 
-
         public override string ToString() => "function declaration";
 
         /// <summary>

@@ -1,5 +1,3 @@
-
-
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -571,7 +569,7 @@ namespace Penguor.Compiler.Parsing
         private void AddSymbol(AddressFrame frame)
         {
             bool succeeded = builder.TableManager.AddSymbol(state, frame);
-            if (!succeeded) throw new PenguorCSException(1);
+            if (!succeeded) throw new PenguorCSException();
         }
 
         private void AddSymbol(AddressFrame frame, TokenType? accessMod, TokenType[]? nonAccessMods)
@@ -581,7 +579,7 @@ namespace Penguor.Compiler.Parsing
                 AccessMod = accessMod,
                 NonAccessMods = nonAccessMods,
             });
-            if (!succeeded) throw new PenguorCSException(1);
+            if (!succeeded) throw new PenguorCSException();
         }
 
         /// <summary>

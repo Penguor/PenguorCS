@@ -25,7 +25,6 @@ namespace Penguor.Compiler.Parsing.AST
         public CallExpr Type { get; init; }
         public AddressFrame Name { get; init; }
 
-
         public override string ToString() => "var expression";
 
         /// <summary>

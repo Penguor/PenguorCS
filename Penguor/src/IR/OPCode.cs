@@ -1,5 +1,3 @@
-
-
 #pragma warning disable 1591
 
 namespace Penguor.Compiler.IR

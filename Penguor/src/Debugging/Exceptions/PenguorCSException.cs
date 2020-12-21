@@ -1,5 +1,4 @@
 
-
 using System;
 
 namespace Penguor.Compiler.Debugging
@@ -12,8 +11,7 @@ namespace Penguor.Compiler.Debugging
         /// <summary>
         /// initialize a new instance of the PenguorCS exception
         /// </summary>
-        /// <param name="msg">the number of the PGRCS error message</param>
-        public PenguorCSException(uint msg)
+        public PenguorCSException()
         {
         }
     }

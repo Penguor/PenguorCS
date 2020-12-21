@@ -25,7 +25,6 @@ namespace Penguor.Compiler.Parsing.AST
         public TokenType Dir { get; init; }
         public Token[] Val { get; init; }
 
-
         public override string ToString() => "compiler statement";
 
         /// <summary>

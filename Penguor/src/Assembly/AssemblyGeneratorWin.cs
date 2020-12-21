@@ -11,7 +11,6 @@ namespace Penguor.Compiler.Assembly
     /// </summary>
     public sealed class AssemblyGeneratorWin : AssemblyGenerator
     {
-
         private readonly Builder builder;
 
         private readonly StringBuilder pre = new StringBuilder();
@@ -59,7 +58,7 @@ namespace Penguor.Compiler.Assembly
                     case OPCode.USE:
                         break;
                     case OPCode.LOAD:
-                        text.AppendLine($"MOV rax, {stmts[i].Operands[0]}");
+                        text.Append("MOV rax, ").Append(stmts[i].Operands[0]).AppendLine();
                         break;
                     case OPCode.LOADPARAM:
                         break;
@@ -107,7 +106,6 @@ namespace Penguor.Compiler.Assembly
                         text.Append("MOV [").Append(stmts[i].Operands[0]).AppendLine("], rax");
                         break;
                     case OPCode.CALL:
-                        GenericCall();
                         break;
                     case OPCode.LOADARG:
                         CallFunction();
@@ -135,11 +133,6 @@ namespace Penguor.Compiler.Assembly
             BuildManager.asmData.Append(data);
             BuildManager.asmText.Append(text);
             BuildManager.asmBss.Append(bss);
-        }
-
-        private void GenericCall()
-        {
-
         }
 
         private void CallFunction()

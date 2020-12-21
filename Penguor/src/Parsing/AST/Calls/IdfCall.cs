@@ -23,7 +23,6 @@ namespace Penguor.Compiler.Parsing.AST
         public int Offset { get; init; }
         public AddressFrame Name { get; init; }
 
-
         public override string ToString() => "idf call";
 
         /// <summary>

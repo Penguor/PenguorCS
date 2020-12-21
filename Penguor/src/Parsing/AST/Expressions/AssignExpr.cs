@@ -27,7 +27,6 @@ namespace Penguor.Compiler.Parsing.AST
         public TokenType Op { get; init; }
         public Expr Value { get; init; }
 
-
         public override string ToString() => "assign expression";
 
         /// <summary>

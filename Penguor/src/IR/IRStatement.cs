@@ -1,5 +1,3 @@
-
-
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.IR
@@ -41,7 +39,7 @@ namespace Penguor.Compiler.IR
         public override string ToString()
         {
             if (Code is OPCode.LABEL or OPCode.LIB or OPCode.FUNC)
-                return $"({Number:D4}) {Code} {Operands[0].ToString()}{':'}";
+                return $"({Number:D4}) {Code} {Operands[0]}{':'}";
             return $"({Number:D4})     {Code} {string.Join(' ', (IEnumerable<IRArgument>)Operands)}";
         }
     }

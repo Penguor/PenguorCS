@@ -1,5 +1,3 @@
-
-
 namespace Penguor.Compiler.IR
 {
     /// <summary>

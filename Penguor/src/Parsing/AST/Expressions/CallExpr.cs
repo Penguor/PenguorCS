@@ -25,7 +25,6 @@ namespace Penguor.Compiler.Parsing.AST
         public List<Call> Callee { get; init; }
         public TokenType? Postfix { get; init; }
 
-
         public override string ToString() => "call expression";
 
         /// <summary>

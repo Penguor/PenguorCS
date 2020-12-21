@@ -27,7 +27,6 @@ namespace Penguor.Compiler.Parsing.AST
         public CallExpr Vars { get; init; }
         public Stmt Content { get; init; }
 
-
         public override string ToString() => "for statement";
 
         /// <summary>

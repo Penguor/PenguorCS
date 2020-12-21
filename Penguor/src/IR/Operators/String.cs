@@ -13,6 +13,6 @@ namespace Penguor.Compiler.IR
         }
 
         /// <inheritdoc/>
-        public override string ToString() => Value.ToString();
+        public override string ToString() => Value;
     }
 }

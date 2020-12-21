@@ -25,7 +25,6 @@ namespace Penguor.Compiler.Parsing.AST
         public AddressFrame Name { get; init; }
         public List<Expr> Args { get; init; }
 
-
         public override string ToString() => "function call";
 
         /// <summary>

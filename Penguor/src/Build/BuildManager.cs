@@ -1,5 +1,3 @@
-
-
 using System;
 using System.IO;
 
@@ -52,10 +50,10 @@ namespace Penguor.Compiler.Build
         {
             if ((File.GetAttributes(path) & FileAttributes.Directory) != 0)
             {
-                if (path.Length == 0 || path == null) throw new PenguorCSException(1);
+                if (path.Length == 0 || path == null) throw new PenguorCSException();
                 string[] files = Directory.GetFiles(path, "*.pgrp", SearchOption.AllDirectories);
-                if (files.Length > 1) throw new PenguorCSException(1);
-                else if (files.Length < 1) throw new PenguorCSException(1);
+                if (files.Length > 1) throw new PenguorCSException();
+                else if (files.Length < 1) throw new PenguorCSException();
                 else BuildProject(files[0], stdLib);
                 return;
             }

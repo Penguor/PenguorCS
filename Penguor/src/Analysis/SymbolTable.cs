@@ -1,6 +1,3 @@
-
-
-using System;
 using System.Collections.Generic;
 
 using Penguor.Compiler.Debugging;
@@ -40,7 +37,7 @@ namespace Penguor.Compiler
         public void Insert(AddressFrame symbol)
         {
             bool succeeded = Symbols.TryAdd(symbol.Symbol, new Symbol(symbol.Symbol, symbol.Type));
-            if (!succeeded) throw new PenguorCSException(1);
+            if (!succeeded) throw new PenguorCSException();
         }
 
         /// <summary>
@@ -50,7 +47,7 @@ namespace Penguor.Compiler
         public void Insert(Symbol symbol)
         {
             bool succeeded = Symbols.TryAdd(symbol.Name, symbol);
-            if (!succeeded) throw new PenguorCSException(1);
+            if (!succeeded) throw new PenguorCSException();
         }
 
         /// <summary>

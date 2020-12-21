@@ -23,7 +23,6 @@ namespace Penguor.Compiler.Parsing.AST
         public int Offset { get; init; }
         public Expr Content { get; init; }
 
-
         public override string ToString() => "grouping expression";
 
         /// <summary>

@@ -29,7 +29,6 @@ namespace Penguor.Compiler.Parsing.AST
         public State Name { get; init; }
         public BlockDecl Content { get; init; }
 
-
         public override string ToString() => "library declaration";
 
         /// <summary>

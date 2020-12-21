@@ -31,7 +31,6 @@ namespace Penguor.Compiler.Parsing.AST
         public CallExpr? Parent { get; init; }
         public BlockDecl Content { get; init; }
 
-
         public override string ToString() => "type declaration";
 
         /// <summary>

@@ -27,7 +27,6 @@ namespace Penguor.Compiler.Parsing.AST
         public List<Stmt> Cases { get; init; }
         public Stmt? DefaultCase { get; init; }
 
-
         public override string ToString() => "switch statement";
 
         /// <summary>

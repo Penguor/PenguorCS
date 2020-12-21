@@ -23,7 +23,6 @@ namespace Penguor.Compiler.Parsing.AST
         public int Offset { get; init; }
         public bool Value { get; init; }
 
-
         public override string ToString() => "boolean expression";
 
         /// <summary>
