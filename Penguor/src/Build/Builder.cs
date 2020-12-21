@@ -1,12 +1,4 @@
-/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-2020
-# all rights reserved
-# 
-*/
+
 
 using System;
 using System.IO;

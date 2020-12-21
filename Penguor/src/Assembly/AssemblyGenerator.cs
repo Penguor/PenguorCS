@@ -1,12 +1,4 @@
-/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-2020
-# 
-# 
-*/
+
 using Penguor.Compiler.Build;
 using Penguor.Compiler.IR;
 

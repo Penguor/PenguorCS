@@ -1,12 +1,4 @@
-/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-2020
-# 
-# 
-*/
+
 #pragma warning disable 1591
 
 namespace Penguor.Compiler.Parsing

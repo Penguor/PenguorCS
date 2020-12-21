@@ -1,12 +1,4 @@
-/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-2020
-# 
-# 
-*/
+
 
 using System;
 using System.Collections;
@@ -299,7 +291,6 @@ namespace Penguor.Compiler
         /// <summary>
         /// get the library of the State
         /// </summary>
-        /// <returns></returns>
         public State GetLibrary()
         {
             int num = 0;

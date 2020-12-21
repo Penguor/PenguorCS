@@ -1,12 +1,4 @@
-/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-2020
-# 
-# 
-*/
+
 
 using System;
 using System.Globalization;

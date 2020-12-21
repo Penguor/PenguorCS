@@ -1,11 +1,4 @@
-/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-2020
-# 
-*/
+
 
 using System;
 using System.IO;
@@ -70,15 +63,6 @@ namespace Penguor.Compiler.Tools
                         using (StreamWriter writer = new StreamWriter(Path.Combine(folder, mode + ".cs")))
                         {
                             writer.Write($@"
-/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-{DateTime.Now.Year}
-# 
-*/
-
 #pragma warning disable 1591
 
 namespace Penguor.Compiler.Parsing.AST
@@ -142,16 +126,7 @@ namespace Penguor.Compiler.Parsing.AST
                         {
                             writer.AutoFlush = true;
 
-                            writer.Write(
-    $@"/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-{DateTime.Now.Year}
-# 
-*/
-
+                            writer.Write($@"
 #pragma warning disable 1591
 
 using System.Collections.Generic;
