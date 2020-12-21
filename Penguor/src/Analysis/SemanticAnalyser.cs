@@ -157,6 +157,11 @@ namespace Penguor.Compiler.Analysis
             List<VarExpr> parameters = new(decl.Parameters.Count);
             foreach (var i in decl.Parameters) parameters.Add((VarExpr)i.Accept(this));
             scopes[0].Push(decl.Name);
+            foreach (var i in parameters)
+            {
+                var symbol = builder.TableManager.GetSymbol(i.Name, scopes);
+                if (symbol != null) symbol.DataType = builder.TableManager.GetStateBySymbol(State.FromCall(i.Type), scopes.ToArray());
+            }
             var content = decl.Content.Accept(this);
             scopes[0].Pop();
 

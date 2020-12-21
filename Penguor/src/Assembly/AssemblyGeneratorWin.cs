@@ -43,31 +43,52 @@ namespace Penguor.Compiler.Assembly
             {
                 switch (stmts[i].Code)
                 {
-                    case OPCode.DEFINT:
-                        data.Append(stmts[i].Operands[0]).Append(" dd ").AppendLine(stmts[i].Operands[1]);
-                        break;
-                    case OPCode.DEFSTR:
-                        data.Append(stmts[i].Operands[0]).Append(" db ").Append(stmts[i].Operands[1]).AppendLine(", 0");
+                    case OPCode.FUNC:
+                        text.Append(stmts[i].Operands[0]).AppendLine(":");
+                        text.AppendLine("PUSH RBP");
+                        text.AppendLine("MOV RSP, RBP");
+                        if (stmts[i].Operands[0] is String s && s.Value == "print")
+                            text.AppendLine("CALL printf");
                         break;
                     case OPCode.LABEL:
                         text.Append(stmts[i].Operands[0]).AppendLine(":");
-                        if (stmts[i].Operands[0] == "print")
-                            text.AppendLine("CALL printf");
                         break;
                     case OPCode.LIB:
-                        text.Append("; ").AppendLine(stmts[i].Operands[0]);
+                        text.Append("; ").AppendLine(stmts[i].Operands[0].ToString());
                         break;
                     case OPCode.USE:
                         break;
                     case OPCode.LOAD:
-                        text.Append("MOV rax, ").AppendJoin(' ', stmts[i].Operands).AppendLine();
+                        text.AppendLine($"MOV rax, {stmts[i].Operands[0]}");
                         break;
                     case OPCode.LOADPARAM:
+                        break;
                     case OPCode.DEF:
+                        if (stmts[i].Operands[0] is IRState state)
+                        {
+                            data.Append(stmts[i].Operands[0]).Append(
+                               ' ').Append(builder.TableManager.GetSymbol(state.State).DataType?.ToString() switch
+                               {
+                                   "bool" or "byte" or "char" or "string" => "db",
+                                   "short" => "dw",
+                                   "int" => "dd",
+                                   "long" => "dq",
+                                   "double" => "dq",
+                                   _ => throw new System.Exception(),
+                               }).Append(' ');
+                            data.Append(stmts[i].Operands[1] switch
+                            {
+                                String a => $"'{a.Value}', 0",
+                                Double a => a.Value,
+                                _ => " "
+                            });
+                            data.AppendLine();
+                        }
+
                         break;
                     case OPCode.DFE:
                         bss.Append(stmts[i].Operands[0]).Append(": ");
-                        bss.Append(stmts[i].Operands[1] switch
+                        bss.Append(builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[1]).State).DataType?.ToString() switch
                         {
                             "byte" => "resb",
                             "short" => "resw",
@@ -77,7 +98,7 @@ namespace Penguor.Compiler.Assembly
                             "double" => "resq",
                             "char" => "resb",
                             // "string" => "",
-                            // "bool" => "resb",
+                            "bool" => "resb",
                             // "void" => "",
                             _ => throw new System.Exception(),
                         }).AppendLine(" 1");
@@ -105,6 +126,7 @@ namespace Penguor.Compiler.Assembly
                     case OPCode.LESS:
                     case OPCode.GREATER:
                     case OPCode.JTR:
+                    case OPCode.JFL:
                         break;
                 }
             }
@@ -138,10 +160,10 @@ namespace Penguor.Compiler.Assembly
                         );
                         break;
                     case OPCode.LOAD:
-                        text.AppendLine("MOV rax, ").AppendLine(stmts[i].Operands[0]);
+                        text.AppendLine("MOV rax, ").AppendLine(stmts[i].Operands[0].ToString());
                         break;
                     case OPCode.CALL:
-                        text.Append("CALL ").AppendLine(stmts[i].Operands[0]);
+                        text.Append("CALL ").AppendLine(stmts[i].Operands[0].ToString());
                         return;
                     default:
                         throw new System.Exception();

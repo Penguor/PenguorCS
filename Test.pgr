@@ -20,6 +20,11 @@ public system Fibonacci
         return result
     }
 
+    void sqrt(int a)
+    {
+        return 0
+    }
+
     public void main()
     {
         print(getFibonacci(0))

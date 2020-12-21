@@ -12,7 +12,6 @@ using System;
 using System.Threading.Tasks;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Tools;
@@ -56,7 +55,6 @@ namespace Penguor.Compiler
 
             rootCommand.AddCommand(toolsCommand);
 #endif
-
             return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
 
             static void Build(string input, bool benchmark, string log, string stdLib)

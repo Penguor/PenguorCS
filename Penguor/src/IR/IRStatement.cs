@@ -1,12 +1,6 @@
-/*
-#
-# PenguorCS Compiler
-# ------------------
-#
-# (c) Carl Schierig 2019-2020
-#
-#
-*/
+
+
+using System.Collections.Generic;
 
 namespace Penguor.Compiler.IR
 {
@@ -28,7 +22,7 @@ namespace Penguor.Compiler.IR
         /// <summary>
         /// the operands which get passed to the OPCode
         /// </summary>
-        public string[] Operands { get; init; }
+        public IRArgument[] Operands { get; init; }
 
         /// <summary>
         /// Initializes a new instance of the IRStatement
@@ -36,7 +30,7 @@ namespace Penguor.Compiler.IR
         /// <param name="number">the instrution number</param>
         /// <param name="code">the OPCode of this IRStatement</param>
         /// <param name="operands">the operands of this IRStatement</param>
-        public IRStatement(uint number, OPCode code, params string[] operands)
+        public IRStatement(uint number, OPCode code, params IRArgument[] operands)
         {
             Number = number;
             Code = code;
@@ -46,9 +40,9 @@ namespace Penguor.Compiler.IR
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (Code is OPCode.LABEL or OPCode.LIB)
-                return $"({Number:D4}) {Code} {Operands[0]}{':'}";
-            return $"({Number:D4})     {Code} {string.Join(' ', Operands)}";
+            if (Code is OPCode.LABEL or OPCode.LIB or OPCode.FUNC)
+                return $"({Number:D4}) {Code} {Operands[0].ToString()}{':'}";
+            return $"({Number:D4})     {Code} {string.Join(' ', (IEnumerable<IRArgument>)Operands)}";
         }
     }
 }

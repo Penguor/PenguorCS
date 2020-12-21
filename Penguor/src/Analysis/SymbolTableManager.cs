@@ -101,6 +101,14 @@ namespace Penguor.Compiler
             return false;
         }
 
+        public Symbol GetSymbol(State symbol)
+        {
+            var localSymbol = (State)symbol.Clone();
+            var frame = localSymbol.Pop();
+            tables[localSymbol].Lookup(frame.Symbol, out Symbol? returned);
+            return returned ?? throw new Exception();
+        }
+
         /// <summary>
         /// Looks up a symbol and returns it
         /// </summary>
