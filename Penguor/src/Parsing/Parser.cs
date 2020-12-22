@@ -84,7 +84,7 @@ namespace Penguor.Compiler.Parsing
                 if (Match(HASHTAG)) return new StmtDecl(ID, GetPrevious().Offset, CompilerStmt());
                 if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
                     return FunctionDecl(null, Array.Empty<TokenType>());
-                else if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(null, Array.Empty<TokenType>());
+                else if (!state.ContainsAdType(AddressType.FunctionDecl) && Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(null, Array.Empty<TokenType>());
                 if (!allowStmtDecl)
                 {
                     StmtDecl decl = StmtDecl();
@@ -100,7 +100,7 @@ namespace Penguor.Compiler.Parsing
                 if (Match(LIBRARY)) return LibraryDecl(accessMod, nonAccessMods);
                 if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
                     return FunctionDecl(accessMod, nonAccessMods);
-                if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(accessMod, nonAccessMods);
+                if (!state.ContainsAdType(AddressType.FunctionDecl) && Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(accessMod, nonAccessMods);
                 if (Match(HASHTAG))
                 {
                     CompilerStmt stmt = CompilerStmt();
@@ -286,6 +286,7 @@ namespace Penguor.Compiler.Parsing
         {
             var variable = VarExpr(AddressType.VarStmt);
             VarStmt stmt = new VarStmt(ID, GetCurrent().Offset, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
+            AddSymbol(stmt.Name);
             GetEnding();
             return stmt;
         }
@@ -688,14 +689,14 @@ namespace Penguor.Compiler.Parsing
             return false;
         }
 
-        void Except(uint msg, params string[] args) => Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
+        private void Except(uint msg, params string[] args) => Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
 
-        T Except<T>(T recover, uint msg, params string[] args)
+        private T Except<T>(T recover, uint msg, params string[] args)
         {
             Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
             return recover;
         }
-        T Except<T>(Func<T> recover, uint msg, params string[] args)
+        private T Except<T>(Func<T> recover, uint msg, params string[] args)
         {
             Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));
             return recover();

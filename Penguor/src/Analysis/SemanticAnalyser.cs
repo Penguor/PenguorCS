@@ -324,7 +324,6 @@ namespace Penguor.Compiler.Analysis
         public Stmt Visit(VarStmt stmt)
         {
             SetDataType(stmt.Name, stmt.Type);
-            builder.TableManager.AddSymbol(scopes[0], stmt.Name);
             stmt.Init?.Accept(this);
             return stmt;
         }
