@@ -238,6 +238,13 @@ namespace Penguor.Compiler
         /// <returns>true if the AddressFrame exists in the State, otherwise false</returns>
         public bool Contains(AddressFrame item) => addressFrames.Contains(item);
 
+        public bool ContainsAdType(AddressType type)
+        {
+            foreach (var i in addressFrames)
+                if (i.Type == type) return true;
+            return false;
+        }
+
         /// <summary>
         /// copy the State to a new AddressFrame array
         /// </summary>

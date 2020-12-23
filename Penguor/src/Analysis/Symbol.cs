@@ -1,3 +1,4 @@
+using Penguor.Compiler.Assembly;
 using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler
@@ -32,6 +33,9 @@ namespace Penguor.Compiler
         /// if the symbol is a declaration, this represents the parent declaration it inherits from
         /// </summary>
         public State? Parent { get; set; }
+
+        public AssemblyInfo? AsmInfo { get; set; }
+
         /// <summary>
         /// Initialize a new Instance of Symbol with the given values
         /// </summary>

@@ -100,7 +100,7 @@ namespace Penguor.Compiler.IR
                 AddStmt(OPCode.LOADPARAM, new IRState(scopes[0] + i.Name));
             var length = statements.Count;
             decl.Content.Accept(this);
-            if (statements[^1].Code != OPCode.RET) AddStmt(OPCode.RET);
+            if (statements[^1].Code != OPCode.RET) AddStmt(OPCode.RETN);
             scopes[0].Pop();
             return 0;
         }
@@ -257,20 +257,45 @@ namespace Penguor.Compiler.IR
 
         public int Visit(SwitchStmt stmt)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public int Visit(VarStmt stmt)
         {
-            throw new System.NotImplementedException();
+            if (stmt.Init != null)
+            {
+                AddStmt(OPCode.DFL, new IRState(builder.TableManager.GetStateBySymbol(stmt.Name, scopes) ?? throw new Exception()), stmt.Init switch
+                {
+                    NumExpr e => new Double(e.Value),
+                    StringExpr s => new String(s.Value),
+                    _ => AcceptInit()
+                });
+            }
+            else
+            {
+                AddStmt(OPCode.DFLE, new IRState(builder.TableManager.GetStateBySymbol(stmt.Name, scopes) ?? throw new Exception()));
+            }
+
+            return 0;
+
+            IRArgument AcceptInit()
+            {
+                stmt.Init!.Accept(this);
+                return new Reference(GetLastNumber());
+            }
         }
 
         public int Visit(WhileStmt stmt)
         {
-            stmt.Condition.Accept(this);
+            var jmpNum = AddStmt(OPCode.ERR);
             scopes[0].Push(new AddressFrame($".while{stmt.Id}", AddressType.Control));
             AddLabel();
             stmt.Content.Accept(this);
+            scopes[0].Push(new AddressFrame(".c", AddressType.Control));
+            AddLabel();
+            stmt.Condition.Accept(this);
+            statements[(int)jmpNum] = new IRStatement(jmpNum, OPCode.JMP, new IRArgument[] { new IRState(scopes[0]) });
+            scopes[0].Pop();
             AddStmt(OPCode.JTR, new Reference(GetLastNumber()), new IRState(scopes[0]));
             scopes[0].Pop();
             return 0;
@@ -278,7 +303,6 @@ namespace Penguor.Compiler.IR
 
         public int Visit(AssignExpr expr)
         {
-            expr.Value.Accept(this);
             if (expr.Op != TokenType.ASSIGN)
             {
                 AddStmt(
@@ -291,7 +315,12 @@ namespace Penguor.Compiler.IR
                     _ => throw new Exception(),
                 },
                 new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr.Lhs), scopes.ToArray()) ?? throw new Exception()),
-                new Reference(GetLastNumber()));
+                expr.Value switch
+                {
+                    NumExpr e => new Double(e.Value),
+                    StringExpr e => new String(e.Value),
+                    _ => AcceptInit(),
+                });
             }
 
             AddStmt(
@@ -299,6 +328,12 @@ namespace Penguor.Compiler.IR
                 new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr.Lhs), scopes.ToArray()) ?? throw new Exception()),
                 new Reference(GetLastNumber()));
             return 0;
+
+            IRArgument AcceptInit()
+            {
+                expr.Value.Accept(this);
+                return new Reference(GetLastNumber());
+            }
         }
 
         public int Visit(BinaryExpr expr)
@@ -347,10 +382,10 @@ namespace Penguor.Compiler.IR
                 switch (expr.Callee[i])
                 {
                     case FunctionCall call:
-                        foreach (var arg in call.Args)
+                        for (int a = 0; a < call.Args.Count; a++)
                         {
-                            arg.Accept(this);
-                            AddStmt(OPCode.LOADARG, new Reference(GetLastNumber()));
+                            call.Args[a].Accept(this);
+                            AddStmt(OPCode.LOADARG, new Reference(GetLastNumber()), new Int(a));
                         }
                         AddStmt(OPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception()));
                         break;

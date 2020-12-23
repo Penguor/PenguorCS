@@ -1,9 +1,10 @@
+void print(string a)
+{
+
+}
+
 public system Fibonacci
 {
-    void print(string a)
-    {
-
-    }
 
     void printLn()
     {
@@ -16,7 +17,10 @@ public system Fibonacci
         int i = 0;
         int result = a;
         while(i < b)
-            result *= a
+            {
+                result *= a
+                i+= 1
+            }
         return result
     }
 
