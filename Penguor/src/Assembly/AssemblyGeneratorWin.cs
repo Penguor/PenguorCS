@@ -42,6 +42,11 @@ namespace Penguor.Compiler.Assembly
             {
                 AnalyseStatement();
             }
+
+            for (i = 0; i < stmts.Count; i++)
+            {
+                GenerateStatement();
+            }
             string final = "\n" + pre.ToString() + "\nsection .data\n\n" + data.ToString() + "\nsection .bss\n\n" + bss.ToString() + "\nsection .text\n\n" + text.ToString();
             if (!(data.Length == 0 && bss.Length == 0 && text.Length == 0)) Logger.Log(final, LogLevel.Debug);
             BuildManager.asmData.Append(data);
@@ -49,8 +54,30 @@ namespace Penguor.Compiler.Assembly
             BuildManager.asmBss.Append(bss);
         }
 
-        // analyses one statement and writes the appropriate assembly
         private void AnalyseStatement()
+        {
+            switch (stmts[i].Code)
+            {
+                case OPCode.FUNC:
+                case OPCode.LABEL:
+                    builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State).AsmInfo = new AsmInfoWindows { Get = stmts[i].Operands[0].ToString() };
+                    break;
+                default:
+                    foreach (var i in stmts[i].Operands)
+                    {
+                        if (i is Reference reference)
+                        {
+                            stmts[(int)reference.Referenced].GetsReferenced = true;
+                            //todo: proper register handling
+                            stmts[(int)reference.Referenced].GetRegister = "r11";
+                        }
+                    }
+                    break;
+            }
+        }
+
+        // generate assembly for one statement
+        private void GenerateStatement()
         {
             string val1;
             string val2;
@@ -60,7 +87,11 @@ namespace Penguor.Compiler.Assembly
                     DefineFunction();
                     break;
                 case OPCode.LABEL:
-                    text.Append(stmts[i].Operands[0]).AppendLine(":");
+                    text.Append(Get(stmts[i].Operands[0], false, false)).AppendLine(":");
+                    break;
+                case OPCode.BCALL:
+                    callLevel++;
+                    Call();
                     break;
                 case OPCode.LIB:
                     text.Append("; ").AppendLine(stmts[i].Operands[0].ToString());
@@ -106,16 +137,29 @@ namespace Penguor.Compiler.Assembly
                     }).AppendLine(" 1");
                     break;
                 case OPCode.DFL:
-                    throw new System.Exception();
+                    var symbol = builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State);
+                    text.Append("sub rsp, ");
+                    text.Append(symbol.DataType?.ToString() switch
+                    {
+                        "byte" => SubStack(1),
+                        "short" => SubStack(2),
+                        "int" => SubStack(4),
+                        "long" => SubStack(8),
+                        "float" => SubStack(4),
+                        "double" => SubStack(8),
+                        "char" => SubStack(1),
+                        "bool" => SubStack(1),
+                        "string" => SubStack(System.Text.RegularExpressions.Regex.Unescape(((String)stmts[i].Operands[1]).Value).Length),
+                        _ => throw new System.Exception(),
+                    }).AppendLine();
+                    symbol.AsmInfo = new AsmInfoWindows { StackOffset = stack, Get = $"rbp-{stack}" };
+                    string val = Get(stmts[i].Operands[1], false, true);
+                    text.Append("mov [rbp-").Append(stack).Append("], ").AppendLine(val);
+                    break;
                 case OPCode.ASSIGN:
                     val1 = Get(stmts[i].Operands[0], true, true);
                     val2 = Get(stmts[i].Operands[1], false, true);
                     text.Append("mov ").Append(val1).Append(", ").AppendLine(val2);
-                    break;
-                case OPCode.CALL:
-                    break;
-                case OPCode.LOADARG:
-                    CallFunction();
                     break;
                 case OPCode.ADD:
                     val1 = Get(stmts[i].Operands[0], true, true);
@@ -131,13 +175,16 @@ namespace Penguor.Compiler.Assembly
                     val1 = Get(stmts[i].Operands[0], true, true);
                     val2 = Get(stmts[i].Operands[1], false, true);
                     text.Append("mov rax, ").AppendLine(val1);
-                    text.Append("mul ").Append(val1).Append(", ").AppendLine(val2);
+                    text.Append("mul ").AppendLine(val2);
                     break;
                 case OPCode.DIV:
                     val1 = Get(stmts[i].Operands[0], false, false);
                     val2 = Get(stmts[i].Operands[1], false, true);
                     text.Append("mov rax, ").AppendLine(val1);
                     text.Append("div ").AppendLine(val2);
+                    break;
+                case OPCode.JMP:
+                    text.Append("jmp ").AppendLine(Get(stmts[i].Operands[0], true, false));
                     break;
             }
         }
@@ -186,19 +233,38 @@ namespace Penguor.Compiler.Assembly
                     return "xmm3";
                 case IRState a:
                     var info = builder.TableManager.GetSymbol(a.State).AsmInfo;
-                    return ((AsmInfoWindows)info!).Get ?? throw new System.Exception();
+                    if (getValue)
+                        return $"[{((AsmInfoWindows)info!).Get ?? throw new System.Exception()}]";
+                    else
+                        return ((AsmInfoWindows)info!).Get ?? throw new System.Exception();
                 case String a:
                     return GetString(a);
-                case Reference or Char:
-                    return "!notimplemented";
+                case Char a:
+                    text.Append("mov r10, ").Append(a.Value).AppendLine();
+                    return "r10";
+                case Reference a:
+                    return stmts[(int)a.Referenced].GetRegister ?? throw new System.Exception();
                 default:
                     throw new System.Exception();
             }
         }
 
+        private void CreateMov()
+        {
+
+        }
+
+        int stack;
+
+        private int SubStack(int amount)
+        {
+            stack += amount;
+            return amount;
+        }
         private void DefineFunction()
         {
-            int stack = 0;
+            int paramCount = 0;
+
             text.Append(stmts[i].Operands[0]).AppendLine(":");
             text.AppendLine("push rbp");
             text.AppendLine("mov rbp, rsp");
@@ -209,53 +275,68 @@ namespace Penguor.Compiler.Assembly
                 i++;
                 switch (stmts[i].Code)
                 {
-                    case OPCode.DFL:
-                        var symbol = builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State);
-                        text.Append("sub rsp, ");
-                        text.Append(symbol.DataType?.ToString() switch
+                    case OPCode.LOADPARAM:
+                        paramCount++;
+                        var paramSymbol = builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State);
+                        paramSymbol.AsmInfo = new AsmInfoWindows
                         {
-                            "byte" => SubStack(1),
-                            "short" => SubStack(2),
-                            "int" => SubStack(4),
-                            "long" => SubStack(8),
-                            "float" => SubStack(4),
-                            "double" => SubStack(8),
-                            "char" => SubStack(1),
-                            "bool" => SubStack(1),
-                            "string" => SubStack(System.Text.RegularExpressions.Regex.Unescape(((String)stmts[i].Operands[1]).Value).Length),
-                            _ => throw new System.Exception(),
-                        }).AppendLine();
-                        symbol.AsmInfo = new AsmInfoWindows { StackOffset = stack, Get = $"rbp-{stack}" };
-                        text.Append("MOV [rbp-").Append(stack).Append("], ").AppendLine(symbol.DataType?.ToString() switch
-                        {
-                            "byte" => "",
-                            "short" => "",
-                            "int" => "",
-                            "long" => "",
-                            "float" => "",
-                            "double" => "",
-                            "char" => "",
-                            "bool" => ((Bool)stmts[i].Operands[1]).Value ? "1" : "0",
-                            "string" => GetString((String)stmts[i].Operands[1]),
-                            _ => throw new System.Exception(),
-                        });
+                            Get = paramSymbol.DataType?.ToString() switch
+                            {
+                                "byte" or "short" or "int" or "long" => paramCount switch
+                                {
+                                    1 => "rcx",
+                                    2 => "rdx",
+                                    3 => "r8",
+                                    4 => "r9",
+                                    _ => "!stack"
+                                },
+                                "float" or "double" => paramCount switch
+                                {
+                                    1 => "xmm0",
+                                    2 => "xmm1",
+                                    3 => "xmm2",
+                                    4 => "xmm3",
+                                    _ => "!stack"
+                                },
+                                _ => "!stack"
+                            }
+                        };
                         break;
                     case OPCode.RET:
+                        string returnValue = Get(stmts[i].Operands[0], true, true);
+                        text.Append("mov rax, ").AppendLine(returnValue);
+                        goto case OPCode.RETN;
                     case OPCode.RETN:
                         text.AppendLine("mov rsp, rbp");
                         text.AppendLine("pop rbp");
                         text.AppendLine("ret");
                         return;
                     default:
-                        AnalyseStatement();
+                        GenerateStatement();
                         break;
                 }
             }
 
-            int SubStack(int amount)
+
+        }
+
+        private int callLevel;
+        private void Call()
+        {
+            while (true)
             {
-                stack += amount;
-                return amount;
+                i++;
+                switch (stmts[i].Code)
+                {
+                    case OPCode.ECALL:
+                        callLevel--;
+                        if (callLevel <= 0)
+                            return;
+                        break;
+                    default:
+                        GenerateStatement();
+                        break;
+                }
             }
         }
 

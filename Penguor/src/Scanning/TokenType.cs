@@ -30,7 +30,7 @@ namespace Penguor.Compiler.Parsing
         , BS_LEFT_ASSIGN, BS_RIGHT_ASSIGN
         , NULL
         , COLON, SEMICOLON, DOT, COMMA, EXCL_MARK
-        , NUM
+        , NUM, NUM_BASE
         , STRING
         , IDF
         , TRUE, FALSE

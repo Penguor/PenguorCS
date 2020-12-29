@@ -11,7 +11,7 @@ namespace Penguor.Compiler.IR
         USE,
         LOAD, LOADARG, LOADPARAM,
         DEF, DFE, ASSIGN, DFL, DFLE, // define, define empty, assign, define local
-        CALL,
+        BCALL, ECALL, CALL,
         RET, RETN,
         ADD, SUB, MUL, DIV,
         INCR, DECR,

@@ -7,7 +7,7 @@ Boolean bool value
 Null
 Grouping Expr content
 Var CallExpr type AddressFrame name
-Num double value
+Num int numBase string value double? numValue
 String string value
 ; Statement Stmt "Penguor\src\Parsing\AST\Statements"
 Compiler TokenType dir Token[] val

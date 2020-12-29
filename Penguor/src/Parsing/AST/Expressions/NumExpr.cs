@@ -13,15 +13,19 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of NumExpr
         /// </summary>
-        public NumExpr(int id, int offset, double value)
+        public NumExpr(int id, int offset, int numbase, string value, double? numvalue)
         {
             Id = id;
             Offset = offset;
+            NumBase = numbase;
             Value = value;
+            NumValue = numvalue;
         }
         public int Id { get; init; }
         public int Offset { get; init; }
-        public double Value { get; init; }
+        public int NumBase { get; init; }
+        public string Value { get; init; }
+        public double? NumValue { get; init; }
 
         public override string ToString() => "num expression";
 

@@ -37,7 +37,11 @@ namespace Penguor.Compiler.IR
             return num;
         }
 
-        private uint AddLabel() => AddStmt(OPCode.LABEL, new IRState(scopes[0]));
+        private uint AddLabel()
+        {
+            builder.TableManager.AddSymbol(scopes[0]);
+            return AddStmt(OPCode.LABEL, new IRState(scopes[0]));
+        }
 
         private uint GetLastNumber() => statements[^1].Number;
 
@@ -153,7 +157,7 @@ namespace Penguor.Compiler.IR
             {
                 IRArgument arg = decl.Init switch
                 {
-                    NumExpr e => new Double(e.Value),
+                    NumExpr e => new Double(e.NumValue ?? throw new Exception()),
                     StringExpr s => new String(s.Value),
                     _ => AcceptInit()
                 };
@@ -266,7 +270,7 @@ namespace Penguor.Compiler.IR
             {
                 AddStmt(OPCode.DFL, new IRState(builder.TableManager.GetStateBySymbol(stmt.Name, scopes) ?? throw new Exception()), stmt.Init switch
                 {
-                    NumExpr e => new Double(e.Value),
+                    NumExpr e => new Double(4),
                     StringExpr s => new String(s.Value),
                     _ => AcceptInit()
                 });
@@ -317,7 +321,7 @@ namespace Penguor.Compiler.IR
                 new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr.Lhs), scopes.ToArray()) ?? throw new Exception()),
                 expr.Value switch
                 {
-                    NumExpr e => new Double(e.Value),
+                    NumExpr e => new Double(e.NumValue ?? throw new Exception()),
                     StringExpr e => new String(e.Value),
                     _ => AcceptInit(),
                 });
@@ -339,13 +343,13 @@ namespace Penguor.Compiler.IR
         public int Visit(BinaryExpr expr)
         {
             uint addr1 = 0, addr2 = 0;
-            double? num1 = expr.Lhs is NumExpr e ? e.Value : null;
+            double? num1 = expr.Lhs is NumExpr e ? e.NumValue ?? throw new Exception() : null;
             if (num1 == null)
             {
                 expr.Lhs.Accept(this);
                 addr1 = statements[^1].Number;
             }
-            double? num2 = expr.Lhs is NumExpr e1 ? e1.Value : null;
+            double? num2 = expr.Lhs is NumExpr e1 ? e1.NumValue ?? throw new Exception() : null;
             if (num2 == null)
             {
                 expr.Rhs.Accept(this);
@@ -377,6 +381,7 @@ namespace Penguor.Compiler.IR
 
         public int Visit(CallExpr expr)
         {
+            AddStmt(OPCode.BCALL);
             for (int i = 0; i < expr.Callee.Count; i++)
             {
                 switch (expr.Callee[i])
@@ -400,6 +405,8 @@ namespace Penguor.Compiler.IR
                 AddStmt(OPCode.INCR, new Reference(GetLastNumber()));
             else if (expr.Postfix == TokenType.DMINUS)
                 AddStmt(OPCode.DECR, new Reference(GetLastNumber()));
+
+            AddStmt(OPCode.ECALL);
             return 0;
         }
 
@@ -417,7 +424,7 @@ namespace Penguor.Compiler.IR
 
         public int Visit(NumExpr expr)
         {
-            AddStmt(OPCode.LOAD, new Double(expr.Value));
+            AddStmt(OPCode.LOAD, new Double(expr.NumValue ?? throw new Exception()));
             return 0;
         }
 

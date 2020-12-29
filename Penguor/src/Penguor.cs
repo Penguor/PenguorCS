@@ -7,6 +7,7 @@ using System.CommandLine.Invocation;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Tools;
+using System.CommandLine.Builder;
 
 namespace Penguor.Compiler
 {
@@ -47,14 +48,28 @@ namespace Penguor.Compiler
 
             rootCommand.AddCommand(toolsCommand);
 #endif
+
+            var builder = new CommandLineBuilder(rootCommand)
+                .UseVersionOption()
+                .UseHelp()
+                .UseExceptionHandler((exception, _) =>
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    throw exception;
+                })
+                .CancelOnProcessTermination()
+                .Build();
+
             return await rootCommand.InvokeAsync(args).ConfigureAwait(false);
 
             static void Build(string input, bool benchmark, string log, string stdLib)
             {
                 if (log != null) Logger.EnableFileLogger(log);
                 if (input == null) input = Environment.CurrentDirectory;
-                if (benchmark) BuildManager.Benchmark(input);
-                else BuildManager.SmartBuild(input, stdLib);
+                if (benchmark)
+                    BuildManager.Benchmark(input);
+                else
+                    BuildManager.SmartBuild(input, stdLib);
             }
         }
     }

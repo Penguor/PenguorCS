@@ -318,6 +318,19 @@ namespace Penguor.Compiler
         }
 
         /// <summary>
+        /// returns the AddressFrame at the index i
+        /// </summary>
+        public AddressFrame[] this[Range r]
+        {
+            get
+            {
+                if (addressFrames.Count < 2)
+                    return Array.Empty<AddressFrame>();
+                return addressFrames.ToArray()[r];
+            }
+        }
+
+        /// <summary>
         /// convert the State to a string of the AddressFrames joined by dots
         /// </summary>
         public override string ToString() => string.Join('.', addressFrames);

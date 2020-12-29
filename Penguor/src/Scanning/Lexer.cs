@@ -152,19 +152,63 @@ namespace Penguor.Compiler.Lexing
 
                 // lex numbers
                 // TODO: add all types of numbers and notations Penguor supports
-                if (char.IsDigit(Peek()))
+                if (char.IsDigit(Peek()) || (Peek() == '.' && char.IsDigit(PeekNext())))
                 {
-                    stringBuilder.Append(Advance());
+                    string numBase = "10";
+                    bool hasBase = true;
+
                     while (char.IsDigit(Peek())) stringBuilder.Append(Advance());
-                    if (Peek() == '.') do stringBuilder.Append(Advance()); while (char.IsDigit(Peek()));
-                    AddToken(TokenType.NUM, stringBuilder.ToString());
-                    continue;
-                }
-                else if (Peek() == '.' && char.IsDigit(PeekNext()))
-                {
-                    stringBuilder.Append(Advance());
-                    do stringBuilder.Append(Advance()); while (char.IsDigit(Peek()));
-                    AddToken(TokenType.NUM, stringBuilder.ToString());
+
+                    if (stringBuilder.ToString() == "0" && "bohd".Contains(Peek()))
+                    {
+                        switch (Advance())
+                        {
+                            case 'b':
+                                numBase = "2";
+                                break;
+                            case 'o':
+                                numBase = "8";
+                                break;
+                            case 'h':
+                                numBase = "16";
+                                break;
+                            case 'd':
+                                numBase = "10";
+                                break;
+                            default:
+                                throw new System.Exception();
+                        }
+                    }
+                    else if (Peek() == 'x')
+                    {
+                        Advance();
+                        numBase = stringBuilder.ToString();
+                    }
+                    else
+                    {
+                        hasBase = false;
+                    }
+
+                    if (hasBase)
+                    {
+                        AddToken(TokenType.NUM_BASE, numBase);
+                        stringBuilder.Clear();
+                    }
+                    else
+                    {
+                        AddToken(TokenType.NUM_BASE, numBase);
+                    }
+
+                    while (char.IsLetterOrDigit(Peek())) stringBuilder.Append(Advance());
+                    if (Peek() == '.')
+                    {
+                        stringBuilder.Append(Advance());
+                        if (!char.IsLetterOrDigit(Peek())) throw new System.Exception();
+                        while (char.IsLetterOrDigit(Peek())) stringBuilder.Append(Advance());
+                    }
+
+                    if (stringBuilder.Length == 0) throw new System.Exception();
+                    AddToken(TokenType.NUM, stringBuilder.ToString().ToUpper());
                     continue;
                 }
 
@@ -306,17 +350,18 @@ namespace Penguor.Compiler.Lexing
         }
 
         /// <summary>
-        /// matches the current character against the expected character
+        /// matches the current character against one of the expected characters
         /// </summary>
-        /// <param name="expected">the character which should be matched against</param>
+        /// <param name="expected">the character array which should be matched against</param>
         /// <returns>
         /// whether the expected character is equal to the current char in the source file
         /// and <c>false</c> when the end of the file is reached
         /// </returns>
-        private bool Match(char expected)
+        private bool Match(params char[] expected)
         {
             if (AtEnd()) return false;
-            if (Peek() != expected) return false;
+            foreach (var i in expected)
+                if (Peek() != i) return false;
 
             current++;
             return true;

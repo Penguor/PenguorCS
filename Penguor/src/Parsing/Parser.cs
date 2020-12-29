@@ -498,7 +498,7 @@ namespace Penguor.Compiler.Parsing
             if (Match(TRUE)) return new BooleanExpr(ID, offset, true);
             if (Match(FALSE)) return new BooleanExpr(ID, offset, false);
             if (Match(NULL)) return new NullExpr(ID, offset);
-            if (Match(NUM)) return new NumExpr(ID, offset, double.Parse(GetPrevious().Name, System.Globalization.CultureInfo.InvariantCulture));
+            if (Match(NUM_BASE)) return new NumExpr(ID, offset, int.Parse(GetPrevious().Name), Advance().Name, null);
             if (Match(STRING)) return new StringExpr(ID, offset, GetPrevious().Name);
             return CallExpr();
         }
