@@ -20,6 +20,11 @@ namespace Penguor.Compiler
             tables = new Dictionary<State, SymbolTable>();
         }
 
+        /// <summary>
+        /// add a new symbol equivalent to state
+        /// </summary>
+        /// <param name="state">the address of the symbol</param>
+        /// <returns>returns true if the insert was successful, otherwise false</returns>
         public bool AddSymbol(State state)
         {
             return AddSymbol(new State(((State)state.Clone())[..^1]), ((State)state.Clone())[^1]);

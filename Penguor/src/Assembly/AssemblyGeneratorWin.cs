@@ -60,7 +60,7 @@ namespace Penguor.Compiler.Assembly
             {
                 case OPCode.FUNC:
                 case OPCode.LABEL:
-                    builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State).AsmInfo = new AsmInfoWindows { Get = stmts[i].Operands[0].ToString() };
+                    builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State).AsmInfo = new AsmInfoWindowsAmd64 { Get = stmts[i].Operands[0].ToString() };
                     break;
                 default:
                     foreach (var i in stmts[i].Operands)
@@ -152,7 +152,7 @@ namespace Penguor.Compiler.Assembly
                         "string" => SubStack(System.Text.RegularExpressions.Regex.Unescape(((String)stmts[i].Operands[1]).Value).Length),
                         _ => throw new System.Exception(),
                     }).AppendLine();
-                    symbol.AsmInfo = new AsmInfoWindows { StackOffset = stack, Get = $"rbp-{stack}" };
+                    symbol.AsmInfo = new AsmInfoWindowsAmd64 { StackOffset = stack, Get = $"rbp-{stack}" };
                     string val = Get(stmts[i].Operands[1], false, true);
                     text.Append("mov [rbp-").Append(stack).Append("], ").AppendLine(val);
                     break;
@@ -234,9 +234,9 @@ namespace Penguor.Compiler.Assembly
                 case IRState a:
                     var info = builder.TableManager.GetSymbol(a.State).AsmInfo;
                     if (getValue)
-                        return $"[{((AsmInfoWindows)info!).Get ?? throw new System.Exception()}]";
+                        return $"[{((AsmInfoWindowsAmd64)info!).Get ?? throw new System.Exception()}]";
                     else
-                        return ((AsmInfoWindows)info!).Get ?? throw new System.Exception();
+                        return ((AsmInfoWindowsAmd64)info!).Get ?? throw new System.Exception();
                 case String a:
                     return GetString(a);
                 case Char a:
@@ -278,7 +278,7 @@ namespace Penguor.Compiler.Assembly
                     case OPCode.LOADPARAM:
                         paramCount++;
                         var paramSymbol = builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State);
-                        paramSymbol.AsmInfo = new AsmInfoWindows
+                        paramSymbol.AsmInfo = new AsmInfoWindowsAmd64
                         {
                             Get = paramSymbol.DataType?.ToString() switch
                             {

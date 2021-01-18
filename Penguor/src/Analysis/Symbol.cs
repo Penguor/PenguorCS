@@ -34,6 +34,9 @@ namespace Penguor.Compiler
         /// </summary>
         public State? Parent { get; set; }
 
+        /// <summary>
+        /// contains information for assembly generation
+        /// </summary>
         public AssemblyInfo? AsmInfo { get; set; }
 
         /// <summary>

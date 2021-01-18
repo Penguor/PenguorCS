@@ -25,9 +25,13 @@ namespace Penguor.Compiler.Build
             set => tableManager = value;
         }
 
+        /// <summary> temporary </summary>
         public static StringBuilder asmPre;
+        /// <summary> temporary </summary>
         public static StringBuilder asmText;
+        /// <summary> temporary </summary>
         public static StringBuilder asmData;
+        /// <summary> temporary </summary>
         public static StringBuilder asmBss;
 
         private static bool run = true;
