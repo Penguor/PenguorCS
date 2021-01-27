@@ -16,8 +16,8 @@ namespace Penguor.Compiler.IR
         private readonly ProgramDecl program;
 
         private readonly List<State> scopes;
-        private uint _instrNum;
-        private uint InstNum { get => _instrNum++; }
+        private uint _instructionNumber;
+        private uint InstructionNumber { get => _instructionNumber++; }
 
         private readonly List<IRStatement> statements = new();
 
@@ -32,7 +32,7 @@ namespace Penguor.Compiler.IR
 
         private uint AddStmt(OPCode code, params IRArgument[] operands)
         {
-            var num = InstNum;
+            var num = InstructionNumber;
             statements.Add(new IRStatement(num, code, operands));
             return num;
         }
@@ -44,24 +44,6 @@ namespace Penguor.Compiler.IR
         }
 
         private uint GetLastNumber() => statements[^1].Number;
-
-        void Except(uint msg, int offset, params string[] args) => Logger.Log(new Notification(builder.SourceFile, offset, msg, MsgType.PGR, args));
-
-        T Except<T>(T recover, uint msg, int offset, params string[] args)
-        {
-            Logger.Log(new Notification(builder.SourceFile, offset, msg, MsgType.PGR, args));
-            return recover;
-        }
-        T Except<T>(T recover, Notification notification)
-        {
-            Logger.Log(notification);
-            return recover;
-        }
-        T Except<T>(Func<T> recover, uint msg, int offset, params string[] args)
-        {
-            Logger.Log(new Notification(builder.SourceFile, offset, msg, MsgType.PGR, args));
-            return recover();
-        }
 
         /// <summary>
         /// Generates ir from an ast (program node)
@@ -367,7 +349,7 @@ namespace Penguor.Compiler.IR
                 TokenType.GREATER_EQUALS => OPCode.GREATER_EQUALS,
                 TokenType.LESS_EQUALS => OPCode.LESS_EQUALS,
                 TokenType.EQUALS => OPCode.EQUALS,
-                TokenType a => Except(OPCode.ERR, new Notification(builder.SourceFile, expr.Offset, 9, MsgType.PGRCS, Token.ToString(a))),
+                TokenType a => builder.Except(OPCode.ERR, new Notification(builder.SourceFile, expr.Offset, 9, MsgType.PGRCS, Token.ToString(a))),
             }, num1 == null ? new Reference(addr1) : new Double(num1 ?? throw new Exception())
             , num2 == null ? new Reference(addr2) : new Double(num2 ?? throw new Exception()));
             return 0;

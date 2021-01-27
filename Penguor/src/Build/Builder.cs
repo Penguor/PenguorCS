@@ -161,6 +161,51 @@ namespace Penguor.Compiler.Build
         }
 
         /// <summary>
+        /// Log an exception
+        /// </summary>
+        /// <param name="msg">the number of the message to log</param>
+        /// <param name="offset">the offset where the message occurred in the source file</param>
+        /// <param name="args">any arguments to insert into the message</param>
+        public void Except(uint msg, int offset, params string[] args) => Logger.Log(new Notification(SourceFile, offset, msg, MsgType.PGR, args));
+
+        /// <summary>
+        /// Log an exception
+        /// </summary>
+        /// <param name="recover">an object to return to recover from failure</param>
+        /// <param name="msg">the number of the message to log</param>
+        /// <param name="offset">the offset where the message occurred in the source file</param>
+        /// <param name="args">any arguments to insert into the message</param>
+        public T Except<T>(T recover, uint msg, int offset, params string[] args)
+        {
+            Logger.Log(new Notification(SourceFile, offset, msg, MsgType.PGR, args));
+            return recover;
+        }
+
+        /// <summary>
+        /// Log an exception
+        /// </summary>
+        /// <param name="recover">an object to return to recover from failure</param>
+        /// <param name="notification">the notification to log</param>
+        public T Except<T>(T recover, Notification notification)
+        {
+            Logger.Log(notification);
+            return recover;
+        }
+
+        /// <summary>
+        /// Log an exception
+        /// </summary>
+        /// <param name="recover">a function to return to recover from failure</param>
+        /// <param name="msg">the number of the message to log</param>
+        /// <param name="offset">the offset where the message occurred in the source file</param>
+        /// <param name="args">any arguments to insert into the message</param>
+        public T Except<T>(Func<T> recover, uint msg, int offset, params string[] args)
+        {
+            Logger.Log(new Notification(SourceFile, offset, msg, MsgType.PGR, args));
+            return recover();
+        }
+
+        /// <summary>
         /// exit the program after submitting all exceptions
         /// </summary>
         /// <param name="exitCode"></param>

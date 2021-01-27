@@ -32,7 +32,7 @@ namespace Penguor.Compiler.Debugging
         None
     }
 
-    internal enum MsgType
+    public enum MsgType
     {
         PGR, PGRCS
     }

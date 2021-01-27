@@ -14,5 +14,15 @@ namespace Penguor.Compiler.Debugging
         public PenguorCSException()
         {
         }
+
+        /// <inheritdoc/>
+        public PenguorCSException(string? message) : base(message)
+        {
+        }
+
+        /// <inheritdoc/>
+        public PenguorCSException(string? message, Exception? innerException) : base(message, innerException)
+        {
+        }
     }
 }
