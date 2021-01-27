@@ -32,9 +32,15 @@ namespace Penguor.Compiler.Debugging
         None
     }
 
+    /// <summary>
+    /// Specifies the type of message of a notification
+    /// </summary>
     public enum MsgType
     {
-        PGR, PGRCS
+        /// <summary>a message indicating a problem in the source code</summary>
+        PGR,
+        /// <summary>a message indicating a problem with the compiler</summary>
+        PGRCS
     }
 
     /// <summary>

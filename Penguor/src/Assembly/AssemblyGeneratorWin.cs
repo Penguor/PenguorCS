@@ -18,7 +18,7 @@ namespace Penguor.Compiler.Assembly
         private readonly StringBuilder data = new StringBuilder();
         private readonly StringBuilder bss = new StringBuilder();
 
-        int i = 0;
+        private int i;
         private readonly List<IRStatement> stmts;
 
         /// <summary>

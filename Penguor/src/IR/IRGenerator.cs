@@ -349,8 +349,9 @@ namespace Penguor.Compiler.IR
                 TokenType.GREATER_EQUALS => OPCode.GREATER_EQUALS,
                 TokenType.LESS_EQUALS => OPCode.LESS_EQUALS,
                 TokenType.EQUALS => OPCode.EQUALS,
-                TokenType a => builder.Except(OPCode.ERR, new Notification(builder.SourceFile, expr.Offset, 9, MsgType.PGRCS, Token.ToString(a))),
-            }, num1 == null ? new Reference(addr1) : new Double(num1 ?? throw new Exception())
+                TokenType a => builder.Except(OPCode.ERR, 9, expr.Offset, Token.ToString(a))
+            }
+            , num1 == null ? new Reference(addr1) : new Double(num1 ?? throw new Exception())
             , num2 == null ? new Reference(addr2) : new Double(num2 ?? throw new Exception()));
             return 0;
         }
@@ -376,7 +377,7 @@ namespace Penguor.Compiler.IR
                         }
                         AddStmt(OPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception()));
                         break;
-                    case IdfCall call:
+                    case IdfCall:
                         AddStmt(OPCode.LOAD, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception()));
                         break;
                     default: throw new Exception();

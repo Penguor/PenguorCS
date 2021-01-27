@@ -83,20 +83,6 @@ namespace Penguor.Compiler.Analysis
             if (e != null) e.DataType = State.FromCall((CallExpr)type.Accept(this));
         }
 
-        private void Except(uint msg, int offset, params string[] args) => Logger.Log(new Notification(builder.SourceFile, offset, msg, MsgType.PGR, args));
-
-        private T Except<T>(T recover, uint msg, int offset, params string[] args)
-        {
-            Logger.Log(new Notification(builder.SourceFile, offset, msg, MsgType.PGR, args));
-            return recover;
-        }
-
-        private T Except<T>(Func<T> recover, uint msg, int offset, params string[] args)
-        {
-            Logger.Log(new Notification(builder.SourceFile, offset, msg, MsgType.PGR, args));
-            return recover();
-        }
-
         public Decl Visit(BlockDecl decl)
         {
             List<Decl> content = new(decl.Content.Count);
@@ -268,7 +254,7 @@ namespace Penguor.Compiler.Analysis
             if (stmt.Expr is AssignExpr or CallExpr)
                 return stmt with { Expr = stmt.Expr.Accept(this) };
             else
-                return Except(stmt with { Expr = stmt.Expr.Accept(this) }, 15, stmt.Offset);
+                return builder.Except(stmt with { Expr = stmt.Expr.Accept(this) }, 15, stmt.Offset);
         }
 
         public Stmt Visit(ForStmt stmt)
@@ -480,7 +466,7 @@ namespace Penguor.Compiler.Analysis
             // return the numeric (base-10) representation of the digit
             double GetNumberFromChar(char chr)
             {
-                int value = 0;
+                int value;
                 if (chr is >= '0' and <= '9')
                     value = chr - '0';
                 else if (chr is >= 'A' and <= 'Z')

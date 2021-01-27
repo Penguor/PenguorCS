@@ -5,10 +5,27 @@ namespace Penguor.Compiler.Debugging
     /// </summary>
     public class Notification
     {
+        /// <summary>
+        /// the offset where the message occurred in the source code,
+        /// only used for PGR messages
+        /// </summary>
         public int Offset { get; set; }
+        /// <summary>
+        /// the number of the message that should be logged
+        /// </summary>
         public uint Message { get; }
+        /// <summary>
+        /// The type of message, currently <c>PGR</c> or <c>PGRCS</c>
+        /// </summary>
         public MsgType Type { get; }
+
+        /// <summary>
+        /// the arguments which get inserted into the message text
+        /// </summary>
         public string[] Args { get; }
+        /// <summary>
+        /// the source file where the problem occurred
+        /// </summary>
         public string File { get; }
 
         /// <summary>
@@ -28,6 +45,10 @@ namespace Penguor.Compiler.Debugging
             Args = args;
         }
 
+        /// <summary>
+        /// formats the message with the given input string
+        /// </summary>
+        /// <param name="input">should be the message corresponding to MsgNumber</param>
         public string Format(string input) => $"[{Type}-{string.Format("{0:D4}", Message)}] {string.Format(input, Args)} {(Type != MsgType.PGRCS ? GetSourcePosition(Offset, File) : "")}";
 
         private static string GetSourcePosition(int offset, string file)
