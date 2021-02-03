@@ -9,7 +9,7 @@ namespace Penguor.Compiler.IR
     {
         LABEL, LIB, FUNC,
         USE,
-        LOAD, LOADARG,
+        LOAD, LOADARG, LOADPARAM,
         DEF, DFE, ASSIGN, DFL, DFLE, // define, define empty, assign, define local
         BCALL, ECALL, CALL,
         RET, RETN,

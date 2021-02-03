@@ -81,6 +81,8 @@ namespace Penguor.Compiler.IR
         {
             scopes[0].Push(decl.Name);
             AddStmt(OPCode.FUNC, new IRState(scopes[0]));
+            foreach (var i in decl.Parameters)
+                AddStmt(OPCode.LOADPARAM, new IRState(scopes[0] + i.Name));
             var length = statements.Count;
             decl.Content.Accept(this);
             if (statements[^1].Code != OPCode.RET) AddStmt(OPCode.RETN);

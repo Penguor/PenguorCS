@@ -95,10 +95,10 @@ namespace Penguor.Compiler.Assembly
                     else
                         text.Append("push ").AppendLine(get);
                     break;
-                case var s when s.Code == OPCode.LOADARG && s.Operands[0] is IRState state:
+                case var s when s.Code == OPCode.LOADARG && s.Operands[0] is Reference reference && stmts[(int)reference.Referenced].Operands[0] is IRState state:
                     Symbol param = builder.TableManager.GetSymbol(state.State);
                     var asmInfo = (AsmInfoWindowsAmd64?)param.AsmInfo ?? throw new System.Exception();
-                    register = (param.DataType?.ToString(), asmInfo.ParamNumber) switch
+                    register = (param.DataType?.ToString(), ((Int)s.Operands[1]).Value) switch
                     {
                         ("int", 0) => "rcx",
                         ("string", 0) => "rcx"
