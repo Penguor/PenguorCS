@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-
+using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Parsing.AST;
-using Penguor.Compiler.Build;
 using static Penguor.Compiler.Parsing.TokenType;
 
 namespace Penguor.Compiler.Parsing

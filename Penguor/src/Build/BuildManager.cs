@@ -1,12 +1,10 @@
 using System;
-using System.IO;
-
-using Stopwatch = System.Diagnostics.Stopwatch;
-
-using Penguor.Compiler.Debugging;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
+using Penguor.Compiler.Debugging;
+using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace Penguor.Compiler.Build
 {
@@ -79,6 +77,8 @@ namespace Penguor.Compiler.Build
         /// <param name="singleFile">whether <paramref name="project"/> is a single file</param>
         public static void BuildProject(string project, string? stdLib, bool singleFile = false)
         {
+            string asm;
+
             List<string> files = singleFile ? new(new string[] { project }) : new(Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories));
             if (stdLib != null) files.AddRange(Directory.GetFiles(Path.GetDirectoryName(stdLib)!, "*.pgr", SearchOption.AllDirectories));
 
@@ -92,13 +92,20 @@ namespace Penguor.Compiler.Build
                 b.Analyse();
             foreach (var b in builders)
                 b.GenerateIR();
-            foreach (var b in builders)
-                b.GenerateAsm();
+            try
+            {
+                foreach (var b in builders)
+                    b.GenerateAsm();
+            }
+            finally
+            {
+                // Console.WriteLine(asmPre.ToString() + "\nsection .data\n\n" + asmData.ToString() + "\nsection .bss\n\n" + asmBss.ToString() + "\nsection .text\n\n" + asmText.ToString());
+            }
+            asm = asmPre.ToString() + "\nsection .data\n\n" + asmData.ToString() + "\nsection .bss\n\n" + asmBss.ToString() + "\nsection .text\n\n" + asmText.ToString();
+
 
             string buildPath = Path.Combine(Path.GetDirectoryName(project) ?? throw new Exception(), "build");
             Directory.CreateDirectory(buildPath);
-
-            string asm = asmPre.ToString() + "\nsection .data\n\n" + asmData.ToString() + "\nsection .bss\n\n" + asmBss.ToString() + "\nsection .text\n\n" + asmText.ToString();
 
             File.WriteAllText(Path.Combine(buildPath, "out.asm"), asm);
 

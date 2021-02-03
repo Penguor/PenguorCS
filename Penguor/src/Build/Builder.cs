@@ -1,15 +1,14 @@
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-
+using System.IO;
+using Penguor.Compiler.Analysis;
+using Penguor.Compiler.Assembly;
 using Penguor.Compiler.Debugging;
+using Penguor.Compiler.IR;
 using Penguor.Compiler.Lexing;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
-using Penguor.Compiler.Analysis;
-using Penguor.Compiler.IR;
-using Penguor.Compiler.Assembly;
 
 namespace Penguor.Compiler.Build
 {

@@ -9,7 +9,7 @@ namespace Penguor.Compiler.IR
     {
         LABEL, LIB, FUNC,
         USE,
-        LOAD, LOADARG, LOADPARAM,
+        LOAD, LOADARG,
         DEF, DFE, ASSIGN, DFL, DFLE, // define, define empty, assign, define local
         BCALL, ECALL, CALL,
         RET, RETN,
@@ -18,7 +18,7 @@ namespace Penguor.Compiler.IR
         LESS, GREATER, LESS_EQUALS, GREATER_EQUALS,
         EQUALS,
         INVERT,
-        CHS, // change sign
+        ABS, CHS, // absolute, change sign
         JMP, JTR, JFL,// jump, jump if true, jump if false
         GOTO,
         ERR // invalid opcode, returned on error

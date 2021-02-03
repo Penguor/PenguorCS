@@ -1,10 +1,9 @@
+using System;
 using System.Collections.Generic;
-
-using Penguor.Compiler.Parsing.AST;
-using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
-using System;
+using Penguor.Compiler.Parsing;
+using Penguor.Compiler.Parsing.AST;
 
 #pragma warning disable 1591
 
@@ -82,8 +81,6 @@ namespace Penguor.Compiler.IR
         {
             scopes[0].Push(decl.Name);
             AddStmt(OPCode.FUNC, new IRState(scopes[0]));
-            foreach (var i in decl.Parameters)
-                AddStmt(OPCode.LOADPARAM, new IRState(scopes[0] + i.Name));
             var length = statements.Count;
             decl.Content.Accept(this);
             if (statements[^1].Code != OPCode.RET) AddStmt(OPCode.RETN);
@@ -129,7 +126,6 @@ namespace Penguor.Compiler.IR
             AddStmt(OPCode.USE, new IRState(State.FromCall(decl.Lib)));
             return 0;
         }
-
 
         public int Visit(VarDecl decl)
         {
@@ -252,7 +248,8 @@ namespace Penguor.Compiler.IR
             {
                 AddStmt(OPCode.DFL, new IRState(builder.TableManager.GetStateBySymbol(stmt.Name, scopes) ?? throw new Exception()), stmt.Init switch
                 {
-                    NumExpr e => new Double(4),
+                    //todo: verify that this code works
+                    NumExpr e => new Double(e.NumValue ?? double.Parse(e.Value)),
                     StringExpr s => new String(s.Value),
                     _ => AcceptInit()
                 });
@@ -364,7 +361,7 @@ namespace Penguor.Compiler.IR
 
         public int Visit(CallExpr expr)
         {
-            AddStmt(OPCode.BCALL);
+            // AddStmt(OPCode.BCALL);
             for (int i = 0; i < expr.Callee.Count; i++)
             {
                 switch (expr.Callee[i])
@@ -373,11 +370,12 @@ namespace Penguor.Compiler.IR
                         for (int a = 0; a < call.Args.Count; a++)
                         {
                             call.Args[a].Accept(this);
-                            AddStmt(OPCode.LOADARG, new Reference(GetLastNumber()), new Int(a));
+                            AddStmt(OPCode.LOADARG, new Reference(GetLastNumber()), new Int(a + 1));
                         }
                         AddStmt(OPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception()));
                         break;
                     case IdfCall:
+                        //todo: not all idfcalls need to be loaded
                         AddStmt(OPCode.LOAD, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception()));
                         break;
                     default: throw new Exception();
@@ -389,7 +387,7 @@ namespace Penguor.Compiler.IR
             else if (expr.Postfix == TokenType.DMINUS)
                 AddStmt(OPCode.DECR, new Reference(GetLastNumber()));
 
-            AddStmt(OPCode.ECALL);
+            // AddStmt(OPCode.ECALL);
             return 0;
         }
 
@@ -407,7 +405,8 @@ namespace Penguor.Compiler.IR
 
         public int Visit(NumExpr expr)
         {
-            AddStmt(OPCode.LOAD, new Double(expr.NumValue ?? throw new Exception()));
+            if (expr.Value.Contains('.')) AddStmt(OPCode.LOAD, new Double(expr.NumValue ?? throw new Exception()));
+            else AddStmt(OPCode.LOAD, new Int((int?)expr.NumValue ?? throw new Exception()));
             return 0;
         }
 
@@ -419,18 +418,17 @@ namespace Penguor.Compiler.IR
 
         public int Visit(UnaryExpr expr)
         {
+            //todo: verify this
             expr.Rhs.Accept(this);
             if (expr.Op != null)
             {
-                return 0;
-                //TODO: add unary expr code
                 AddStmt(expr.Op switch
                 {
                     TokenType.EXCL_MARK => OPCode.INVERT,
-                    TokenType.PLUS => throw new Exception(),
+                    TokenType.PLUS => OPCode.ABS,
                     TokenType.MINUS => OPCode.CHS,
                     _ => throw new Exception(),
-                });
+                }, new Reference(GetLastNumber()));
             }
 
             return 0;
@@ -438,7 +436,8 @@ namespace Penguor.Compiler.IR
 
         public int Visit(VarExpr expr)
         {
-            throw new System.NotImplementedException();
+            AddStmt(OPCode.DFE, new IRState(builder.TableManager.GetStateBySymbol(expr.Name, scopes) ?? throw new ArgumentNullException(nameof(expr))));
+            return 0;
         }
     }
 }

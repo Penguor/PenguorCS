@@ -78,7 +78,8 @@ namespace Penguor.Compiler.Debugging
             {12, (LogLevel.Error, "Expecting a code block (with curly braces) or a colon followed by a statement")},
             {13, (LogLevel.Error, "{0}s must not have modifiers")},
             {14, (LogLevel.Error, "Values cannot be assigned to {0}s, expecting a call")},
-            {15, (LogLevel.Error, "Only assign expressions and call expressions may be statements")}
+            {15, (LogLevel.Error, "Only assign expressions and call expressions may be statements")},
+            {16, (LogLevel.Error, "Unknown escape sequence '{0}'")}
         };
 
         /// <summary>

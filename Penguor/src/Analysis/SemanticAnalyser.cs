@@ -1,10 +1,9 @@
+using System;
 using System.Collections.Generic;
-
-using Penguor.Compiler.Parsing.AST;
-using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
-using System;
+using Penguor.Compiler.Parsing;
+using Penguor.Compiler.Parsing.AST;
 
 #pragma warning disable 1591
 
@@ -500,7 +499,7 @@ namespace Penguor.Compiler.Analysis
         public Call Visit(FunctionCall call)
         {
             var args = new List<Expr>(call.Args.Count);
-            foreach (var i in args)
+            foreach (var i in call.Args)
                 args.Add(i.Accept(this));
             return call with { Args = args };
         }

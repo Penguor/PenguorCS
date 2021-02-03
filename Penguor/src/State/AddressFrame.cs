@@ -1,7 +1,3 @@
-
-
-using System;
-
 namespace Penguor.Compiler
 {
     /// <summary>

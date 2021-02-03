@@ -14,5 +14,7 @@ namespace Penguor.Compiler.Assembly
         /// how to get the value in assembly
         /// </summary>
         public string? Get { get; set; }
+
+        public int ParamNumber { get; set; }
     }
 }
