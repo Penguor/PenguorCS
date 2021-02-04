@@ -52,6 +52,9 @@ namespace Penguor.Compiler.Build
         {
             BuildManager.run = run;
             if (string.IsNullOrEmpty(stdLib)) stdLib = Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "stdlib/stdlib.pgrp");
+
+            Array.ForEach(Directory.GetDirectories(AppDomain.CurrentDomain.BaseDirectory), (s) => Console.WriteLine(s));
+
             if ((File.GetAttributes(path) & FileAttributes.Directory) != 0)
             {
                 if (path.Length == 0 || path == null) throw new PenguorCSException();
