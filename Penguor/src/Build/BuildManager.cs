@@ -111,7 +111,7 @@ namespace Penguor.Compiler.Build
 
             if (OperatingSystem.IsWindows())
             {
-                Process.Start("nasm", $" -fwin64 {Path.Combine(buildPath, "out.asm")}").WaitForExit();
+                Process.Start("nasm", $" -fwin64 -g {Path.Combine(buildPath, "out.asm")}").WaitForExit();
                 Process.Start("gcc", $"{Path.Combine(buildPath, "out.obj")} -o {Path.Combine(buildPath, "out.exe")}").WaitForExit();
                 if (run)
                 {

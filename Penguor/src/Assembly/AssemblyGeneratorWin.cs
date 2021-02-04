@@ -3,7 +3,7 @@ using System.Text;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.IR;
-
+using static Penguor.Compiler.Assembly.RegisterAmd64;
 namespace Penguor.Compiler.Assembly
 {
     /// <summary>
@@ -62,7 +62,7 @@ namespace Penguor.Compiler.Assembly
             {
                 case OPCode.FUNC:
                 case OPCode.LABEL:
-                    builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State).AsmInfo = new AsmInfoWindowsAmd64 { Get = stmts[i].Operands[0].ToString() };
+                    // builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State).AsmInfo = new AsmInfoWindowsAmd64 { Register = stmts[i].Operands[0].ToString() };
                     break;
             }
         }
@@ -70,16 +70,36 @@ namespace Penguor.Compiler.Assembly
         // generate assembly for one statement
         private void GenerateStatement()
         {
-            string? register = null;
+            RegisterAmd64? register;
             switch (stmts[i])
             {
                 case var s when s.Code == OPCode.FUNC:
-                    DefineFunction();
+                    CreateLabel(s.Operands[0]);
+                    Push(RBP);
+                    Move(RSP, RBP);
+
+                    //just there because there's no inline assembly yet
+                    if (s.Operands[0] is IRState sstate && sstate.ToString() == "print")
+                        text.AppendLine("sub rsp, 32\nCALL printf");
+                    break;
+                case var s when s.Code == OPCode.LOADPARAM && s.Operands[0] is IRState irState:
+                    var symbol = builder.TableManager.GetSymbol(irState.State);
+                    System.Console.WriteLine(symbol.DataType?.ToString());
+                    register = GetRegister(symbol.DataType?.ToString(), ((Int)s.Operands[1]).Value);
+                    symbol.AsmInfo = new AsmInfoWindowsAmd64
+                    {
+                        ParamNumber = ((Int)s.Operands[1]).Value,
+                        Register = register
+                    };
+
                     break;
                 case var s when s.Code == OPCode.LOAD:
                     loaded.Add(new Reference((uint)i), s.Operands[0]);
                     break;
-                case var s when s.Code == OPCode.LOADARG && s.Operands[0] is Reference reference && stmts[(int)reference.Referenced].Operands[0] is String or Int:
+                case var s when s.Code == OPCode.LOADARG && s.Operands[0] is String or Int:
+                    GetValueOrPointer(s.Operands[0], GetRegister(s.Operands[0], (Int)s.Operands[1]));
+                    break;
+                /* case var s when s.Code == OPCode.LOADARG && s.Operands[0] is Reference reference && stmts[(int)reference.Referenced].Operands[0] is String or Int:
                     IRArgument argument = loaded.GetValueOrDefault(reference) ?? throw new System.Exception();
                     register = (argument, ((Int)s.Operands[1]).Value) switch
                     {
@@ -94,20 +114,25 @@ namespace Penguor.Compiler.Assembly
                         text.Append("mov ").Append(register).Append(", ").AppendLine(get);
                     else
                         text.Append("push ").AppendLine(get);
-                    break;
-                case var s when s.Code == OPCode.LOADARG && s.Operands[0] is Reference reference && stmts[(int)reference.Referenced].Operands[0] is IRState state:
+                    break; */
+                /* case var s when s.Code == OPCode.LOADARG && s.Operands[0] is Reference reference && stmts[(int)reference.Referenced].Operands[0] is IRState state:
                     Symbol param = builder.TableManager.GetSymbol(state.State);
                     var asmInfo = (AsmInfoWindowsAmd64?)param.AsmInfo ?? throw new System.Exception();
                     register = (param.DataType?.ToString(), ((Int)s.Operands[1]).Value) switch
                     {
-                        ("int", 0) => "rcx",
-                        ("string", 0) => "rcx"
+                        ("int", 1) => "rcx",
+                        ("string", 1) => "rcx"
                     };
-                    text.Append("mov ").Append(register).Append(", ").AppendLine(asmInfo.Get);
-                    break;
+                    text.Append("mov ").Append(register).Append(", ").AppendLine(asmInfo.Register);
+                    break; */
                 case var s when s.Code == OPCode.CALL && s.Operands[0] is IRState state:
                     text.Append("call ").Append(state.State).AppendLine();
                     break;
+                case var s when s.Code == OPCode.RETN:
+                    text.AppendLine("mov rsp, rbp");
+                    text.AppendLine("pop rbp");
+                    text.AppendLine("ret");
+                    return;
             }
         }
 
@@ -150,28 +175,50 @@ namespace Penguor.Compiler.Assembly
             }
         }
 
-        private void DefineFunction()
+        private void GetValueOrPointer(IRArgument argument, RegisterAmd64 toRegister)
         {
-            text.Append(stmts[i].Operands[0]).AppendLine(":");
-            text.AppendLine("push rbp");
-            text.AppendLine("mov rbp, rsp");
-            if (stmts[i].Operands[0] is IRState s && s.ToString() == "print")
-                text.AppendLine("CALL printf");
-            while (true)
+            switch (argument)
             {
-                i++;
-                switch (stmts[i].Code)
-                {
-                    case OPCode.RETN:
-                        text.AppendLine("mov rsp, rbp");
-                        text.AppendLine("pop rbp");
-                        text.AppendLine("ret");
-                        return;
-                    default:
-                        GenerateStatement();
-                        break;
-                }
+                case String str:
+                    string name = GetString(str);
+                    text.Append("mov ").Append(toRegister).Append(", ").AppendLine(name);
+                    break;
+                case Int num:
+                    text.Append("mov ").Append(toRegister).Append(", ").AppendLine(num.Value.ToString());
+                    break;
             }
         }
+
+        private void CreateLabel(IRArgument labelName) => CreateLabel(labelName.ToString());
+        private void CreateLabel(string labelName) => text.Append(labelName).AppendLine(":");
+
+        private void Move(RegisterAmd64 from, RegisterAmd64 to) => text.Append("mov ").Append(to).Append(", ").Append(from).AppendLine();
+
+        private void Push(RegisterAmd64 register)
+        {
+            if (register != STACK)
+                text.Append("push ").Append(register).AppendLine();
+            else throw new System.Exception();
+        }
+
+        private RegisterAmd64 GetRegister(IRArgument argument, Int paramNumber) => (argument, paramNumber.Value) switch
+        {
+            (String or Int or Double or Float, 1) => RCX,
+            (String or Int or Double or Float, 2) => RDX,
+            (String or Int or Double or Float, 3) => R8,
+            (String or Int or Double or Float, 4) => R9,
+            (String or Int or Double or Float, _) => STACK,
+        };
+
+        private RegisterAmd64 GetRegister(IRState state, int paramNumber) => GetRegister(state.ToString(), paramNumber);
+
+        private RegisterAmd64 GetRegister(string? type, int paramNumber) => (type, paramNumber) switch
+        {
+            ("string" or "int" or "double" or "float", 1) => RCX,
+            ("string" or "int" or "double" or "float", 2) => RDX,
+            ("string" or "int" or "double" or "float", 3) => R8,
+            ("string" or "int" or "double" or "float", 4) => R9,
+            ("string" or "int" or "double" or "float", _) => STACK,
+        };
     }
 }

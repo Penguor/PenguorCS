@@ -1,9 +1,13 @@
-void print(string a)
+void printLn(string a)
 {
-
+    print(a); print("\n")
 }
 
-public system Fibonacci
+void print(string a) {}
+
+void main() : printLn("Hello World!")
+
+/*public system Fibonacci
 {
 
     void printLn()
@@ -75,4 +79,4 @@ public system Fibonacci
                 ) / 2, n))
             ))
     }
-}
+} */

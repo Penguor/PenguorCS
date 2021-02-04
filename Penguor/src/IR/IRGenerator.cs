@@ -81,8 +81,8 @@ namespace Penguor.Compiler.IR
         {
             scopes[0].Push(decl.Name);
             AddStmt(OPCode.FUNC, new IRState(scopes[0]));
-            foreach (var i in decl.Parameters)
-                AddStmt(OPCode.LOADPARAM, new IRState(scopes[0] + i.Name));
+            for (int i = 0; i < decl.Parameters.Count; i++)
+                AddStmt(OPCode.LOADPARAM, new IRState(scopes[0] + decl.Parameters[i].Name), new Int(i + 1));
             var length = statements.Count;
             decl.Content.Accept(this);
             if (statements[^1].Code != OPCode.RET) AddStmt(OPCode.RETN);
@@ -371,6 +371,15 @@ namespace Penguor.Compiler.IR
                     case FunctionCall call:
                         for (int a = 0; a < call.Args.Count; a++)
                         {
+                            if (call.Args[a] is StringExpr strExpr)
+                            {
+                                AddStmt(OPCode.LOADARG, new String(strExpr.Value), new Int(a + 1));
+                            }
+                            else if (call.Args[a] is NumExpr numExpr)
+                            {
+                                if (numExpr.Value.Contains('.')) AddStmt(OPCode.LOADARG, new Double(numExpr.NumValue ?? throw new Exception()), new Int(a + 1));
+                                else AddStmt(OPCode.LOADARG, new Int((int?)numExpr.NumValue ?? throw new Exception()), new Int(a + 1));
+                            }
                             call.Args[a].Accept(this);
                             AddStmt(OPCode.LOADARG, new Reference(GetLastNumber()), new Int(a + 1));
                         }

@@ -13,7 +13,7 @@ namespace Penguor.Compiler.Assembly
         /// <summary>
         /// how to get the value in assembly
         /// </summary>
-        public string? Get { get; set; }
+        public RegisterAmd64? Register { get; set; }
 
         public int ParamNumber { get; set; }
     }
