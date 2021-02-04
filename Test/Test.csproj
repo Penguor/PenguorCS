@@ -13,11 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Penguor\Penguor.csproj" />
+    <ProjectReference Include="../Penguor/Penguor.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Files\**">
+    <Content Include="Files/**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
