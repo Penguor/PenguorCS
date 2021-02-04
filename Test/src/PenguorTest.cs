@@ -12,14 +12,14 @@ namespace Penguor.Compiler.Tests
         public void TestHelloWorld()
         {
             BuildManager.TableManager = new SymbolTableManager();
-            BuildManager.SmartBuild("src/Files/HelloWorld/HelloWorld.pgr", null, false);
+            BuildManager.SmartBuild("Files/HelloWorld/HelloWorld.pgr", null, false);
         }
 
         // [Fact]
         public void TestFibonacci()
         {
             BuildManager.TableManager = new SymbolTableManager();
-            BuildManager.SmartBuild("src/Files/Fibonacci/Fibonacci.pgr", null, false);
+            BuildManager.SmartBuild("Files/Fibonacci/Fibonacci.pgr", null, false);
         }
     }
 }
