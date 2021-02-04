@@ -231,6 +231,13 @@ namespace Penguor.Compiler.IR
             return 0;
         }
 
+        public int Visit(AsmStmt stmt)
+        {
+            foreach (var i in stmt.Contents)
+                AddStmt(OPCode.ASM, new String(i));
+            return 0;
+        }
+
         public int Visit(ReturnStmt stmt)
         {
             stmt.Value?.Accept(this);

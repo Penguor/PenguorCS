@@ -73,14 +73,13 @@ namespace Penguor.Compiler.Assembly
             RegisterAmd64? register;
             switch (stmts[i])
             {
+                case var s when s.Code == OPCode.ASM:
+                    text.AppendLine(((String)s.Operands[0]).Value);
+                    break;
                 case var s when s.Code == OPCode.FUNC:
                     CreateLabel(s.Operands[0]);
                     Push(RBP);
                     Move(RSP, RBP);
-
-                    //just there because there's no inline assembly yet
-                    if (s.Operands[0] is IRState sstate && sstate.ToString() == "print")
-                        text.AppendLine("sub rsp, 32\nCALL printf");
                     break;
                 case var s when s.Code == OPCode.LOADPARAM && s.Operands[0] is IRState irState:
                     var symbol = builder.TableManager.GetSymbol(irState.State);

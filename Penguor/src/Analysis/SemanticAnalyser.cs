@@ -304,6 +304,8 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(CompilerStmt stmt) => stmt;
 
+        public Stmt Visit(AsmStmt stmt) => stmt;
+
         public Stmt Visit(ReturnStmt stmt) => stmt with { Value = stmt.Value?.Accept(this) };
 
         public Stmt Visit(SwitchStmt stmt)

@@ -248,6 +248,7 @@ namespace Penguor.Compiler.Parsing
             if (Match(FOR)) return ForStmt();
             if (Match(DO)) return DoStmt();
             if (Match(SWITCH)) return SwitchStmt();
+            if (Match(ASM)) return AsmStmt();
             if (Match(RETURN)) return ReturnStmt();
             return ExprStmt();
         }
@@ -392,6 +393,14 @@ namespace Penguor.Compiler.Parsing
             }
 
             return new CaseStmt(ID, offset, condition, statements);
+        }
+
+        private AsmStmt AsmStmt()
+        {
+            string assembly = Consume(STRING).Name;
+            string[] strings = assembly.Split('\n');
+            Array.ForEach(strings, (s) => s.Trim());
+            return new AsmStmt(ID, GetPrevious().Offset, strings);
         }
 
         private ReturnStmt ReturnStmt()

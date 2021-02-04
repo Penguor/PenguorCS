@@ -20,6 +20,7 @@ Do Stmt content Expr condition
 For VarExpr currentVar CallExpr vars Stmt content
 Switch Expr condition List<Stmt> cases Stmt? defaultCase
 Case Expr? condition List<Stmt> content
+Asm string[] contents
 Return Expr? value
 Expr Expr expr
 ; Declaration Decl "Penguor\src\Parsing\AST\Declarations"

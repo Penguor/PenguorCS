@@ -21,6 +21,7 @@ namespace Penguor.Compiler.IR
         ABS, CHS, // absolute, change sign
         JMP, JTR, JFL,// jump, jump if true, jump if false
         GOTO,
-        ERR // invalid opcode, returned on error
+        ERR, // invalid opcode, returned on error
+        ASM
     }
 }

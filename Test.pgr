@@ -3,7 +3,12 @@ void printLn(string a)
     print(a); print("\n")
 }
 
-void print(string a) {}
+void print(string a) 
+{    
+    asm
+"sub rsp, 32
+CALL printf"
+}
 
 void main() : printLn("Hello World!")
 
