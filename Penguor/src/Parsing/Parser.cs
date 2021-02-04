@@ -222,7 +222,7 @@ namespace Penguor.Compiler.Parsing
         private Decl DeclContent()
         {
             if (Check(LBRACE)) return BlockDecl(true);
-            if (Check(COLON)) return StmtDecl();
+            if (Match(COLON)) return StmtDecl();
             return Except(new StmtDecl(ID, GetCurrent().Offset, null!), 12);
         }
 
