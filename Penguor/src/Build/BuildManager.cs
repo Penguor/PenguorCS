@@ -32,7 +32,7 @@ namespace Penguor.Compiler.Build
         /// <summary> temporary </summary>
         public static StringBuilder asmBss;
 
-        private static bool run = true;
+        private static bool run;
 
         static BuildManager()
         {
@@ -48,8 +48,9 @@ namespace Penguor.Compiler.Build
         /// </summary>
         /// <param name="path">the file/project to build</param>
         /// <param name="stdLib">the path of the standard library</param>
-        public static void SmartBuild(string path, string? stdLib)
+        public static void SmartBuild(string path, string? stdLib, bool run = true)
         {
+            BuildManager.run = run;
             if (string.IsNullOrEmpty(stdLib)) stdLib = AppDomain.CurrentDomain.BaseDirectory + "stdlib\\stdlib.pgrp";
             if ((File.GetAttributes(path) & FileAttributes.Directory) != 0)
             {

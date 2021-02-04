@@ -9,7 +9,7 @@ namespace Penguor.Compiler.Assembly
     /// <summary>
     /// generate assembly code for windows
     /// </summary>
-    public sealed class AssemblyGeneratorWin : AssemblyGenerator
+    public sealed class AssemblyGeneratorWinAmd64 : AssemblyGenerator
     {
         private readonly Builder builder;
 
@@ -28,7 +28,7 @@ namespace Penguor.Compiler.Assembly
         /// </summary>
         /// <param name="program">the input ir program</param>
         /// <param name="builder">the builder which compiles this unit</param>
-        public AssemblyGeneratorWin(IRProgram program, Builder builder) : base(program)
+        public AssemblyGeneratorWinAmd64(IRProgram program, Builder builder) : base(program)
         {
             this.builder = builder;
             stmts = program.Statements;
@@ -37,13 +37,10 @@ namespace Penguor.Compiler.Assembly
         /// <inheritdoc/>
         public override void Generate()
         {
+            
+
             pre.AppendLine("global main");
             pre.AppendLine("extern printf");
-
-            for (i = 0; i < stmts.Count; i++)
-            {
-                AnalyseStatement();
-            }
 
             for (i = 0; i < stmts.Count; i++)
             {
@@ -56,32 +53,21 @@ namespace Penguor.Compiler.Assembly
             BuildManager.asmBss.Append(bss);
         }
 
-        private void AnalyseStatement()
-        {
-            switch (stmts[i].Code)
-            {
-                case OPCode.FUNC:
-                case OPCode.LABEL:
-                    // builder.TableManager.GetSymbol(((IRState)stmts[i].Operands[0]).State).AsmInfo = new AsmInfoWindowsAmd64 { Register = stmts[i].Operands[0].ToString() };
-                    break;
-            }
-        }
-
         // generate assembly for one statement
         private void GenerateStatement()
         {
             RegisterAmd64? register;
             switch (stmts[i])
             {
-                case var s when s.Code == OPCode.ASM:
+                case var s when s.Code == IROPCode.ASM:
                     text.AppendLine(((String)s.Operands[0]).Value);
                     break;
-                case var s when s.Code == OPCode.FUNC:
+                case var s when s.Code == IROPCode.FUNC:
                     CreateLabel(s.Operands[0]);
                     Push(RBP);
                     Move(RSP, RBP);
                     break;
-                case var s when s.Code == OPCode.LOADPARAM && s.Operands[0] is IRState irState:
+                case var s when s.Code == IROPCode.LOADPARAM && s.Operands[0] is IRState irState:
                     var symbol = builder.TableManager.GetSymbol(irState.State);
                     System.Console.WriteLine(symbol.DataType?.ToString());
                     register = GetRegister(symbol.DataType?.ToString(), ((Int)s.Operands[1]).Value);
@@ -92,10 +78,10 @@ namespace Penguor.Compiler.Assembly
                     };
 
                     break;
-                case var s when s.Code == OPCode.LOAD:
+                case var s when s.Code == IROPCode.LOAD:
                     loaded.Add(new Reference((uint)i), s.Operands[0]);
                     break;
-                case var s when s.Code == OPCode.LOADARG && s.Operands[0] is String or Int:
+                case var s when s.Code == IROPCode.LOADARG && s.Operands[0] is String or Int:
                     GetValueOrPointer(s.Operands[0], GetRegister(s.Operands[0], (Int)s.Operands[1]));
                     break;
                 /* case var s when s.Code == OPCode.LOADARG && s.Operands[0] is Reference reference && stmts[(int)reference.Referenced].Operands[0] is String or Int:
@@ -124,10 +110,10 @@ namespace Penguor.Compiler.Assembly
                     };
                     text.Append("mov ").Append(register).Append(", ").AppendLine(asmInfo.Register);
                     break; */
-                case var s when s.Code == OPCode.CALL && s.Operands[0] is IRState state:
+                case var s when s.Code == IROPCode.CALL && s.Operands[0] is IRState state:
                     text.Append("call ").Append(state.State).AppendLine();
                     break;
-                case var s when s.Code == OPCode.RETN:
+                case var s when s.Code == IROPCode.RETN:
                     text.AppendLine("mov rsp, rbp");
                     text.AppendLine("pop rbp");
                     text.AppendLine("ret");

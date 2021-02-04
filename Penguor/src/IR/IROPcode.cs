@@ -5,7 +5,7 @@ namespace Penguor.Compiler.IR
     /// <summary>
     /// an instruction in the Penguor intermediate representation
     /// </summary>
-    public enum OPCode : byte
+    public enum IROPCode : byte
     {
         LABEL, LIB, FUNC,
         USE,

@@ -15,7 +15,7 @@ namespace Penguor.Compiler.IR
         /// <summary>
         /// the OPCode of this statement
         /// </summary>
-        public OPCode Code { get; init; }
+        public IROPCode Code { get; init; }
 
         /// <summary>
         /// the operands which get passed to the OPCode
@@ -38,7 +38,7 @@ namespace Penguor.Compiler.IR
         /// <param name="number">the instrution number</param>
         /// <param name="code">the OPCode of this IRStatement</param>
         /// <param name="operands">the operands of this IRStatement</param>
-        public IRStatement(uint number, OPCode code, params IRArgument[] operands)
+        public IRStatement(uint number, IROPCode code, params IRArgument[] operands)
         {
             Number = number;
             Code = code;
@@ -49,7 +49,7 @@ namespace Penguor.Compiler.IR
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (Code is OPCode.LABEL or OPCode.LIB or OPCode.FUNC)
+            if (Code is IROPCode.LABEL or IROPCode.LIB or IROPCode.FUNC)
                 return $"({Number:D4}) {Code} {Operands[0]}{':'}";
             return $"({Number:D4})     {Code} {string.Join(' ', (IEnumerable<IRArgument>)Operands)}";
         }
