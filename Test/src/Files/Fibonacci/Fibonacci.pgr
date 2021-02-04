@@ -1,6 +1,9 @@
-#safety 2;
-
-using Standard;
+void print(string a) 
+{    
+    asm
+"sub rsp, 32
+CALL printf"
+}
 
 public system Fibonacci
 {

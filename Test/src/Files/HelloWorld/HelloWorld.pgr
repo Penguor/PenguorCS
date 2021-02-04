@@ -1,7 +1,13 @@
-public system Hello
+void printLn(string a)
 {
-    void execute()
-    {
-        print("Hello World")
-    }
+    print(a); print("\n")
 }
+
+void print(string a) 
+{    
+    asm
+"sub rsp, 32
+CALL printf"
+}
+
+void main() : printLn("Hello World!")
