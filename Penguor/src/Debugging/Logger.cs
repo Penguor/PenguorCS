@@ -70,6 +70,7 @@ namespace Penguor.Compiler.Debugging
             {3, (LogLevel.Debug, "Debug")},
             {4, (LogLevel.Info, "Info")},
             {5, (LogLevel.Error, "Expecting a statement terminator: new line or ';'")},
+            {6, (LogLevel.Error, "Standard library not found at path '{0}'")},
             {7, (LogLevel.Error, "Unexpected character '{0}'")},
             {8, (LogLevel.Error, "Unknown compiler statement '{0}'")},
             {9, (LogLevel.Error, "Unexpected end of file")},

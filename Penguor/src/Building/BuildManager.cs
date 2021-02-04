@@ -61,9 +61,14 @@ namespace Penguor.Compiler.Build
                 else BuildProject(files[0], stdLib);
                 return;
             }
-            if (!File.Exists(path) || !File.Exists(stdLib))
+            if (!File.Exists(path))
             {
                 Logger.Log(new Notification(path, 0, 10, MsgType.PGR, path));
+                Environment.Exit(1);
+            }
+            if (!File.Exists(stdLib))
+            {
+                Logger.Log(new Notification(stdLib, 0, 6, MsgType.PGR, stdLib));
                 Environment.Exit(1);
             }
 
