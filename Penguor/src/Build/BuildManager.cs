@@ -50,6 +50,7 @@ namespace Penguor.Compiler.Build
         /// <param name="stdLib">the path of the standard library</param>
         public static void SmartBuild(string path, string? stdLib)
         {
+            if (string.IsNullOrEmpty(stdLib)) stdLib = AppDomain.CurrentDomain.BaseDirectory + "stdlib\\stdlib.pgrp";
             if ((File.GetAttributes(path) & FileAttributes.Directory) != 0)
             {
                 if (path.Length == 0 || path == null) throw new PenguorCSException();
@@ -61,6 +62,7 @@ namespace Penguor.Compiler.Build
             }
             if (!File.Exists(path) || !File.Exists(stdLib))
             {
+                Logger.Log(stdLib, LogLevel.Debug);
                 Logger.Log(new Notification(path, 0, 10, MsgType.PGR, path));
                 Environment.Exit(1);
             }

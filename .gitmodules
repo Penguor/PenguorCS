@@ -1,0 +1,3 @@
+[submodule "Penguor/stdlib"]
+	path = Penguor/stdlib
+	url = https://github.com/Penguor/stdlib

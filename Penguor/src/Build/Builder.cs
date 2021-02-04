@@ -65,7 +65,7 @@ namespace Penguor.Compiler.Build
             }
             catch (FileNotFoundException)
             {
-                Logger.Log(new Notification(file, 0, 6, MsgType.PGR, file));
+                Logger.Log(new Notification(file, 0, 10, MsgType.PGR, file));
                 SourceFile = null!;
                 Input = null!;
                 Exit(1);
@@ -151,7 +151,7 @@ namespace Penguor.Compiler.Build
         /// </summary>
         public void GenerateAsm()
         {
-            AssemblyGeneratorWin generator = new AssemblyGeneratorWin(ir ?? throw new ArgumentNullException(nameof(program)), this);
+            AssemblyGeneratorWinAmd64 generator = new AssemblyGeneratorWinAmd64(ir ?? throw new ArgumentNullException(nameof(program)), this);
             generator.Generate();
         }
 
