@@ -3,9 +3,9 @@ namespace Penguor.Compiler.IR
     /// <summary>
     /// an argument of a statement
     /// </summary>
-    public record Null : IRArgument
+    public record IRVoid : IRArgument
     {
         /// <inheritdoc/>
-        public override string ToString() => "$null";
+        public override string ToString() => "$void";
     }
 }

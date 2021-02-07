@@ -3,18 +3,18 @@ namespace Penguor.Compiler.IR
     /// <summary>
     /// an argument of a statement
     /// </summary>
-    public record Byte : IRArgument
+    public record IRShort : IRArgument
     {
         /// <summary>
         /// the value of the argument
         /// </summary>
-        public byte Value { get; }
+        public short Value { get; }
 
         /// <summary>
         /// Initialize a new Instance of this IRArgument with the given value
         /// </summary>
         /// <param name="value">the value of this argument</param>
-        public Byte(byte value)
+        public IRShort(short value)
         {
             Value = value;
         }

@@ -3,18 +3,18 @@ namespace Penguor.Compiler.IR
     /// <summary>
     /// an argument of a statement
     /// </summary>
-    public record Double : IRArgument
+    public record IRChar : IRArgument
     {
         /// <summary>
         /// the value of the argument
         /// </summary>
-        public double Value { get; }
+        public char Value { get; }
 
         /// <summary>
         /// Initialize a new Instance of this IRArgument with the given value
         /// </summary>
         /// <param name="value">the value of this argument</param>
-        public Double(double value)
+        public IRChar(char value)
         {
             Value = value;
         }

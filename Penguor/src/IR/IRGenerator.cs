@@ -9,7 +9,7 @@ using Penguor.Compiler.Parsing.AST;
 
 namespace Penguor.Compiler.IR
 {
-    public class IRGenerator : IExceptionHandler, IDeclVisitor<int>, IStmtVisitor<int>, IExprVisitor<Reference>
+    public class IRGenerator : IExceptionHandler, IDeclVisitor<int>, IStmtVisitor<int>, IExprVisitor<IRReference>
     {
         private readonly Builder builder;
         private readonly ProgramDecl program;
@@ -20,11 +20,6 @@ namespace Penguor.Compiler.IR
 
         private readonly List<IRStatement> statements = new();
 
-        //ssa related stuff
-
-        private readonly Dictionary<State, Dictionary<int, Reference>> currentDefinition = new();
-        private int currentBlock;
-
         public IRGenerator(ProgramDecl program, Builder builder)
         {
             this.program = program;
@@ -34,13 +29,18 @@ namespace Penguor.Compiler.IR
             scopes.Add(new State());
         }
 
-        private void WriteVariable(State variable, int block, Reference value)
+        //ssa related stuff
+        private readonly Dictionary<State, Dictionary<int, IRReference>> currentDefinition = new();
+        private int currentBlock;
+        private List<int> sealedBlocks = new();
+
+        private void WriteVariable(State variable, int block, IRReference value)
         {
-            currentDefinition.TryAdd(variable, new Dictionary<int, Reference>());
+            currentDefinition.TryAdd(variable, new Dictionary<int, IRReference>());
             currentDefinition[variable][block] = value;
         }
 
-        private Reference ReadVariable(State variable, int block)
+        private IRReference ReadVariable(State variable, int block)
         {
             if (currentDefinition[variable].ContainsKey(block))
                 return currentDefinition[variable][block];
@@ -48,7 +48,7 @@ namespace Penguor.Compiler.IR
                 return ReadVariableRecursive();
         }
 
-        private Reference ReadVariableRecursive() => new Reference(1);
+        private IRReference ReadVariableRecursive() => new IRReference(1);
 
         private void CloseBlock() => currentBlock++;
 
@@ -66,7 +66,7 @@ namespace Penguor.Compiler.IR
             return AddStmt(IROPCode.LABEL, new IRState(scopes[0]));
         }
 
-        private Reference GetLastNumber() => new Reference(statements[^1].Number);
+        private IRReference GetLastNumber() => new IRReference(statements[^1].Number);
 
         /// <summary>
         /// Generates ir from an ast (program node)
@@ -161,8 +161,8 @@ namespace Penguor.Compiler.IR
             {
                 IRArgument arg = decl.Init switch
                 {
-                    NumExpr e => new Double(e.NumValue ?? throw new Exception()),
-                    StringExpr s => new String(s.Value),
+                    NumExpr e => new IRDouble(e.NumValue ?? throw new Exception()),
+                    StringExpr s => new IRString(s.Value),
                     _ => AcceptInit()
                 };
                 AddStmt(IROPCode.DEF, new IRState(scopes[0]), arg);
@@ -260,7 +260,7 @@ namespace Penguor.Compiler.IR
         public int Visit(AsmStmt stmt)
         {
             foreach (var i in stmt.Contents)
-                AddStmt(IROPCode.ASM, new String(i));
+                AddStmt(IROPCode.ASM, new IRString(i));
             return 0;
         }
 
@@ -305,7 +305,7 @@ namespace Penguor.Compiler.IR
             return 0;
         }
 
-        public Reference Visit(AssignExpr expr)
+        public IRReference Visit(AssignExpr expr)
         {
             if (expr.Op != TokenType.ASSIGN) throw new Exception();
 
@@ -317,9 +317,9 @@ namespace Penguor.Compiler.IR
             return GetLastNumber();
         }
 
-        public Reference Visit(BinaryExpr expr)
+        public IRReference Visit(BinaryExpr expr)
         {
-            Reference? addr1 = null, addr2 = null;
+            IRReference? addr1 = null, addr2 = null;
             double? num1 = expr.Lhs is NumExpr e ? e.NumValue ?? throw new Exception() : null;
             if (num1 == null)
             {
@@ -331,7 +331,7 @@ namespace Penguor.Compiler.IR
                 addr2 = expr.Rhs.Accept(this);
             }
 
-            return new Reference(AddStmt(expr.Op switch
+            return new IRReference(AddStmt(expr.Op switch
             {
                 TokenType.PLUS => IROPCode.ADD,
                 TokenType.MINUS => IROPCode.SUB,
@@ -344,13 +344,13 @@ namespace Penguor.Compiler.IR
                 TokenType.EQUALS => IROPCode.EQUALS,
                 TokenType a => builder.Except(IROPCode.ERR, 9, expr.Offset, Token.ToString(a))
             }
-            , num1 == null ? addr1 ?? throw new Exception() : new Double(num1 ?? throw new Exception())
-            , num2 == null ? addr2 ?? throw new Exception() : new Double(num2 ?? throw new Exception())));
+            , num1 == null ? addr1 ?? throw new Exception() : new IRDouble(num1 ?? throw new Exception())
+            , num2 == null ? addr2 ?? throw new Exception() : new IRDouble(num2 ?? throw new Exception())));
         }
 
-        public Reference Visit(BooleanExpr expr) => new(AddStmt(IROPCode.LOAD, new Bool(expr.Value)));
+        public IRReference Visit(BooleanExpr expr) => new(AddStmt(IROPCode.LOAD, new IRBool(expr.Value)));
 
-        public Reference Visit(CallExpr expr)
+        public IRReference Visit(CallExpr expr)
         {
             if (expr.Callee[^1] is IdfCall)
             {
@@ -362,17 +362,17 @@ namespace Penguor.Compiler.IR
                 {
                     if (fCall.Args[a] is StringExpr strExpr)
                     {
-                        AddStmt(IROPCode.LOADARG, new String(strExpr.Value), new Int(a + 1));
+                        AddStmt(IROPCode.LOADARG, new IRString(strExpr.Value), new IRInt(a + 1));
                     }
                     else if (fCall.Args[a] is NumExpr numExpr)
                     {
-                        if (numExpr.Value.Contains('.')) AddStmt(IROPCode.LOADARG, new Double(numExpr.NumValue ?? throw new Exception()), new Int(a + 1));
-                        else AddStmt(IROPCode.LOADARG, new Int((int?)numExpr.NumValue ?? throw new Exception()), new Int(a + 1));
+                        if (numExpr.Value.Contains('.')) AddStmt(IROPCode.LOADARG, new IRDouble(numExpr.NumValue ?? throw new Exception()), new IRInt(a + 1));
+                        else AddStmt(IROPCode.LOADARG, new IRInt((int?)numExpr.NumValue ?? throw new Exception()), new IRInt(a + 1));
                     }
                     fCall.Args[a].Accept(this);
-                    AddStmt(IROPCode.LOADARG, GetLastNumber(), new Int(a + 1));
+                    AddStmt(IROPCode.LOADARG, GetLastNumber(), new IRInt(a + 1));
                 }
-                return new Reference(AddStmt(IROPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception())));
+                return new IRReference(AddStmt(IROPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception())));
             }
             else
             {
@@ -380,19 +380,19 @@ namespace Penguor.Compiler.IR
             }
         }
 
-        public Reference Visit(GroupingExpr expr) => expr.Content.Accept(this);
-        public Reference Visit(NullExpr expr) => new(AddStmt(IROPCode.LOAD, new Null()));
+        public IRReference Visit(GroupingExpr expr) => expr.Content.Accept(this);
+        public IRReference Visit(NullExpr expr) => new(AddStmt(IROPCode.LOAD, new IRNull()));
 
-        public Reference Visit(NumExpr expr)
+        public IRReference Visit(NumExpr expr)
         {
-            if (expr.Value.Contains('.')) AddStmt(IROPCode.LOAD, new Double(expr.NumValue ?? throw new Exception()));
-            else AddStmt(IROPCode.LOAD, new Int((int?)expr.NumValue ?? throw new Exception()));
+            if (expr.Value.Contains('.')) AddStmt(IROPCode.LOAD, new IRDouble(expr.NumValue ?? throw new Exception()));
+            else AddStmt(IROPCode.LOAD, new IRInt((int?)expr.NumValue ?? throw new Exception()));
             return GetLastNumber();
         }
 
-        public Reference Visit(StringExpr expr) => new(AddStmt(IROPCode.LOAD, new String(expr.Value)));
+        public IRReference Visit(StringExpr expr) => new(AddStmt(IROPCode.LOAD, new IRString(expr.Value)));
 
-        public Reference Visit(UnaryExpr expr)
+        public IRReference Visit(UnaryExpr expr)
         {
             //todo: verify this
             expr.Rhs.Accept(this);
@@ -410,7 +410,7 @@ namespace Penguor.Compiler.IR
             return GetLastNumber();
         }
 
-        public Reference Visit(VarExpr expr) => new(AddStmt(
+        public IRReference Visit(VarExpr expr) => new(AddStmt(
             IROPCode.DFE,
             new IRState(builder.TableManager.GetStateBySymbol(expr.Name, scopes) ?? throw new ArgumentNullException(nameof(expr)))));
     }

@@ -3,11 +3,11 @@ namespace Penguor.Compiler.IR
     /// <summary>
     /// an argument of a statement
     /// </summary>
-    public record Reference : IRArgument
+    public record IRReference : IRArgument
     {
         public uint Referenced { get; }
 
-        public Reference(uint referenced)
+        public IRReference(uint referenced)
         {
             Referenced = referenced;
         }

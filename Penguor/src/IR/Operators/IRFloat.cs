@@ -3,23 +3,23 @@ namespace Penguor.Compiler.IR
     /// <summary>
     /// an argument of a statement
     /// </summary>
-    public record String : IRArgument
+    public record IRFloat : IRArgument
     {
         /// <summary>
         /// the value of the argument
         /// </summary>
-        public string Value { get; }
+        public float Value { get; }
 
         /// <summary>
         /// Initialize a new Instance of this IRArgument with the given value
         /// </summary>
         /// <param name="value">the value of this argument</param>
-        public String(string value)
+        public IRFloat(float value)
         {
             Value = value;
         }
 
         /// <inheritdoc/>
-        public override string ToString() => '"' + Value + '"';
+        public override string ToString() => Value.ToString();
     }
 }

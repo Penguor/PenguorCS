@@ -21,7 +21,7 @@ namespace Penguor.Compiler.Assembly
         private int i;
         private readonly List<IRStatement> stmts;
 
-        private Dictionary<Reference, IRArgument> loaded = new();
+        private Dictionary<IRReference, IRArgument> loaded = new();
 
         /// <summary>
         /// create a new instance of the AssemblyGenerator for windows
@@ -60,7 +60,7 @@ namespace Penguor.Compiler.Assembly
             switch (stmts[i])
             {
                 case var s when s.Code == IROPCode.ASM:
-                    text.AppendLine(((String)s.Operands[0]).Value);
+                    text.AppendLine(((IRString)s.Operands[0]).Value);
                     break;
                 case var s when s.Code == IROPCode.FUNC:
                     CreateLabel(s.Operands[0]);
@@ -70,19 +70,19 @@ namespace Penguor.Compiler.Assembly
                 case var s when s.Code == IROPCode.LOADPARAM && s.Operands[0] is IRState irState:
                     var symbol = builder.TableManager.GetSymbol(irState.State);
                     System.Console.WriteLine(symbol.DataType?.ToString());
-                    register = GetRegister(symbol.DataType?.ToString(), ((Int)s.Operands[1]).Value);
+                    register = GetRegister(symbol.DataType?.ToString(), ((IRInt)s.Operands[1]).Value);
                     symbol.AsmInfo = new AsmInfoWindowsAmd64
                     {
-                        ParamNumber = ((Int)s.Operands[1]).Value,
+                        ParamNumber = ((IRInt)s.Operands[1]).Value,
                         Register = register
                     };
 
                     break;
                 case var s when s.Code == IROPCode.LOAD:
-                    loaded.Add(new Reference((uint)i), s.Operands[0]);
+                    loaded.Add(new IRReference((uint)i), s.Operands[0]);
                     break;
-                case var s when s.Code == IROPCode.LOADARG && s.Operands[0] is String or Int:
-                    GetValueOrPointer(s.Operands[0], GetRegister(s.Operands[0], (Int)s.Operands[1]));
+                case var s when s.Code == IROPCode.LOADARG && s.Operands[0] is IRString or IRInt:
+                    GetValueOrPointer(s.Operands[0], GetRegister(s.Operands[0], (IRInt)s.Operands[1]));
                     break;
                 /* case var s when s.Code == OPCode.LOADARG && s.Operands[0] is Reference reference && stmts[(int)reference.Referenced].Operands[0] is String or Int:
                     IRArgument argument = loaded.GetValueOrDefault(reference) ?? throw new System.Exception();
@@ -125,7 +125,7 @@ namespace Penguor.Compiler.Assembly
         private uint StringNum { get => _stringNum++; }
         private readonly Dictionary<string, uint> stringConstants = new();
 
-        private string GetString(String s)
+        private string GetString(IRString s)
         {
             if (!stringConstants.ContainsKey(s.Value))
             {
@@ -164,11 +164,11 @@ namespace Penguor.Compiler.Assembly
         {
             switch (argument)
             {
-                case String str:
+                case IRString str:
                     string name = GetString(str);
                     text.Append("mov ").Append(toRegister).Append(", ").AppendLine(name);
                     break;
-                case Int num:
+                case IRInt num:
                     text.Append("mov ").Append(toRegister).Append(", ").AppendLine(num.Value.ToString());
                     break;
             }
@@ -186,13 +186,13 @@ namespace Penguor.Compiler.Assembly
             else throw new System.Exception();
         }
 
-        private RegisterAmd64 GetRegister(IRArgument argument, Int paramNumber) => (argument, paramNumber.Value) switch
+        private RegisterAmd64 GetRegister(IRArgument argument, IRInt paramNumber) => (argument, paramNumber.Value) switch
         {
-            (String or Int or Double or Float, 1) => RCX,
-            (String or Int or Double or Float, 2) => RDX,
-            (String or Int or Double or Float, 3) => R8,
-            (String or Int or Double or Float, 4) => R9,
-            (String or Int or Double or Float, _) => STACK,
+            (IRString or IRInt or IRDouble or IRFloat, 1) => RCX,
+            (IRString or IRInt or IRDouble or IRFloat, 2) => RDX,
+            (IRString or IRInt or IRDouble or IRFloat, 3) => R8,
+            (IRString or IRInt or IRDouble or IRFloat, 4) => R9,
+            (IRString or IRInt or IRDouble or IRFloat, _) => STACK,
         };
 
         private RegisterAmd64 GetRegister(IRState state, int paramNumber) => GetRegister(state.ToString(), paramNumber);
