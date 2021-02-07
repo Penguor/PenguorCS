@@ -1,16 +1,16 @@
-void printLn(string a)
+void main()
 {
-    print(a); print("\n")
+    int x = 0
+    int c;
+    while(x < 5)
+    {
+        if(true)
+        {
+            x = x + 1
+        }
+        c = x + x
+    }
 }
-
-void print(string a) 
-{    
-    asm
-"sub rsp, 32
-CALL printf"
-}
-
-void main() : printLn("Hello World!")
 
 /*public system Fibonacci
 {

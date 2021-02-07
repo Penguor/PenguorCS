@@ -37,10 +37,10 @@ namespace Penguor.Compiler.Assembly
         /// <inheritdoc/>
         public override void Generate()
         {
-            
-
             pre.AppendLine("global main");
             pre.AppendLine("extern printf");
+
+            AsmProgram program = new AsmProgram();
 
             for (i = 0; i < stmts.Count; i++)
             {

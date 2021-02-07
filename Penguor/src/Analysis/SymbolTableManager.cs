@@ -77,7 +77,7 @@ namespace Penguor.Compiler
             if (exists)
             {
                 exists = tables[scope].Lookup(symbol.Symbol, out Symbol? outSym);
-                return exists ? (outSym ?? throw new Exception()) : throw new System.Exception();
+                return exists ? (outSym ?? throw new Exception()) : throw new Exception();
             }
             else
             {
@@ -91,7 +91,6 @@ namespace Penguor.Compiler
         /// <param name="scope">the scope in which the symbol exists</param>
         /// <param name="symbol">the symbol to look for</param>
         /// <param name="outSymbol">the Symbol to put the output to</param>
-        /// <returns></returns>
         public bool TryLookupSymbolInScope(State scope, AddressFrame symbol, out Symbol? outSymbol)
         {
             bool exists = tables.ContainsKey(scope);

@@ -20,6 +20,6 @@ namespace Penguor.Compiler.IR
         }
 
         /// <inheritdoc/>
-        public override string ToString() => Value;
+        public override string ToString() => '"' + Value + '"';
     }
 }
