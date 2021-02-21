@@ -148,6 +148,18 @@ namespace Penguor.Compiler
         }
 
         /// <summary>
+        /// Pops <c>amount</c> AddressFrames from the state
+        /// </summary>
+        /// <Exception cref="InvalidOperationException">Thrown when state is empty</Exception>
+        public void Pop(int amount)
+        {
+            if (addressFrames.Count >= amount)
+                addressFrames.RemoveRange(addressFrames.Count - amount - 1, amount);
+            else
+                throw new InvalidOperationException();
+        }
+
+        /// <summary>
         /// add two States together
         /// </summary>
         public static State operator +(State a, State b)
@@ -195,6 +207,7 @@ namespace Penguor.Compiler
             }
 
             var state = (State)obj;
+            if (addressFrames.Count != state.addressFrames.Count) return false;
             for (int i = 0; i < addressFrames.Count; i++)
             {
                 if (addressFrames[i].Symbol != state[i].Symbol) return false;

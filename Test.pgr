@@ -8,7 +8,7 @@ void main()
         {
             x = x + 1
         }
-        c = x + x
+        x = x + x
     }
 }
 

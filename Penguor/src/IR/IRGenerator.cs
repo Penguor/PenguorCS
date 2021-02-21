@@ -18,7 +18,7 @@ namespace Penguor.Compiler.IR
         private uint _instructionNumber;
         private uint InstructionNumber { get => _instructionNumber++; }
 
-        private readonly List<IRStatement> statements = new();
+        private readonly SortedDictionary<uint, IRStatement> statements = new();
 
         public IRGenerator(ProgramDecl program, Builder builder)
         {
@@ -27,46 +27,158 @@ namespace Penguor.Compiler.IR
             scopes = new();
             scopes.Add(new State());
             scopes.Add(new State());
+            currentBlock = CreateBlock(new State(), false, false);
         }
 
         //ssa related stuff
-        private readonly Dictionary<State, Dictionary<int, IRReference>> currentDefinition = new();
-        private int currentBlock;
-        private List<int> sealedBlocks = new();
+        // paper: Simple and Efficient Construction of Static Single Assignment Form, Braun et al.
+        // https://pp.info.uni-karlsruhe.de/uploads/publikationen/braun13cc.pdf
 
-        private void WriteVariable(State variable, int block, IRReference value)
+        private readonly Dictionary<BlockID, IRBlock> blocks = new();
+        private readonly Dictionary<State, Dictionary<BlockID, IRReference>> currentDefinition = new();
+
+        private readonly List<BlockID> sealedBlocks = new();
+
+        private readonly Dictionary<BlockID, Dictionary<State, IRReference>> incompletePhis = new();
+
+        private BlockID currentBlock;
+
+        private int _currentBlockID;
+        private int CurrentBlockID { get => _currentBlockID++; }
+
+        private void WriteVariable(State variable, BlockID block, IRReference value)
         {
-            currentDefinition.TryAdd(variable, new Dictionary<int, IRReference>());
+            currentDefinition.TryAdd(variable, new());
             currentDefinition[variable][block] = value;
         }
 
-        private IRReference ReadVariable(State variable, int block)
+        private IRReference ReadVariable(State variable, BlockID block)
         {
             if (currentDefinition[variable].ContainsKey(block))
                 return currentDefinition[variable][block];
             else
-                return ReadVariableRecursive();
+                return ReadVariableRecursive(variable, block);
         }
 
-        private IRReference ReadVariableRecursive() => new IRReference(1);
+        private IRReference ReadVariableRecursive(State variable, BlockID block)
+        {
+            IRReference value;
+            if (!sealedBlocks.Contains(block))
+            {
+                value = AddPhi();
+                incompletePhis.TryAdd(block, new());
+                incompletePhis[block][variable] = value;
+            }
+            else if (blocks[block].Predecessors.Count == 1)
+            {
+                value = ReadVariable(variable, blocks[block].Predecessors[0]);
+            }
+            else
+            {
+                value = AddPhi();
+                WriteVariable(variable, block, value);
+                AddPhiOperands(variable, value);
+            }
+            WriteVariable(variable, block, value);
+            return value;
+        }
 
-        private void CloseBlock() => currentBlock++;
+        private IRReference AddPhi() => new(AddStmt(IROPCode.PHI, new IRPhi(currentBlock)));
 
+        private IRReference AddPhiOperands(State variable, IRReference phi)
+        {
+            IRPhi irPhi = (IRPhi)statements[phi.Referenced].Operands[0];
+            foreach (var predecessor in FindBlock(irPhi.Block)?.Predecessors ?? throw new NullReferenceException())
+                irPhi.AppendOperand(ReadVariable(variable, predecessor));
+            return TryRemoveTrivialPhi(phi);
+        }
+
+        private IRReference TryRemoveTrivialPhi(IRReference phi)
+        {
+            IRPhi irPhi = (IRPhi)statements[phi.Referenced].Operands[0];
+            IRReference? same = null;
+            foreach (var op in irPhi.Operands)
+            {
+                if (op == same || op == phi)
+                    continue;
+                if (same != null)
+                    return phi;
+                same = op;
+            }
+            if (same == null)
+                //todo: create undefined
+                same = new IRReference(0);
+            irPhi.Users.Remove(phi);
+
+            statements[phi.Referenced] = statements[phi.Referenced] with { Code = IROPCode.REROUTE, Operands = new IRArgument[] { same } };
+
+            foreach (var use in irPhi.Users)
+            {
+                if (statements[use.Referenced].Code == IROPCode.PHI)
+                    TryRemoveTrivialPhi(use);
+            }
+
+            return same;
+        }
+
+        private BlockID BeginBlock(State newBlock, bool labelled) => currentBlock = CreateBlock(newBlock, true, labelled);
+
+        private BlockID CreateBlock(State block, bool addPred, bool labelled)
+        {
+            if (labelled)
+            {
+                var blockID = new BlockID(-1, (State)block.Clone());
+                if (!blocks.ContainsKey(blockID))
+                {
+                    blocks.Add(blockID, new IRBlock(blockID));
+                    incompletePhis[blockID] = new();
+                }
+                if (addPred && blockID != currentBlock)
+                    blocks[blockID].AddPredecessor(currentBlock);
+                return blockID;
+            }
+            else
+            {
+                var blockID = new BlockID(CurrentBlockID, (State)block.Clone());
+                blocks.Add(blockID, new IRBlock(blockID));
+                incompletePhis[blockID] = new();
+                if (addPred)
+                    blocks[blockID].AddPredecessor(currentBlock);
+                return blockID;
+            }
+        }
+
+        private IRBlock? FindBlock(BlockID state) => blocks.GetValueOrDefault(state);
+
+        private void SealBlock(BlockID block)
+        {
+            if (sealedBlocks.Contains(block)) return;
+            foreach (var i in incompletePhis[block])
+                AddPhiOperands(i.Key, incompletePhis[block][i.Key]);
+            sealedBlocks.Add(block);
+        }
+
+        private BlockID AddJumpStmt(IROPCode code, IRState jumpTo)
+        {
+            AddStmt(code, jumpTo);
+            return CreateBlock(jumpTo.State, true, true);
+        }
 
         private uint AddStmt(IROPCode code, params IRArgument[] operands)
         {
             var num = InstructionNumber;
-            statements.Add(new IRStatement(num, code, operands));
+            statements.Add(num, new IRStatement(num, code, operands));
             return num;
         }
 
         private uint AddLabel()
         {
+            BeginBlock(scopes[0], true);
             builder.TableManager.AddSymbol(scopes[0]);
             return AddStmt(IROPCode.LABEL, new IRState(scopes[0]));
         }
 
-        private IRReference GetLastNumber() => new IRReference(statements[^1].Number);
+        private IRReference GetLastNumber() => new IRReference(statements[(uint)statements.Count - 1].Number);
 
         /// <summary>
         /// Generates ir from an ast (program node)
@@ -80,9 +192,14 @@ namespace Penguor.Compiler.IR
             }
             finally
             {
-                if (statements.Count != 0) Logger.Log(new IRProgram(statements).ToString(), LogLevel.Debug);
+                if (statements.Count != 0) Logger.Log(new IRProgram(statements.Values).ToString(), LogLevel.Debug);
             }
-            return new IRProgram(statements);
+            Console.WriteLine(blocks.Count);
+            foreach (var i in blocks.Values)
+            {
+                Console.WriteLine($"ID: {i.ID}; Preds: {{{string.Join(',', i.Predecessors)}}}");
+            }
+            return new IRProgram(statements.Values);
         }
 
         public int Visit(BlockDecl decl)
@@ -104,12 +221,10 @@ namespace Penguor.Compiler.IR
         public int Visit(FunctionDecl decl)
         {
             scopes[0].Push(decl.Name);
+            BeginBlock(scopes[0], true);
             AddStmt(IROPCode.FUNC, new IRState(scopes[0]));
-            // for (int i = 0; i < decl.Parameters.Count; i++)
-            //     AddStmt(IROPCode.LOADPARAM, new IRState(scopes[0] + decl.Parameters[i].Name), new Int(i + 1));
-            var length = statements.Count;
             decl.Content.Accept(this);
-            if (statements[^1].Code != IROPCode.RET) AddStmt(IROPCode.RETN);
+            if (statements[(uint)statements.Count - 1].Code != IROPCode.RET) AddStmt(IROPCode.RETN);
             scopes[0].Pop();
             return 0;
         }
@@ -185,8 +300,10 @@ namespace Penguor.Compiler.IR
         public int Visit(BlockStmt stmt)
         {
             scopes[0].Push(new AddressFrame(".block", AddressType.BlockStmt));
+            var block = BeginBlock(scopes[0], false);
             foreach (var i in stmt.Content)
                 i.Accept(this);
+            SealBlock(block);
             scopes[0].Pop();
             return 0;
         }
@@ -220,9 +337,9 @@ namespace Penguor.Compiler.IR
             scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
             stmt.Content.Accept(this);
             scopes[0].Pop();
-            statements[(int)num] = statements[(int)num] with
+            statements[num] = statements[num] with
             {
-                Operands = new IRArgument[] { statements[(int)num].Operands[0], GetLastNumber() }
+                Operands = new IRArgument[] { statements[num].Operands[0], GetLastNumber() }
             };
             return 0;
         }
@@ -240,20 +357,29 @@ namespace Penguor.Compiler.IR
 
         public int Visit(IfStmt stmt)
         {
-            stmt.Condition.Accept(this);
-            uint num = AddStmt(IROPCode.JFL, GetLastNumber());
-            scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
-            stmt.IfC.Accept(this);
-            scopes[0].Pop();
-            statements[(int)num] = statements[(int)num] with
-            {
-                Operands = new IRArgument[] { statements[(int)num].Operands[0], GetLastNumber() }
-            };
-            foreach (var i in stmt.Elif)
-                i.Accept(this);
-            stmt.ElseC?.Accept(this);
+            SealBlock(currentBlock);
 
-            CloseBlock();
+            //condition
+            scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
+            scopes[0].Push(new AddressFrame(".c", AddressType.Control));
+            var conditionBlock = BeginBlock(scopes[0], true);
+            stmt.Condition.Accept(this);
+            scopes[0].Pop();
+            AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
+
+            //content
+            var contentBlock = BeginBlock(scopes[0], true);
+            stmt.IfC.Accept(this);
+
+            SealBlock(contentBlock);
+            SealBlock(conditionBlock);
+
+            //todo: elif and else blocks
+
+            //rest
+            scopes[0].Push(new AddressFrame(".e", AddressType.Control));
+            AddLabel();
+            scopes[0].Pop(2);
             return 0;
         }
 
@@ -289,19 +415,30 @@ namespace Penguor.Compiler.IR
 
         public int Visit(WhileStmt stmt)
         {
-            var jmpNum = AddStmt(IROPCode.ERR);
+            SealBlock(currentBlock);
+
+            // condition
             scopes[0].Push(new AddressFrame($".while{stmt.Id}", AddressType.Control));
-            AddLabel();
-            stmt.Content.Accept(this);
             scopes[0].Push(new AddressFrame(".c", AddressType.Control));
+            var conditionBlock = BeginBlock(scopes[0], true);
             AddLabel();
             stmt.Condition.Accept(this);
-            statements[(int)jmpNum] = new IRStatement(jmpNum, IROPCode.JMP, new IRArgument[] { new IRState(scopes[0]) });
             scopes[0].Pop();
-            AddStmt(IROPCode.JTR, GetLastNumber(), new IRState(scopes[0]));
-            scopes[0].Pop();
+            AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
 
-            CloseBlock();
+            // content
+            var contentBlock = BeginBlock(scopes[0], true);
+            AddLabel();
+            stmt.Content.Accept(this);
+            AddJumpStmt(IROPCode.JMP, new IRState(scopes[0] + new AddressFrame(".c", AddressType.Control)));
+            SealBlock(contentBlock);
+
+            SealBlock(conditionBlock);
+
+            //rest
+            scopes[0].Push(new AddressFrame(".e", AddressType.Control));
+            AddLabel();
+            scopes[0].Pop(2);
             return 0;
         }
 
@@ -348,7 +485,7 @@ namespace Penguor.Compiler.IR
             , num2 == null ? addr2 ?? throw new Exception() : new IRDouble(num2 ?? throw new Exception())));
         }
 
-        public IRReference Visit(BooleanExpr expr) => new(AddStmt(IROPCode.LOAD, new IRBool(expr.Value)));
+        public IRReference Visit(BooleanExpr expr) => new IRReference(AddStmt(IROPCode.LOAD, new IRBool(expr.Value)));
 
         public IRReference Visit(CallExpr expr)
         {
@@ -381,7 +518,7 @@ namespace Penguor.Compiler.IR
         }
 
         public IRReference Visit(GroupingExpr expr) => expr.Content.Accept(this);
-        public IRReference Visit(NullExpr expr) => new(AddStmt(IROPCode.LOAD, new IRNull()));
+        public IRReference Visit(NullExpr expr) => new IRReference(AddStmt(IROPCode.LOAD, new IRNull()));
 
         public IRReference Visit(NumExpr expr)
         {
@@ -390,7 +527,7 @@ namespace Penguor.Compiler.IR
             return GetLastNumber();
         }
 
-        public IRReference Visit(StringExpr expr) => new(AddStmt(IROPCode.LOAD, new IRString(expr.Value)));
+        public IRReference Visit(StringExpr expr) => new IRReference(AddStmt(IROPCode.LOAD, new IRString(expr.Value)));
 
         public IRReference Visit(UnaryExpr expr)
         {
@@ -410,7 +547,7 @@ namespace Penguor.Compiler.IR
             return GetLastNumber();
         }
 
-        public IRReference Visit(VarExpr expr) => new(AddStmt(
+        public IRReference Visit(VarExpr expr) => new IRReference(AddStmt(
             IROPCode.DFE,
             new IRState(builder.TableManager.GetStateBySymbol(expr.Name, scopes) ?? throw new ArgumentNullException(nameof(expr)))));
     }

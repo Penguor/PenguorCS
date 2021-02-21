@@ -4,6 +4,11 @@ namespace Penguor.Compiler.Debugging
 {
     internal static class CLogger
     {
+        static CLogger()
+        {
+            Console.OutputEncoding = System.Text.Encoding.Unicode;
+        }
+
         public static void Log(string logText, LogLevel logLevel)
         {
             var FGColor = Console.ForegroundColor;

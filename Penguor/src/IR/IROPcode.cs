@@ -22,6 +22,8 @@ namespace Penguor.Compiler.IR
         JMP, JTR, JFL,// jump, jump if true, jump if false
         GOTO,
         ERR, // invalid opcode, returned on error
-        ASM
+        UNDEF, // undefined
+        ASM,
+        PHI, REROUTE
     }
 }
