@@ -322,6 +322,8 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(WhileStmt stmt)
         {
+            scopes[0].Push(new AddressFrame($".while{stmt.Id}", AddressType.Control));
+            builder.TableManager.AddTable(scopes[0]);
             Expr condition = stmt.Condition.Accept(this);
             if (condition is BooleanExpr
                 || (condition is CallExpr cExpr
@@ -335,15 +337,13 @@ namespace Penguor.Compiler.Analysis
                                                            or TokenType.AND
                                                            or TokenType.OR)))
             {
-                scopes[0].Push(new AddressFrame($".while{stmt.Id}", AddressType.Control));
-                builder.TableManager.AddTable(scopes[0]);
                 var content = stmt.Content.Accept(this);
                 scopes[0].Pop();
                 return stmt with { Condition = condition, Content = content };
             }
             else
             {
-                throw new Exception();
+                builder.Except(1, stmt.Offset);
             }
         }
 

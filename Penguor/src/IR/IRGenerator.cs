@@ -171,11 +171,12 @@ namespace Penguor.Compiler.IR
             return num;
         }
 
-        private uint AddLabel()
+        private BlockID AddLabel()
         {
-            BeginBlock(scopes[0], true);
+            var block = BeginBlock(scopes[0], true);
             builder.TableManager.AddSymbol(scopes[0]);
-            return AddStmt(IROPCode.LABEL, new IRState(scopes[0]));
+            AddStmt(IROPCode.LABEL, new IRState(scopes[0]));
+            return block;
         }
 
         private IRReference GetLastNumber() => new IRReference(statements[(uint)statements.Count - 1].Number);
@@ -420,15 +421,13 @@ namespace Penguor.Compiler.IR
             // condition
             scopes[0].Push(new AddressFrame($".while{stmt.Id}", AddressType.Control));
             scopes[0].Push(new AddressFrame(".c", AddressType.Control));
-            var conditionBlock = BeginBlock(scopes[0], true);
-            AddLabel();
-            stmt.Condition.Accept(this);
+            var conditionBlock = AddLabel();
             scopes[0].Pop();
+            stmt.Condition.Accept(this);
             AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
 
             // content
-            var contentBlock = BeginBlock(scopes[0], true);
-            AddLabel();
+            var contentBlock = AddLabel();
             stmt.Content.Accept(this);
             AddJumpStmt(IROPCode.JMP, new IRState(scopes[0] + new AddressFrame(".c", AddressType.Control)));
             SealBlock(contentBlock);
