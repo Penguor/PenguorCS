@@ -343,7 +343,7 @@ namespace Penguor.Compiler.Analysis
             }
             else
             {
-                builder.Except(1, stmt.Offset);
+                return builder.Except(stmt, 1, stmt.Offset);
             }
         }
 
