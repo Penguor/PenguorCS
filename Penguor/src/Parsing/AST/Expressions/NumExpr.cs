@@ -21,8 +21,6 @@ namespace Penguor.Compiler.Parsing.AST
             Value = value;
             NumValue = numvalue;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public int NumBase { get; init; }
         public string Value { get; init; }
         public double? NumValue { get; init; }

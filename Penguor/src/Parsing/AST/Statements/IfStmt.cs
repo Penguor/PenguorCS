@@ -22,8 +22,6 @@ namespace Penguor.Compiler.Parsing.AST
             Elif = elif;
             ElseC = elsec;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public Expr Condition { get; init; }
         public Stmt IfC { get; init; }
         public List<Stmt> Elif { get; init; }

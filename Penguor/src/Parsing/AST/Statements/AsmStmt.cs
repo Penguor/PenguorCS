@@ -19,8 +19,6 @@ namespace Penguor.Compiler.Parsing.AST
             Offset = offset;
             Contents = contents;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public string[] Contents { get; init; }
 
         public override string ToString() => "asm statement";

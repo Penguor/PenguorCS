@@ -20,8 +20,6 @@ namespace Penguor.Compiler.Parsing.AST
             Dir = dir;
             Val = val;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public TokenType Dir { get; init; }
         public Token[] Val { get; init; }
 

@@ -19,8 +19,6 @@ namespace Penguor.Compiler.Parsing.AST
             Offset = offset;
             Name = name;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public AddressFrame Name { get; init; }
 
         public override string ToString() => "idf call";

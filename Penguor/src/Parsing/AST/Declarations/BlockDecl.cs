@@ -19,8 +19,6 @@ namespace Penguor.Compiler.Parsing.AST
             Offset = offset;
             Content = content;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public List<Decl> Content { get; init; }
 
         public override string ToString() => "block declaration";

@@ -1,8 +1,8 @@
 
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Penguor.Compiler.Tools
 {
@@ -72,6 +72,9 @@ namespace Penguor.Compiler.Parsing.AST
     /// </summary>
     public abstract record {mode}
     {{
+        public int Id {{ get; init; }}
+        public int Offset {{ get; init; }}
+
         /// <summary>
         /// <c>Accept</c> returns the visit method for the {mode}
         /// </summary>
@@ -88,11 +91,6 @@ namespace Penguor.Compiler.Parsing.AST
                         string name = "";
                         types = new List<string>();
                         names = new List<string>();
-
-                        types.Add("int");
-                        names.Add("id");
-                        types.Add("int");
-                        names.Add("offset");
 
                         while (char.IsWhiteSpace(current)) Advance();
                         string? line = current + reader.ReadLine();
@@ -141,7 +139,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of {name.ToUppercase()}{mode}
         /// </summary>
-        public {name.ToUppercase()}{mode}(");
+        public {name.ToUppercase()}{mode}(int id, int offset{(types.Count == 0 ? "" : ", " )}");
 
                             for (int i = 0; i < types.Count; i++)
                             {
@@ -152,6 +150,8 @@ namespace Penguor.Compiler.Parsing.AST
                             writer.Write(
                 @")
         {
+            Id = id;
+            Offset = offset;
 ");
 
                             for (int i = 0; i < names.Count; i++)

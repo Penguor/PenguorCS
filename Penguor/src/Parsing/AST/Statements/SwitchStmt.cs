@@ -21,8 +21,6 @@ namespace Penguor.Compiler.Parsing.AST
             Cases = cases;
             DefaultCase = defaultcase;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public Expr Condition { get; init; }
         public List<Stmt> Cases { get; init; }
         public Stmt? DefaultCase { get; init; }

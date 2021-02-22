@@ -23,8 +23,6 @@ namespace Penguor.Compiler.Parsing.AST
             Name = name;
             Init = init;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public TokenType? AccessMod { get; init; }
         public TokenType[] NonAccessMod { get; init; }
         public CallExpr Type { get; init; }

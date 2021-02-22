@@ -20,8 +20,6 @@ namespace Penguor.Compiler.Parsing.AST
             Callee = callee;
             Postfix = postfix;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public List<Call> Callee { get; init; }
         public TokenType? Postfix { get; init; }
 

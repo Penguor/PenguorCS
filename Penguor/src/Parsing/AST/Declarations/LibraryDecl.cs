@@ -22,8 +22,6 @@ namespace Penguor.Compiler.Parsing.AST
             Name = name;
             Content = content;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public TokenType? AccessMod { get; init; }
         public TokenType[] NonAccessMod { get; init; }
         public State Name { get; init; }

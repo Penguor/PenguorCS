@@ -21,8 +21,6 @@ namespace Penguor.Compiler.Parsing.AST
             Vars = vars;
             Content = content;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public VarExpr CurrentVar { get; init; }
         public CallExpr Vars { get; init; }
         public Stmt Content { get; init; }

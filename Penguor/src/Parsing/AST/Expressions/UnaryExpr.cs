@@ -20,8 +20,6 @@ namespace Penguor.Compiler.Parsing.AST
             Op = op;
             Rhs = rhs;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public TokenType? Op { get; init; }
         public Expr Rhs { get; init; }
 

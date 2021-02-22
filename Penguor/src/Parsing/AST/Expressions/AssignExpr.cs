@@ -21,8 +21,6 @@ namespace Penguor.Compiler.Parsing.AST
             Op = op;
             Value = value;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public CallExpr Lhs { get; init; }
         public TokenType Op { get; init; }
         public Expr Value { get; init; }

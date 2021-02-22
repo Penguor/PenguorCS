@@ -8,6 +8,9 @@ namespace Penguor.Compiler.Parsing.AST
     /// </summary>
     public abstract record Expr
     {
+        public int Id { get; init; }
+        public int Offset { get; init; }
+
         /// <summary>
         /// <c>Accept</c> returns the visit method for the Expr
         /// </summary>

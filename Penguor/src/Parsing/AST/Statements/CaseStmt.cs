@@ -20,8 +20,6 @@ namespace Penguor.Compiler.Parsing.AST
             Condition = condition;
             Content = content;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public Expr? Condition { get; init; }
         public List<Stmt> Content { get; init; }
 

@@ -19,8 +19,6 @@ namespace Penguor.Compiler.Parsing.AST
             Offset = offset;
             Value = value;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public string Value { get; init; }
 
         public override string ToString() => "string expression";

@@ -21,8 +21,6 @@ namespace Penguor.Compiler.Parsing.AST
             Name = name;
             Init = init;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public CallExpr Type { get; init; }
         public AddressFrame Name { get; init; }
         public Expr? Init { get; init; }

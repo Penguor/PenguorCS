@@ -20,8 +20,6 @@ namespace Penguor.Compiler.Parsing.AST
             Name = name;
             Args = args;
         }
-        public int Id { get; init; }
-        public int Offset { get; init; }
         public AddressFrame Name { get; init; }
         public List<Expr> Args { get; init; }
 
