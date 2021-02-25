@@ -427,7 +427,9 @@ namespace Penguor.Compiler.Analysis
         public Expr Visit(CallExpr expr)
         {
             var e = State.FromCall(expr);
-            if (!builder.TableManager.FindSymbol(e, scopes.ToArray()) && pass > 1) throw new Exception();
+            if (!builder.TableManager.FindSymbol(e, scopes.ToArray()) && pass > 1) {
+                Logger.Log(e.ToString(), LogLevel.Debug);
+                throw new Exception();}
 
             var callee = new List<Call>(expr.Callee.Count);
             foreach (var i in expr.Callee)

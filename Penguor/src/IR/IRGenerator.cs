@@ -121,7 +121,11 @@ namespace Penguor.Compiler.IR
             return same;
         }
 
-        private BlockID BeginBlock(State newBlock, bool labelled) => currentBlock = CreateBlock(newBlock, true, labelled);
+        private BlockID BeginBlock(State newBlock, bool labelled)
+        {
+            currentBlock = CreateBlock(newBlock, true, labelled);
+            return currentBlock;
+        }
 
         private BlockID CreateBlock(State block, bool addPred, bool labelled)
         {
@@ -171,6 +175,12 @@ namespace Penguor.Compiler.IR
             return num;
         }
 
+        private IRReference AddReference(uint referenced)
+        {
+            // if (statements[referenced].Code == IROPCode.PHI) ((IRPhi)statements[referenced].Operands[0]).AddUser(GetLastNumber());
+            return new IRReference(referenced);
+        }
+
         private BlockID AddLabel()
         {
             var block = BeginBlock(scopes[0], true);
@@ -194,11 +204,6 @@ namespace Penguor.Compiler.IR
             finally
             {
                 if (statements.Count != 0) Logger.Log(new IRProgram(statements.Values).ToString(), LogLevel.Debug);
-            }
-            Console.WriteLine(blocks.Count);
-            foreach (var i in blocks.Values)
-            {
-                Console.WriteLine($"ID: {i.ID}; Preds: {{{string.Join(',', i.Predecessors)}}}");
             }
             return new IRProgram(statements.Values);
         }
@@ -224,9 +229,14 @@ namespace Penguor.Compiler.IR
             scopes[0].Push(decl.Name);
             BeginBlock(scopes[0], true);
             AddStmt(IROPCode.FUNC, new IRState(scopes[0]));
+            foreach (var parameter in decl.Parameters)
+            {
+                parameter.Accept(this);
+            }
             decl.Content.Accept(this);
             if (statements[(uint)statements.Count - 1].Code != IROPCode.RET) AddStmt(IROPCode.RETN);
             scopes[0].Pop();
+            SealBlock(currentBlock);
             return 0;
         }
 
@@ -241,8 +251,10 @@ namespace Penguor.Compiler.IR
 
         public int Visit(ProgramDecl decl)
         {
+            var programBlock = currentBlock;
             foreach (var i in decl.Declarations)
                 i.Accept(this);
+            SealBlock(programBlock);
             return 0;
         }
 
@@ -300,6 +312,7 @@ namespace Penguor.Compiler.IR
 
         public int Visit(BlockStmt stmt)
         {
+            SealBlock(currentBlock);
             scopes[0].Push(new AddressFrame(".block", AddressType.BlockStmt));
             var block = BeginBlock(scopes[0], false);
             foreach (var i in stmt.Content)
@@ -362,18 +375,16 @@ namespace Penguor.Compiler.IR
 
             //condition
             scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
-            scopes[0].Push(new AddressFrame(".c", AddressType.Control));
-            var conditionBlock = BeginBlock(scopes[0], true);
+            var conditionBlock = BeginBlock(scopes[0] + new AddressFrame(".c", AddressType.Control), true);
             stmt.Condition.Accept(this);
-            scopes[0].Pop();
             AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
+            SealBlock(conditionBlock);
 
             //content
             var contentBlock = BeginBlock(scopes[0], true);
             stmt.IfC.Accept(this);
 
             SealBlock(contentBlock);
-            SealBlock(conditionBlock);
 
             //todo: elif and else blocks
 
@@ -429,6 +440,7 @@ namespace Penguor.Compiler.IR
             // content
             var contentBlock = AddLabel();
             stmt.Content.Accept(this);
+            SealBlock(currentBlock);
             AddJumpStmt(IROPCode.JMP, new IRState(scopes[0] + new AddressFrame(".c", AddressType.Control)));
             SealBlock(contentBlock);
 
@@ -443,11 +455,25 @@ namespace Penguor.Compiler.IR
 
         public IRReference Visit(AssignExpr expr)
         {
-            if (expr.Op != TokenType.ASSIGN) throw new Exception();
-
             State sym = builder.TableManager.GetStateBySymbol(State.FromCall(expr.Lhs), scopes.ToArray()) ?? throw new Exception();
 
-            expr.Value.Accept(this);
+            var value = expr.Value.Accept(this);
+            switch (expr.Op)
+            {
+                case TokenType.ASSIGN:
+                    break;
+                case TokenType.ADD_ASSIGN:
+                    AddStmt(IROPCode.ADD, ReadVariable(sym, currentBlock), value);
+                    break;
+                case TokenType.SUB_ASSIGN:
+                    AddStmt(IROPCode.SUB, ReadVariable(sym, currentBlock), value);
+                    break;
+                case TokenType.MUL_ASSIGN:
+                    AddStmt(IROPCode.MUL, ReadVariable(sym, currentBlock), value);
+                    break;
+                default:
+                    throw new Exception();
+            }
             WriteVariable(sym, currentBlock, GetLastNumber());
 
             return GetLastNumber();
@@ -467,7 +493,7 @@ namespace Penguor.Compiler.IR
                 addr2 = expr.Rhs.Accept(this);
             }
 
-            return new IRReference(AddStmt(expr.Op switch
+            return AddReference(AddStmt(expr.Op switch
             {
                 TokenType.PLUS => IROPCode.ADD,
                 TokenType.MINUS => IROPCode.SUB,
@@ -484,7 +510,7 @@ namespace Penguor.Compiler.IR
             , num2 == null ? addr2 ?? throw new Exception() : new IRDouble(num2 ?? throw new Exception())));
         }
 
-        public IRReference Visit(BooleanExpr expr) => new IRReference(AddStmt(IROPCode.LOAD, new IRBool(expr.Value)));
+        public IRReference Visit(BooleanExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRBool(expr.Value)));
 
         public IRReference Visit(CallExpr expr)
         {
@@ -508,7 +534,7 @@ namespace Penguor.Compiler.IR
                     fCall.Args[a].Accept(this);
                     AddStmt(IROPCode.LOADARG, GetLastNumber(), new IRInt(a + 1));
                 }
-                return new IRReference(AddStmt(IROPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception())));
+                return AddReference(AddStmt(IROPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception())));
             }
             else
             {
@@ -517,7 +543,7 @@ namespace Penguor.Compiler.IR
         }
 
         public IRReference Visit(GroupingExpr expr) => expr.Content.Accept(this);
-        public IRReference Visit(NullExpr expr) => new IRReference(AddStmt(IROPCode.LOAD, new IRNull()));
+        public IRReference Visit(NullExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRNull()));
 
         public IRReference Visit(NumExpr expr)
         {
@@ -526,7 +552,7 @@ namespace Penguor.Compiler.IR
             return GetLastNumber();
         }
 
-        public IRReference Visit(StringExpr expr) => new IRReference(AddStmt(IROPCode.LOAD, new IRString(expr.Value)));
+        public IRReference Visit(StringExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRString(expr.Value)));
 
         public IRReference Visit(UnaryExpr expr)
         {
@@ -546,8 +572,13 @@ namespace Penguor.Compiler.IR
             return GetLastNumber();
         }
 
-        public IRReference Visit(VarExpr expr) => new IRReference(AddStmt(
-            IROPCode.DFE,
-            new IRState(builder.TableManager.GetStateBySymbol(expr.Name, scopes) ?? throw new ArgumentNullException(nameof(expr)))));
+        public IRReference Visit(VarExpr expr)
+        {
+            AddStmt(
+                IROPCode.DFE,
+                new IRState(builder.TableManager.GetStateBySymbol(expr.Name, scopes) ?? throw new NullReferenceException()));
+            WriteVariable(builder.TableManager.GetStateBySymbol(expr.Name, scopes) ?? throw new NullReferenceException(), currentBlock, GetLastNumber());
+            return GetLastNumber();
+        }
     }
 }

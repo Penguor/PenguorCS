@@ -7,7 +7,7 @@ namespace Penguor.Compiler.IR
     /// </summary>
     public record IRReference : IRArgument
     {
-        public uint Referenced { get; }
+        public uint Referenced { get; init; }
 
         public IRReference(uint referenced)
         {

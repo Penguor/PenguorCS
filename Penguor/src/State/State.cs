@@ -154,7 +154,7 @@ namespace Penguor.Compiler
         public void Pop(int amount)
         {
             if (addressFrames.Count >= amount)
-                addressFrames.RemoveRange(addressFrames.Count - amount - 1, amount);
+                addressFrames.RemoveRange(addressFrames.Count - amount, amount);
             else
                 throw new InvalidOperationException();
         }
