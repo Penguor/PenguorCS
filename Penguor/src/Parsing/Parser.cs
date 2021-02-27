@@ -34,6 +34,14 @@ namespace Penguor.Compiler.Parsing
             state = new State();
         }
 
+        private void CheckBraces(Stmt content, string name)
+        {
+            if (!(content is AST.ExprStmt or AST.ReturnStmt or AST.BlockStmt))
+                builder.Except(17, content.Offset, name);
+            else if (!(content is AST.BlockStmt or AST.ReturnStmt))
+                builder.Except(18, content.Offset, name);
+        }
+
         /// <summary>
         /// start the Parsing process
         /// </summary>
@@ -299,15 +307,34 @@ namespace Penguor.Compiler.Parsing
             Consume(RPAREN);
 
             Stmt ifC = Statement();
-            if (!(ifC is AST.ExprStmt or AST.ReturnStmt or AST.BlockStmt))
-                builder.Except(17, ifC.Offset, "if statement");
-            if (!(ifC is AST.BlockStmt or AST.ReturnStmt))
-                builder.Except(18, ifC.Offset, "if statement");
+            CheckBraces(ifC, "if statement");
+
+            List<Stmt> elif = new();
+            while (Check(ELSE) && Check(IF, 1))
+            {
+                Advance(); Advance();
+                elif.Add(ElifStmt());
+            }
 
             Stmt? elseC = null;
             if (Match(ELSE)) elseC = Statement();
+            if (elseC != null)
+                CheckBraces(elseC, "else statement");
 
             return new IfStmt(ID, offset, condition, ifC, elseC);
+
+            IfStmt ElifStmt()
+            {
+                int offset = GetPrevious().Offset;
+                Consume(LPAREN);
+                Expr condition = Expression();
+                Consume(RPAREN);
+
+                Stmt content = Statement();
+                CheckBraces(content, "else if statement");
+
+                return new IfStmt(ID, offset, condition, content, null);
+            }
         }
 
         private WhileStmt WhileStmt()
@@ -317,7 +344,10 @@ namespace Penguor.Compiler.Parsing
             Expr condition = Expression();
             Consume(RPAREN);
 
-            return new WhileStmt(ID, offset, condition, Statement());
+            Stmt content = Statement();
+            CheckBraces(content, "while statement");
+
+            return new WhileStmt(ID, offset, condition, content);
         }
 
         private ForStmt ForStmt()
@@ -329,13 +359,16 @@ namespace Penguor.Compiler.Parsing
             CallExpr vars = CallExpr();
             Consume(RPAREN);
 
-            return new ForStmt(ID, offset, current, vars, Statement());
+            Stmt content = Statement();
+            CheckBraces(content, "for statement");
+            return new ForStmt(ID, offset, current, vars, content);
         }
 
         private DoStmt DoStmt()
         {
             int offset = GetPrevious().Offset;
             Stmt content = Statement();
+            CheckBraces(content, "do statement");
 
             Consume(WHILE);
             Consume(LPAREN);

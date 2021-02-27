@@ -6,9 +6,7 @@ void main()
     if(true) 
         return
     else if(false)
-    {
         x = 3
-    }
 }
 
 /*public system Fibonacci
