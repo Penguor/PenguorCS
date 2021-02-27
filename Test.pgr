@@ -3,10 +3,8 @@ void print() {}
 void main()
 {
     int x = 0
-    if(true)
-    {
-        x = 1
-    }
+    if(true) 
+        return
     else if(false)
     {
         x = 3

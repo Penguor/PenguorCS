@@ -27,7 +27,7 @@ namespace Penguor.Compiler.Debugging
                     break;
                 case LogLevel.Warn:
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.Write("[Warn] ");
+                    Console.Write("[Warning] ");
                     break;
                 case LogLevel.Error:
                     Console.ForegroundColor = ConsoleColor.Red;

@@ -80,7 +80,9 @@ namespace Penguor.Compiler.Debugging
             {13, (LogLevel.Error, "{0}s must not have modifiers")},
             {14, (LogLevel.Error, "Values cannot be assigned to {0}s, expecting a call")},
             {15, (LogLevel.Error, "Only assign expressions and call expressions may be statements")},
-            {16, (LogLevel.Error, "Unknown escape sequence '{0}'")}
+            {16, (LogLevel.Error, "Unknown escape sequence '{0}'")},
+            {17, (LogLevel.Error, "The contents of {0}s containing more than one statement have to be surrounded by braces")},
+            {18, (LogLevel.Warn, "Consider wrapping the contents of this {0} in braces")}
         };
 
         /// <summary>

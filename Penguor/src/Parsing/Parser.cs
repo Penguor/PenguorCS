@@ -299,6 +299,10 @@ namespace Penguor.Compiler.Parsing
             Consume(RPAREN);
 
             Stmt ifC = Statement();
+            if (!(ifC is AST.ExprStmt or AST.ReturnStmt or AST.BlockStmt))
+                builder.Except(17, ifC.Offset, "if statement");
+            if (!(ifC is AST.BlockStmt or AST.ReturnStmt))
+                builder.Except(18, ifC.Offset, "if statement");
 
             Stmt? elseC = null;
             if (Match(ELSE)) elseC = Statement();
