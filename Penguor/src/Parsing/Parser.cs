@@ -300,23 +300,10 @@ namespace Penguor.Compiler.Parsing
 
             Stmt ifC = Statement();
 
-            List<Stmt> elif = new List<Stmt>();
-            while (Match(ELIF)) elif.Add(ElifStmt());
-
             Stmt? elseC = null;
             if (Match(ELSE)) elseC = Statement();
 
-            return new IfStmt(ID, offset, condition, ifC, elif, elseC);
-        }
-
-        private ElifStmt ElifStmt()
-        {
-            int offset = GetPrevious().Offset;
-            Consume(LPAREN);
-            Expr condition = Expression();
-            Consume(RPAREN);
-
-            return new ElifStmt(ID, offset, condition, Statement());
+            return new IfStmt(ID, offset, condition, ifC, elseC);
         }
 
         private WhileStmt WhileStmt()

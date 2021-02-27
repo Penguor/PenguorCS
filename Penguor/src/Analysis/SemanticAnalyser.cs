@@ -221,33 +221,6 @@ namespace Penguor.Compiler.Analysis
             return stmt with { Content = content, Condition = stmt.Condition.Accept(this) };
         }
 
-        public Stmt Visit(ElifStmt stmt)
-        {
-            Expr condition = stmt.Condition.Accept(this);
-            if (condition is BooleanExpr
-                || (condition is CallExpr cExpr
-                    && builder.TableManager.GetSymbol(State.FromCall(cExpr), scopes.ToArray())?.DataType?.ToString() == "bool")
-                || (condition is BinaryExpr bExpr && (bExpr.Op is TokenType.LESS
-                                                           or TokenType.GREATER
-                                                           or TokenType.LESS_EQUALS
-                                                           or TokenType.GREATER_EQUALS
-                                                           or TokenType.EQUALS
-                                                           or TokenType.NEQUALS
-                                                           or TokenType.AND
-                                                           or TokenType.OR)))
-            {
-                scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
-                builder.TableManager.AddTable(scopes[0]);
-                Stmt content = stmt.Content.Accept(this);
-                scopes[0].Pop();
-                return stmt with { Content = content, Condition = condition };
-            }
-            else
-            {
-                throw new Exception();
-            }
-        }
-
         public Stmt Visit(ExprStmt stmt)
         {
             if (stmt.Expr is AssignExpr or CallExpr)
@@ -288,13 +261,11 @@ namespace Penguor.Compiler.Analysis
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt ifC = stmt.IfC.Accept(this);
                 scopes[0].Pop();
-                List<Stmt> elif = new List<Stmt>(stmt.Elif.Count);
-                foreach (var i in stmt.Elif) elif.Add(i.Accept(this));
                 scopes[0].Push(new AddressFrame($".else{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt? elseC = stmt.ElseC?.Accept(this);
                 scopes[0].Pop();
-                return stmt with { Condition = condition, IfC = ifC, Elif = elif, ElseC = elseC };
+                return stmt with { Condition = condition, IfC = ifC, ElseC = elseC };
             }
             else
             {
@@ -427,9 +398,11 @@ namespace Penguor.Compiler.Analysis
         public Expr Visit(CallExpr expr)
         {
             var e = State.FromCall(expr);
-            if (!builder.TableManager.FindSymbol(e, scopes.ToArray()) && pass > 1) {
+            if (!builder.TableManager.FindSymbol(e, scopes.ToArray()) && pass > 1)
+            {
                 Logger.Log(e.ToString(), LogLevel.Debug);
-                throw new Exception();}
+                throw new Exception();
+            }
 
             var callee = new List<Call>(expr.Callee.Count);
             foreach (var i in expr.Callee)

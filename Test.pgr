@@ -3,13 +3,13 @@ void print() {}
 void main()
 {
     int x = 0
-    int c;
-    while(x < 5)
+    if(true)
     {
-        if(true)
-        {
-            x += 1
-        }
+        x = 1
+    }
+    else if(false)
+    {
+        x = 3
     }
 }
 
