@@ -3,7 +3,7 @@
 # PenguorCS Compiler
 # __________________
 #
-# (c) Carl Schierig 2019-2020
+# (c) Carl Schierig 2019-2021
 # 
 #
 -->
@@ -23,7 +23,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <DocumentationFile>bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).xml</DocumentationFile>
-    <Copyright>(c) 2019-2020 Carl Schierig</Copyright>
+    <Copyright>(c) 2019-2021 Carl Schierig</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
