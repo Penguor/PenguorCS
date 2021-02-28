@@ -45,11 +45,17 @@ namespace Penguor.Compiler.Analysis
                 builder.TableManager.AddSymbol(scopes[0], e.Name);
         }
 
-        private void IsAccessable(State callee, State called)
+        private void IsAccessible(State callee, State called, int offset)
         {
             bool accessable = false;
-            if (pass <= 1) accessable = true;
-            Symbol? calleeSymbol = builder.TableManager.GetSymbol(callee, scopes.ToArray());
+            if (pass <= 1) return;
+
+            Symbol? calleeSymbol;
+            if (callee.Count != 0)
+                calleeSymbol = builder.TableManager.GetSymbol(callee, scopes.ToArray());
+            else
+                calleeSymbol = null;
+
             Symbol? calledSymbol = builder.TableManager.GetSymbol(called, scopes.ToArray());
 
             if (calleeSymbol != null && calledSymbol != null)
@@ -71,9 +77,27 @@ namespace Penguor.Compiler.Analysis
                         else if (callee.Count != 0 && called.Count == 0) accessable = false;
                         else accessable = callee[0].Symbol == called[0].Symbol;
                         break;
+                    case null:
+                        accessable = true;
+                        break;
                 }
             }
-            if (!accessable) throw new Exception();
+            else if (calleeSymbol == null && calledSymbol != null)
+            {
+                switch (calledSymbol.AccessMod)
+                {
+                    case TokenType.PUBLIC:
+                        accessable = true;
+                        break;
+                    case TokenType.PRIVATE:
+                    case TokenType.PROTECTED:
+                    case TokenType.RESTRICTED:
+                        accessable = called.Count == 0;
+                        break;
+                }
+            }
+
+            if (!accessable) builder.Except(19, offset, called.GetRaw().ToString(), callee.GetRaw().ToString());
         }
 
         private void SetDataType(AddressFrame name, CallExpr type)
@@ -97,7 +121,7 @@ namespace Penguor.Compiler.Analysis
                 var c = State.FromCall((CallExpr)parent);
                 var s = builder.TableManager.GetSymbol(c, scopes.ToArray())!;
                 s.Parent = c;
-                IsAccessable(scopes[0] + new State(decl.Name), c);
+                IsAccessible(scopes[0] + new State(decl.Name), c, decl.Offset);
             }
 
             scopes[0].Push(decl.Name);
@@ -115,7 +139,7 @@ namespace Penguor.Compiler.Analysis
                 var c = State.FromCall((CallExpr)parent);
                 var s = builder.TableManager.GetSymbol(c, scopes.ToArray())!;
                 s.Parent = c;
-                IsAccessable(scopes[0] + new State(decl.Name), c);
+                IsAccessible(scopes[0] + new State(decl.Name), c, decl.Offset);
             }
 
             scopes[0].Push(decl.Name);
@@ -139,11 +163,11 @@ namespace Penguor.Compiler.Analysis
                 if (symbol != null) symbol.DataType = builder.TableManager.GetStateBySymbol(State.FromCall(i.Type), scopes.ToArray());
             }
             var content = decl.Content.Accept(this);
-            var returns = decl.Returns.Accept(this);
+
             scopes[0].Pop();
 
             //TODO: functions should always return something, void is also a data type in Penguor
-            return decl with { Parameters = parameters, Content = content, Returns = (CallExpr)returns };
+            return decl with { Parameters = parameters, Content = content };
         }
 
         public Decl Visit(LibraryDecl decl)
@@ -169,7 +193,7 @@ namespace Penguor.Compiler.Analysis
                 var c = State.FromCall((CallExpr)parent);
                 var s = builder.TableManager.GetSymbol(c, scopes.ToArray())!;
                 s.Parent = c;
-                IsAccessable(scopes[0] + new State(decl.Name), c);
+                IsAccessible(scopes[0] + new State(decl.Name), c, decl.Offset);
             }
 
             scopes[0].Push(decl.Name);
@@ -184,7 +208,7 @@ namespace Penguor.Compiler.Analysis
             var call = State.FromCall(decl.Lib);
             if (builder.TableManager.FindTable(call))
                 scopes.Add(call);
-            else throw new Exception();
+            else builder.Except(21, decl.Offset, call.ToString());
             return decl;
         }
 
@@ -219,6 +243,33 @@ namespace Penguor.Compiler.Analysis
             var content = stmt.Content.Accept(this);
             scopes[0].Pop();
             return stmt with { Content = content, Condition = stmt.Condition.Accept(this) };
+        }
+
+        public Stmt Visit(ElifStmt stmt)
+        {
+            Expr condition = stmt.Condition.Accept(this);
+            if (condition is BooleanExpr
+                || (condition is CallExpr cExpr
+                    && builder.TableManager.GetSymbol(State.FromCall(cExpr), scopes.ToArray())?.DataType?.ToString() == "bool")
+                || (condition is BinaryExpr bExpr && (bExpr.Op is TokenType.LESS
+                                                           or TokenType.GREATER
+                                                           or TokenType.LESS_EQUALS
+                                                           or TokenType.GREATER_EQUALS
+                                                           or TokenType.EQUALS
+                                                           or TokenType.NEQUALS
+                                                           or TokenType.AND
+                                                           or TokenType.OR)))
+            {
+                scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
+                builder.TableManager.AddTable(scopes[0]);
+                Stmt content = stmt.Content.Accept(this);
+                scopes[0].Pop();
+                return stmt with { Content = content, Condition = condition };
+            }
+            else
+            {
+                throw new Exception();
+            }
         }
 
         public Stmt Visit(ExprStmt stmt)
@@ -261,6 +312,10 @@ namespace Penguor.Compiler.Analysis
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt ifC = stmt.IfC.Accept(this);
                 scopes[0].Pop();
+
+                foreach (var i in stmt.Elif)
+                    i.Accept(this);
+
                 scopes[0].Push(new AddressFrame($".else{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt? elseC = stmt.ElseC?.Accept(this);
@@ -400,9 +455,11 @@ namespace Penguor.Compiler.Analysis
             var e = State.FromCall(expr);
             if (!builder.TableManager.FindSymbol(e, scopes.ToArray()) && pass > 1)
             {
-                Logger.Log(e.ToString(), LogLevel.Debug);
-                throw new Exception();
+                builder.Except(20, expr.Offset, e.ToString());
+                return expr;
             }
+
+            IsAccessible(scopes[0], e, expr.Offset);
 
             var callee = new List<Call>(expr.Callee.Count);
             foreach (var i in expr.Callee)

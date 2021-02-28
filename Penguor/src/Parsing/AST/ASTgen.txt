@@ -13,7 +13,8 @@ String string value
 Compiler TokenType dir Token[] val
 Block List<Stmt> content
 Var CallExpr type AddressFrame name Expr? init
-If Expr condition Stmt ifC Stmt? elseC
+If Expr condition Stmt ifC List<ElifStmt> elif Stmt? elseC
+Elif Expr condition Stmt content
 While Expr condition Stmt content
 Do Stmt content Expr condition
 For VarExpr currentVar CallExpr vars Stmt content

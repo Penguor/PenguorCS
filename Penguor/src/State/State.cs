@@ -101,6 +101,14 @@ namespace Penguor.Compiler
             return new State(frames);
         }
 
+        public State GetRaw()
+        {
+            State state = (State)Clone();
+
+            state.addressFrames.RemoveAll((frame) => frame.Type == AddressType.Control || frame.Type == AddressType.BlockStmt);
+            return state;
+        }
+
         /// <summary>
         /// Convert the <c>State</c> into an array
         /// </summary>
@@ -223,7 +231,7 @@ namespace Penguor.Compiler
             var hashCode = 25937216;
             foreach (var i in addressFrames)
             {
-                hashCode *= -28674107 + i.GetHashCode();
+                hashCode *= -28674107 + i.Symbol.GetHashCode();
             }
             return hashCode;
         }

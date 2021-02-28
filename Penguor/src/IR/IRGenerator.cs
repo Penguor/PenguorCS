@@ -344,6 +344,20 @@ namespace Penguor.Compiler.IR
             return 0;
         }
 
+        public int Visit(ElifStmt stmt)
+        {
+            stmt.Condition.Accept(this);
+            uint num = AddStmt(IROPCode.JFL, GetLastNumber());
+            scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
+            stmt.Content.Accept(this);
+            scopes[0].Pop();
+            statements[num] = statements[num] with
+            {
+                Operands = new IRArgument[] { statements[num].Operands[0], GetLastNumber() }
+            };
+            return 0;
+        }
+
         public int Visit(ExprStmt stmt)
         {
             stmt.Expr.Accept(this);

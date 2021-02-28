@@ -82,7 +82,10 @@ namespace Penguor.Compiler.Debugging
             {15, (LogLevel.Error, "Only assign expressions and call expressions may be statements")},
             {16, (LogLevel.Error, "Unknown escape sequence '{0}'")},
             {17, (LogLevel.Error, "The contents of {0}s containing more than one statement have to be surrounded by braces")},
-            {18, (LogLevel.Warn, "Consider wrapping the contents of this {0} in braces")}
+            {18, (LogLevel.Warn, "Consider wrapping the contents of this {0} in braces")},
+            {19, (LogLevel.Error, "{0} is not accessible from {1}")},
+            {20, (LogLevel.Error, "The symbol '{0}' does not exist in the current scope")},
+            {21, (LogLevel.Error, "Could not find library '{0}'")}
         };
 
         /// <summary>

@@ -1,12 +1,16 @@
-void print() {}
+system Test {
+private void print() {}
+}
 
 void main()
 {
     int x = 0
     if(true) 
-        return
-    else if(false)
-        x = 3
+        x += x
+    else if(true)
+        Test.print(test)
+        
+    return
 }
 
 /*public system Fibonacci

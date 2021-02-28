@@ -6,28 +6,24 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A If Stmt
+    /// A Elif Stmt
     /// </summary>
-    public sealed record IfStmt : Stmt
+    public sealed record ElifStmt : Stmt
     {
         /// <summary>
-        /// creates a new instance of IfStmt
+        /// creates a new instance of ElifStmt
         /// </summary>
-        public IfStmt(int id, int offset, Expr condition, Stmt ifc, List<Stmt> elif, Stmt? elsec)
+        public ElifStmt(int id, int offset, Expr condition, Stmt content)
         {
             Id = id;
             Offset = offset;
             Condition = condition;
-            IfC = ifc;
-            Elif = elif;
-            ElseC = elsec;
+            Content = content;
         }
         public Expr Condition { get; init; }
-        public Stmt IfC { get; init; }
-        public List<Stmt> Elif { get; init; }
-        public Stmt? ElseC { get; init; }
+        public Stmt Content { get; init; }
 
-        public override string ToString() => "if statement";
+        public override string ToString() => "elif statement";
 
         /// <summary>
         /// returns Visit() of this instance
@@ -46,8 +42,8 @@ namespace Penguor.Compiler.Parsing.AST
     public partial interface IStmtVisitor<T>
     {
         /// <summary>
-        /// visit a IfStmt
+        /// visit a ElifStmt
         /// </summary>
-        T Visit(IfStmt stmt);
+        T Visit(ElifStmt stmt);
     }
 }

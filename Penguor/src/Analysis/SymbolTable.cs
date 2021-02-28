@@ -36,6 +36,8 @@ namespace Penguor.Compiler
         /// <param name="symbol">the symbol to insert into the table</param>
         public void Insert(AddressFrame symbol)
         {
+            if (Symbols.ContainsKey(symbol.ToString())) return;
+
             bool succeeded = Symbols.TryAdd(symbol.Symbol, new Symbol(symbol.Symbol, symbol.Type));
             if (!succeeded) throw new PenguorCSException();
         }

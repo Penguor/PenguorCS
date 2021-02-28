@@ -134,7 +134,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.SystemDecl);
             CallExpr? parent = GetParent();
-            AddSymbol(name, accessMod, nonAccessMods);
+            AddSymbol(name, accessMod ?? RESTRICTED, nonAccessMods);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
@@ -147,7 +147,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.DataDecl);
             CallExpr? parent = GetParent();
-            AddSymbol(name, accessMod, nonAccessMods);
+            AddSymbol(name, accessMod ?? RESTRICTED, nonAccessMods);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
@@ -160,7 +160,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.TypeDecl);
             CallExpr? parent = GetParent();
-            AddSymbol(name, accessMod, nonAccessMods);
+            AddSymbol(name, accessMod ?? RESTRICTED, nonAccessMods);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
@@ -175,7 +175,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.FunctionDecl);
             AddressFrame name = variable.Name;
-            AddSymbol(name, accessMod, nonAccessMods);
+            AddSymbol(name, accessMod ?? PROTECTED, nonAccessMods);
             state.Push(name);
             AddTable();
 
@@ -204,7 +204,7 @@ namespace Penguor.Compiler.Parsing
         {
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.VarDecl);
-            AddSymbol(variable.Name);
+            AddSymbol(variable.Name, accessMod ?? RESTRICTED, nonAccessMods);
             VarDecl dec = new VarDecl(ID, offset, accessMod, nonAccessMods, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
             return dec;
@@ -321,9 +321,9 @@ namespace Penguor.Compiler.Parsing
             if (elseC != null)
                 CheckBraces(elseC, "else statement");
 
-            return new IfStmt(ID, offset, condition, ifC, elseC);
+            return new IfStmt(ID, offset, condition, ifC, elif, elseC);
 
-            IfStmt ElifStmt()
+            ElifStmt ElifStmt()
             {
                 int offset = GetPrevious().Offset;
                 Consume(LPAREN);
@@ -333,7 +333,7 @@ namespace Penguor.Compiler.Parsing
                 Stmt content = Statement();
                 CheckBraces(content, "else if statement");
 
-                return new IfStmt(ID, offset, condition, content, null);
+                return new ElifStmt(ID, offset, condition, content);
             }
         }
 

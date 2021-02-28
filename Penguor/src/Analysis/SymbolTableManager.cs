@@ -326,6 +326,12 @@ namespace Penguor.Compiler
             State newState = new State(frames);
 
             tables.Add(newState, new SymbolTable(scope.Count));
+
+            if (scope.Count == 0)
+                return;
+            var symbolState = (State)newState.Clone();
+            var symbol = symbolState.Pop();
+            tables[symbolState].Insert(symbol);
         }
 
         /// <summary>
