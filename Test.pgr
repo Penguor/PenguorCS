@@ -1,17 +1,22 @@
-system Test {
-private void print() {}
-}
-
 void main()
 {
     int x = 0
-    if(true) 
-        x += x
-    else if(true)
-        Test.print(test)
+    while(x < 5){
+        if(x < 3)
+            x += 1
+        x += 1
+    }
         
     return
 }
+
+// void main()
+// {
+//     int x = 0
+//     x += 1
+//     int y = x + 5
+//     int z = x + y
+// }
 
 /*public system Fibonacci
 {

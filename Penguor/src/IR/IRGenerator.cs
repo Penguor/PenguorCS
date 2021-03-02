@@ -13,6 +13,7 @@ namespace Penguor.Compiler.IR
     {
         private readonly Builder builder;
         private readonly ProgramDecl program;
+        private IRProgram irProgram = new();
 
         private readonly List<State> scopes;
         private uint _instructionNumber;
@@ -168,10 +169,27 @@ namespace Penguor.Compiler.IR
             return CreateBlock(jumpTo.State, true, true);
         }
 
+        private IRFunction? currentFunction;
+
+        private void BeginFunction()
+        {
+            currentFunction = new IRFunction();
+        }
+
+        private void EndFunction()
+        {
+            irProgram.Functions.Add(currentFunction!);
+            currentFunction = null;
+        }
+
         private uint AddStmt(IROPCode code, params IRArgument[] operands)
         {
             var num = InstructionNumber;
             statements.Add(num, new IRStatement(num, code, operands));
+            if (currentFunction != null)
+                currentFunction.Add(statements[num]);
+            else
+                throw new NullReferenceException();
             return num;
         }
 
@@ -203,9 +221,9 @@ namespace Penguor.Compiler.IR
             }
             finally
             {
-                if (statements.Count != 0) Logger.Log(new IRProgram(statements.Values).ToString(), LogLevel.Debug);
+                if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
             }
-            return new IRProgram(statements.Values);
+            return irProgram;
         }
 
         public int Visit(BlockDecl decl)
@@ -227,6 +245,7 @@ namespace Penguor.Compiler.IR
         public int Visit(FunctionDecl decl)
         {
             scopes[0].Push(decl.Name);
+            BeginFunction();
             BeginBlock(scopes[0], true);
             AddStmt(IROPCode.FUNC, new IRState(scopes[0]));
             foreach (var parameter in decl.Parameters)
@@ -236,6 +255,7 @@ namespace Penguor.Compiler.IR
             decl.Content.Accept(this);
             if (statements[(uint)statements.Count - 1].Code != IROPCode.RET) AddStmt(IROPCode.RETN);
             scopes[0].Pop();
+            EndFunction();
             SealBlock(currentBlock);
             return 0;
         }
@@ -283,31 +303,12 @@ namespace Penguor.Compiler.IR
 
         public int Visit(VarDecl decl)
         {
-            scopes[0].Push(decl.Name);
-
+            State name = builder.TableManager.GetStateBySymbol(decl.Name, scopes) ?? throw new Exception();
             if (decl.Init != null)
             {
-                IRArgument arg = decl.Init switch
-                {
-                    NumExpr e => new IRDouble(e.NumValue ?? throw new Exception()),
-                    StringExpr s => new IRString(s.Value),
-                    _ => AcceptInit()
-                };
-                AddStmt(IROPCode.DEF, new IRState(scopes[0]), arg);
+                WriteVariable(name, currentBlock, decl.Init.Accept(this));
             }
-            else
-            {
-                AddStmt(IROPCode.DFE, new IRState(scopes[0]), new IRState(builder.TableManager.GetSymbol(scopes[0], scopes.ToArray())?.DataType ?? throw new Exception()));
-            }
-            scopes[0].Pop();
-
             return 0;
-
-            IRArgument AcceptInit()
-            {
-                decl.Init!.Accept(this);
-                return GetLastNumber();
-            }
         }
 
         public int Visit(BlockStmt stmt)
@@ -346,15 +347,12 @@ namespace Penguor.Compiler.IR
 
         public int Visit(ElifStmt stmt)
         {
-            stmt.Condition.Accept(this);
-            uint num = AddStmt(IROPCode.JFL, GetLastNumber());
+            SealBlock(currentBlock);
+
+            //condition
             scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
-            stmt.Content.Accept(this);
-            scopes[0].Pop();
-            statements[num] = statements[num] with
-            {
-                Operands = new IRArgument[] { statements[num].Operands[0], GetLastNumber() }
-            };
+            var conditionBlock = BeginBlock(scopes[0] + new AddressFrame(".c", AddressType.Control), true);
+            stmt.Condition.Accept(this);
             return 0;
         }
 
@@ -377,7 +375,7 @@ namespace Penguor.Compiler.IR
             scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
             var conditionBlock = BeginBlock(scopes[0] + new AddressFrame(".c", AddressType.Control), true);
             stmt.Condition.Accept(this);
-            AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
+            AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame($".e", AddressType.Control)));
             SealBlock(conditionBlock);
 
             //content
@@ -386,7 +384,7 @@ namespace Penguor.Compiler.IR
 
             SealBlock(contentBlock);
 
-            //todo: elif and else blocks
+            // todo: else if and else
 
             //rest
             scopes[0].Push(new AddressFrame(".e", AddressType.Control));

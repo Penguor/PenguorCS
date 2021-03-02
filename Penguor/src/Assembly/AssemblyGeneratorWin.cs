@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Penguor.Compiler.Build;
@@ -12,16 +14,11 @@ namespace Penguor.Compiler.Assembly
     public sealed class AssemblyGeneratorWinAmd64 : AssemblyGenerator
     {
         private readonly Builder builder;
-
-        private readonly StringBuilder pre = new StringBuilder();
-        private readonly StringBuilder text = new StringBuilder();
-        private readonly StringBuilder data = new StringBuilder();
-        private readonly StringBuilder bss = new StringBuilder();
-
+        private readonly List<IRFunction> functions;
+        private AsmProgram program = new AsmProgram();
         private int i;
-        private readonly List<IRStatement> stmts;
 
-        private Dictionary<IRReference, IRArgument> loaded = new();
+        private readonly Dictionary<IRReference, IRArgument> loaded = new();
 
         /// <summary>
         /// create a new instance of the AssemblyGenerator for windows
@@ -31,179 +28,222 @@ namespace Penguor.Compiler.Assembly
         public AssemblyGeneratorWinAmd64(IRProgram program, Builder builder) : base(program)
         {
             this.builder = builder;
-            stmts = program.Statements;
+            functions = program.Functions;
         }
 
         /// <inheritdoc/>
         public override void Generate()
         {
-            pre.AppendLine("global main");
-            pre.AppendLine("extern printf");
+            program.AddGlobalLabel("main");
 
-            AsmProgram program = new AsmProgram();
-
-            for (i = 0; i < stmts.Count; i++)
+            foreach (var i in functions)
             {
-                GenerateStatement();
+                GetRegisters(i);
             }
-            string final = "\n" + pre.ToString() + "\nsection .data\n\n" + data.ToString() + "\nsection .bss\n\n" + bss.ToString() + "\nsection .text\n\n" + text.ToString();
-            if (!(data.Length == 0 && bss.Length == 0 && text.Length == 0)) Logger.Log(final, LogLevel.Debug);
-            BuildManager.asmData.Append(data);
-            BuildManager.asmText.Append(text);
-            BuildManager.asmBss.Append(bss);
+        }
+
+
+        private void GetRegisters(IRFunction function)
+        {
+            List<(int, BitArray)> lifetimes = ComputeLifetime(function);
+
+            int[,] weight = ComputeWeight(lifetimes, function);
+
+            ComputeRegisters(lifetimes, weight);
+        }
+
+        private List<(int, BitArray)> ComputeLifetime(IRFunction function)
+        {
+            List<(int, BitArray)> lifetimes = new();
+
+            for (int i = 0; i < function.Statements.Count; i++)
+            {
+                uint number = function.Statements[i].Number;
+                IRReference numReference = new IRReference(number);
+
+                var bits = new BitArray(function.Statements.Count);
+
+                uint refCount = 0;
+
+                for (int j = 0; j < function.Statements.Count; j++)
+                {
+                    bool referenced = false;
+                    if (j != i)
+                    {
+                        foreach (var operand in function.Statements[j].Operands)
+                        {
+                            referenced = (operand is IRPhi phiOperand && phiOperand.Operands.Contains(numReference))
+                                || (operand is IRReference refOperand && refOperand == numReference);
+                        }
+                    }
+                    else
+                    {
+                        referenced = true;
+                    }
+                    if (referenced) refCount++;
+                    bits[j] = referenced;
+                }
+
+                // do not add variables whose only occurrence are themselves
+                if (refCount > 1)
+                    lifetimes.Add((i, bits));
+            }
+
+            Console.WriteLine(function.Statements[0].ToString());
+            foreach (var row in lifetimes)
+            {
+                Console.Write(string.Format("{0,-4}", row.Item1));
+                foreach (var item in row.Item2)
+                {
+                    Console.Write(item.ToString() == "True" ? 1 : 0);
+                    Console.Write(' ');
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+
+            return lifetimes;
+        }
+
+        private int[,] ComputeWeight(List<(int, BitArray)> lifetime, IRFunction function)
+        {
+            int[,] weight = new int[lifetime.Count, function.Statements.Count];
+
+            for (int y = 0; y < lifetime.Count; y++)
+            {
+                int localWeight = 0;
+                bool first = true;
+                for (int x = 0; x < function.Statements.Count; x++)
+                {
+                    if (lifetime[y].Item2[x] && !first)
+                    {
+                        for (; localWeight > 0; localWeight--)
+                        {
+                            weight[y, x - localWeight] = localWeight;
+                        }
+                    }
+                    else if (lifetime[y].Item2[x] && first)
+                    {
+                        for (; localWeight > 0; localWeight--)
+                        {
+                            weight[y, x - localWeight] = -1;
+                        }
+                        first = false;
+                    }
+                    else
+                    {
+                        weight[y, x] = -2;
+                        localWeight++;
+                    }
+                }
+            }
+
+            Console.WriteLine(function.Statements[0].ToString());
+            for (int y = 0; y < lifetime.Count; y++)
+            {
+                for (int x = 0; x < function.Statements.Count; x++)
+                {
+                    Console.Write(string.Format("{0,-3}", weight[y, x]));
+                }
+                Console.WriteLine();
+            }
+
+            return weight;
+        }
+
+        private void ComputeRegisters(List<(int, BitArray)> lifetimes, int[,] weight)
+        {
+            int registerCount = 3;
+
+            int[] registerOccupied = new int[registerCount];
+            int[,] registerMap = new int[lifetimes.Count, lifetimes[0].Item2.Count];
+
+            int xMax = lifetimes[0].Item2.Count;
+            List<int> finished = new();
+            for (int x = 0; x < xMax; x++)
+            {
+
+                for (int y = 0; y < lifetimes.Count; y++)
+                {
+                    if (!finished.Contains(y))
+                    {
+                        (int statement, BitArray row) = lifetimes[y];
+                        if (row[x])
+                        {
+                            if (registerMap[y, x - 1] <= 0)
+                            {
+                                bool foundEmpty = false;
+                                for (int i = 0; i < registerOccupied.Length; i++)
+                                {
+                                    if (registerOccupied[i] == 0)
+                                    {
+                                        registerMap[y, x] = i + 1;
+                                        registerOccupied[i] = statement;
+                                        foundEmpty = true;
+                                        i = registerOccupied.Length;
+                                    }
+                                }
+                                if (!foundEmpty)
+                                {
+                                    int highestWeight = 0;
+                                    int highestY = 0;
+                                    for (int innerY = 0; innerY < lifetimes.Count; innerY++)
+                                    {
+                                        if (lifetimes[innerY].Item1 != statement && weight[innerY, x] > highestWeight)
+                                        {
+                                            highestWeight = weight[innerY, x];
+                                            highestY = innerY;
+                                        }
+                                    }
+
+                                    int register = 0;
+                                    if (highestY > y)
+                                    {
+                                        register = registerMap[highestY, x - 1];
+                                        registerMap[highestY, x - 1] = -1;
+                                    }
+                                    else
+                                    {
+                                        register = registerMap[highestY, x];
+                                        registerMap[highestY, x] = -1;
+                                    }
+
+                                    registerMap[y, x] = register;
+                                    registerOccupied[register - 1] = statement;
+                                }
+                            }
+                            else
+                            {
+                                registerMap[y, x] = registerMap[y, x - 1];
+                            }
+                        }
+                        else if (weight[y, x] == -2)
+                        {
+                            registerOccupied[registerMap[y, x - 1] - 1] = 0;
+                            finished.Add(y);
+                        }
+                        else if (x != 0)
+                        {
+                            registerMap[y, x] = registerMap[y, x - 1];
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine();
+            for (int y = 0; y < registerMap.Length / xMax; y++)
+            {
+                for (int x = 0; x < xMax; x++)
+                {
+                    Console.Write(string.Format("{0,-3}", registerMap[y, x]));
+                }
+                Console.WriteLine();
+            }
         }
 
         // generate assembly for one statement
         private void GenerateStatement()
         {
-            RegisterAmd64? register;
-            switch (stmts[i])
-            {
-                case var s when s.Code == IROPCode.ASM:
-                    text.AppendLine(((IRString)s.Operands[0]).Value);
-                    break;
-                case var s when s.Code == IROPCode.FUNC:
-                    CreateLabel(s.Operands[0]);
-                    Push(RBP);
-                    Move(RSP, RBP);
-                    break;
-                case var s when s.Code == IROPCode.LOADPARAM && s.Operands[0] is IRState irState:
-                    var symbol = builder.TableManager.GetSymbol(irState.State);
-                    System.Console.WriteLine(symbol.DataType?.ToString());
-                    register = GetRegister(symbol.DataType?.ToString(), ((IRInt)s.Operands[1]).Value);
-                    symbol.AsmInfo = new AsmInfoWindowsAmd64
-                    {
-                        ParamNumber = ((IRInt)s.Operands[1]).Value,
-                        Register = register
-                    };
-
-                    break;
-                case var s when s.Code == IROPCode.LOAD:
-                    loaded.Add(new IRReference((uint)i), s.Operands[0]);
-                    break;
-                case var s when s.Code == IROPCode.LOADARG && s.Operands[0] is IRString or IRInt:
-                    GetValueOrPointer(s.Operands[0], GetRegister(s.Operands[0], (IRInt)s.Operands[1]));
-                    break;
-                /* case var s when s.Code == OPCode.LOADARG && s.Operands[0] is Reference reference && stmts[(int)reference.Referenced].Operands[0] is String or Int:
-                    IRArgument argument = loaded.GetValueOrDefault(reference) ?? throw new System.Exception();
-                    register = (argument, ((Int)s.Operands[1]).Value) switch
-                    {
-                        (String or Int, 1) => "rcx"
-                    };
-                    string get = argument switch
-                    {
-                        String str => GetString(str),
-                        Int i => i.ToString()
-                    };
-                    if (register != "stack")
-                        text.Append("mov ").Append(register).Append(", ").AppendLine(get);
-                    else
-                        text.Append("push ").AppendLine(get);
-                    break; */
-                /* case var s when s.Code == OPCode.LOADARG && s.Operands[0] is Reference reference && stmts[(int)reference.Referenced].Operands[0] is IRState state:
-                    Symbol param = builder.TableManager.GetSymbol(state.State);
-                    var asmInfo = (AsmInfoWindowsAmd64?)param.AsmInfo ?? throw new System.Exception();
-                    register = (param.DataType?.ToString(), ((Int)s.Operands[1]).Value) switch
-                    {
-                        ("int", 1) => "rcx",
-                        ("string", 1) => "rcx"
-                    };
-                    text.Append("mov ").Append(register).Append(", ").AppendLine(asmInfo.Register);
-                    break; */
-                case var s when s.Code == IROPCode.CALL && s.Operands[0] is IRState state:
-                    text.Append("call ").Append(state.State).AppendLine();
-                    break;
-                case var s when s.Code == IROPCode.RETN:
-                    text.AppendLine("mov rsp, rbp");
-                    text.AppendLine("pop rbp");
-                    text.AppendLine("ret");
-                    return;
-            }
         }
-
-        private uint _stringNum;
-        private uint StringNum { get => _stringNum++; }
-        private readonly Dictionary<string, uint> stringConstants = new();
-
-        private string GetString(IRString s)
-        {
-            if (!stringConstants.ContainsKey(s.Value))
-            {
-                string[] values = s.Value.Split('\\');
-                var labelNum = StringNum;
-                var labelName = $"@string{labelNum}";
-                stringConstants.Add(s.Value, labelNum);
-                data.Append(labelName).Append(" db ");
-
-                for (int i2 = 0; i2 < values.Length; i2++)
-                {
-                    if (i2 == 0)
-                    {
-                        if (values[i2].Length > 0) data.Append('\'').Append(values[i2]).Append("', ");
-                    }
-                    else
-                    {
-                        data.Append(values[i2][0] switch
-                        {
-                            'n' => 10,
-                            //todo: proper offset for ir statements
-                            char escape => builder.Except(16, 0, escape)
-                        }).Append(", ");
-                    }
-                }
-                data.AppendLine("0");
-                return labelName;
-            }
-            else
-            {
-                return $"@string{stringConstants[s.Value]}";
-            }
-        }
-
-        private void GetValueOrPointer(IRArgument argument, RegisterAmd64 toRegister)
-        {
-            switch (argument)
-            {
-                case IRString str:
-                    string name = GetString(str);
-                    text.Append("mov ").Append(toRegister).Append(", ").AppendLine(name);
-                    break;
-                case IRInt num:
-                    text.Append("mov ").Append(toRegister).Append(", ").AppendLine(num.Value.ToString());
-                    break;
-            }
-        }
-
-        private void CreateLabel(IRArgument labelName) => CreateLabel(labelName.ToString());
-        private void CreateLabel(string labelName) => text.Append(labelName).AppendLine(":");
-
-        private void Move(RegisterAmd64 from, RegisterAmd64 to) => text.Append("mov ").Append(to).Append(", ").Append(from).AppendLine();
-
-        private void Push(RegisterAmd64 register)
-        {
-            if (register != STACK)
-                text.Append("push ").Append(register).AppendLine();
-            else throw new System.Exception();
-        }
-
-        private RegisterAmd64 GetRegister(IRArgument argument, IRInt paramNumber) => (argument, paramNumber.Value) switch
-        {
-            (IRString or IRInt or IRDouble or IRFloat, 1) => RCX,
-            (IRString or IRInt or IRDouble or IRFloat, 2) => RDX,
-            (IRString or IRInt or IRDouble or IRFloat, 3) => R8,
-            (IRString or IRInt or IRDouble or IRFloat, 4) => R9,
-            (IRString or IRInt or IRDouble or IRFloat, _) => STACK,
-        };
-
-        private RegisterAmd64 GetRegister(IRState state, int paramNumber) => GetRegister(state.ToString(), paramNumber);
-
-        private RegisterAmd64 GetRegister(string? type, int paramNumber) => (type, paramNumber) switch
-        {
-            ("string" or "int" or "double" or "float", 1) => RCX,
-            ("string" or "int" or "double" or "float", 2) => RDX,
-            ("string" or "int" or "double" or "float", 3) => R8,
-            ("string" or "int" or "double" or "float", 4) => R9,
-            ("string" or "int" or "double" or "float", _) => STACK,
-        };
     }
 }

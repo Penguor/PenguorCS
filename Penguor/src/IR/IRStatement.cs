@@ -23,16 +23,6 @@ namespace Penguor.Compiler.IR
         public IRArgument[] Operands { get; init; }
 
         /// <summary>
-        /// whether the value of the ir argument is used later on
-        /// </summary>
-        public bool GetsReferenced { get; set; }
-
-        /// <summary>
-        /// get the register where the value is stored if GetsReferenced is true
-        /// </summary>
-        public string? GetRegister { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the IRStatement
         /// </summary>
         /// <param name="number">the instrution number</param>
@@ -43,7 +33,6 @@ namespace Penguor.Compiler.IR
             Number = number;
             Code = code;
             Operands = operands;
-            GetsReferenced = false;
         }
 
         /// <inheritdoc/>

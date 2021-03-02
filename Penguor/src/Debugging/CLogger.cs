@@ -6,7 +6,7 @@ namespace Penguor.Compiler.Debugging
     {
         static CLogger()
         {
-            Console.OutputEncoding = System.Text.Encoding.Unicode;
+            // Console.OutputEncoding = System.Text.Encoding.Unicode;
         }
 
         public static void Log(string logText, LogLevel logLevel)

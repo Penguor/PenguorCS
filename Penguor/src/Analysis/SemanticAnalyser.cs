@@ -72,10 +72,9 @@ namespace Penguor.Compiler.Analysis
                         accessable = calleeSymbol.Parent == callee;
                         break;
                     case TokenType.RESTRICTED:
-                        if (callee.Count == 0 && called.Count != 0) accessable = false;
-                        else if (callee.Count == 0 && called.Count == 0) accessable = false;
-                        else if (callee.Count != 0 && called.Count == 0) accessable = false;
-                        else accessable = callee[0].Symbol == called[0].Symbol;
+                        if (called.Count == 1) accessable = true;
+                        else if (callee.Count > 1 && called.Count > 1) accessable = callee[0].Symbol == called[0].Symbol;
+                        else accessable = false;
                         break;
                     case null:
                         accessable = true;
@@ -92,7 +91,8 @@ namespace Penguor.Compiler.Analysis
                     case TokenType.PRIVATE:
                     case TokenType.PROTECTED:
                     case TokenType.RESTRICTED:
-                        accessable = called.Count == 0;
+                        var tempCalled = (State)called.Clone();
+                        accessable = called.Count > 0 && (builder.TableManager.GetStateBySymbol(tempCalled.Pop(), tempCalled) ?? throw new Exception())[0].Type != AddressType.LibraryDecl;
                         break;
                 }
             }

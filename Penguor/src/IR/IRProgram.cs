@@ -11,36 +11,20 @@ namespace Penguor.Compiler.IR
         /// <summary>
         /// The child declarations of the program
         /// </summary>
-        public List<IRStatement> Statements { get; init; }
-
-        /// <summary>
-        /// Initialize a new instance of IRProgram
-        /// </summary>
-        public IRProgram()
-        {
-            Statements = new();
-        }
-
-        /// <summary>
-        /// Initialize a new instance of IRProgram
-        /// </summary>
-        public IRProgram(IEnumerable<IRStatement> statements)
-        {
-            Statements = new(statements);
-        }
+        public List<IRFunction> Functions { get; init; } = new();
 
         /// <summary>
         /// append a new statement to the end of the list
         /// </summary>
-        /// <param name="stmt"></param>
-        public void Add(IRStatement stmt) => Statements.Add(stmt);
+        /// <param name="function"></param>
+        public void Add(IRFunction function) => Functions.Add(function);
 
         /// <inheritdoc/>
         public override string ToString()
         {
             StringBuilder builder = new();
             builder.AppendLine();
-            foreach (var i in Statements)
+            foreach (var i in Functions)
                 builder.AppendLine(i.ToString());
             return builder.ToString();
         }
