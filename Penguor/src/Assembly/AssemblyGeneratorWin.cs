@@ -143,7 +143,7 @@ namespace Penguor.Compiler.Assembly
             {
                 for (int x = 0; x < function.Statements.Count; x++)
                 {
-                    Console.Write(string.Format("{0,-3}", weight[y, x]));
+                    Console.Write(string.Format("{0,-4}", weight[y, x].ToString("+0;-#")));
                 }
                 Console.WriteLine();
             }
@@ -151,8 +151,9 @@ namespace Penguor.Compiler.Assembly
             return weight;
         }
 
-        private void ComputeRegisters(List<(int, BitArray)> lifetimes, int[,] weight)
+        private int[,] ComputeRegisters(List<(int, BitArray)> lifetimes, int[,] weight)
         {
+            if (lifetimes.Count == 0) return new int[0, 0];
             int registerCount = 3;
 
             int[] registerOccupied = new int[registerCount];
@@ -228,6 +229,7 @@ namespace Penguor.Compiler.Assembly
                         }
                     }
                 }
+
             }
 
             Console.WriteLine();
@@ -239,6 +241,8 @@ namespace Penguor.Compiler.Assembly
                 }
                 Console.WriteLine();
             }
+
+            return registerMap;
         }
 
         // generate assembly for one statement

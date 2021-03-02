@@ -263,7 +263,6 @@ namespace Penguor.Compiler.IR
         public int Visit(LibraryDecl decl)
         {
             scopes[0].Append(decl.Name);
-            AddStmt(IROPCode.LIB, new IRState(scopes[0]));
             decl.Content.Accept(this);
             scopes[0].Remove(decl.Name);
             return 0;
@@ -353,6 +352,21 @@ namespace Penguor.Compiler.IR
             scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
             var conditionBlock = BeginBlock(scopes[0] + new AddressFrame(".c", AddressType.Control), true);
             stmt.Condition.Accept(this);
+            AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
+            SealBlock(conditionBlock);
+
+            //content
+            var contentBlock = BeginBlock(scopes[0], true);
+            stmt.Content.Accept(this);
+
+            AddJumpStmt(IROPCode.JMP, new IRState(scopes[0]));
+            SealBlock(contentBlock);
+
+            //rest
+            scopes[0].Push(new AddressFrame(".e", AddressType.Control));
+            AddLabel();
+            scopes[0].Pop(2);
+
             return 0;
         }
 
@@ -371,22 +385,42 @@ namespace Penguor.Compiler.IR
         {
             SealBlock(currentBlock);
 
+            bool hasElse = stmt.Elif.Count > 0 || stmt.ElseC != null;
+
             //condition
             scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
             var conditionBlock = BeginBlock(scopes[0] + new AddressFrame(".c", AddressType.Control), true);
             stmt.Condition.Accept(this);
-            AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame($".e", AddressType.Control)));
+            if (hasElse)
+                AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".else", AddressType.Control)));
+            else
+                AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
             SealBlock(conditionBlock);
 
             //content
             var contentBlock = BeginBlock(scopes[0], true);
             stmt.IfC.Accept(this);
+            if (hasElse)
+                AddJumpStmt(IROPCode.JMP, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
 
             SealBlock(contentBlock);
 
-            // todo: else if and else
-
             //rest
+            if (hasElse)
+            {
+                scopes[0].Push(new AddressFrame(".else", AddressType.Control));
+                AddLabel();
+                scopes[0].Pop();
+                foreach (var i in stmt.Elif)
+                {
+                    i.Accept(this);
+                }
+                if (stmt.ElseC != null)
+                {
+                    BeginBlock(scopes[0], true);
+                    stmt.ElseC.Accept(this);
+                }
+            }
             scopes[0].Push(new AddressFrame(".e", AddressType.Control));
             AddLabel();
             scopes[0].Pop(2);

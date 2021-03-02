@@ -313,14 +313,15 @@ namespace Penguor.Compiler.Analysis
                 Stmt ifC = stmt.IfC.Accept(this);
                 scopes[0].Pop();
 
+                List<Stmt> elif = new(stmt.Elif.Count);
                 foreach (var i in stmt.Elif)
-                    i.Accept(this);
+                    elif.Add(i.Accept(this));
 
                 scopes[0].Push(new AddressFrame($".else{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt? elseC = stmt.ElseC?.Accept(this);
                 scopes[0].Pop();
-                return stmt with { Condition = condition, IfC = ifC, ElseC = elseC };
+                return stmt with { Condition = condition, IfC = ifC, Elif = elif, ElseC = elseC };
             }
             else
             {
