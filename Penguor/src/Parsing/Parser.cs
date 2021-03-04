@@ -309,7 +309,7 @@ namespace Penguor.Compiler.Parsing
             Stmt ifC = Statement();
             CheckBraces(ifC, "if statement");
 
-            List<Stmt> elif = new();
+            List<ElifStmt> elif = new();
             while (Check(ELSE) && Check(IF, 1))
             {
                 Advance(); Advance();

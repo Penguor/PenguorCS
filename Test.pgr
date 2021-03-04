@@ -1,95 +1,88 @@
-// void main()
-// {
-//     int x = 0
-//     while(x < 5){
-//         if(x < 3)
-//             x += 1
-//         x += 1
-//     }
-        
-//     return
-// }
-
-// void factorial(int n): return factorial(n-1) * n
-
-// void main()
-// {
-//     factorial(5)
-// }
-
-
-void print() {}
-
-public system Fibonacci
+void main()
 {
-
-    void printLn()
-    {
-        string a = "\n"
-        print(a)
+    int x = 0
+    while(x < 5){
+        if(x < 3)
+            x += 1
+        x += 2
     }
-
-    void pow(int a, int b)
-    {
-        int i = 0;
-        int result = a;
-        while(i < b)
-            {
-                result *= a
-                i+= 1
-            }
-        return result
-    }
-
-    void sqrt(int a)
-    {
-        return 0
-    }
-
-    public void main()
-    {
-        print(getFibonacci(0))
-        int i = 0
-        while(i <= 10)
-        {
-            print(", " + getFibonacci(i))
-            i++
-        }
-
-        printLn()
-        print(fibMoivreBinet(0))
-
-        i = 0
-        while(i <= 10)
-        {
-            print(", " + getFibonacci(i))
-            i++
-        }
-    }
-
-    // returns the fibonacci number at n
-    private int getFibonacci(int n)
-    {
-        if(n == 0)
-            return 0
-        else if(n == 1)
-            return 1
-        else
-            return getFibonacci(n - 1) + getFibonacci(n - 2)
-    }
-
-    // like the one above, but using a different algorithm
-    private int fibMoivreBinet(int n)
-    {
-        return (
-            (1 / 5) * (
-                (pow(
-                    (1 + sqrt(5)
-                ) / 2, n))
-                 -
-                (pow(
-                    (1 - sqrt(5)
-                ) / 2, n))
-            ))
-    }
+        
+    return
 }
+
+
+// void print() {}
+
+// public system Fibonacci
+// {
+
+//     void printLn()
+//     {
+//         string a = "\n"
+//         print(a)
+//     }
+
+//     void pow(int a, int b)
+//     {
+//         int i = 0;
+//         int result = a;
+//         while(i < b)
+//             {
+//                 result *= a
+//                 i+= 1
+//             }
+//         return result
+//     }
+
+//     void sqrt(int a)
+//     {
+//         return 0
+//     }
+
+//     public void main()
+//     {
+//         print(getFibonacci(0))
+//         int i = 0
+//         while(i <= 10)
+//         {
+//             print(", " + getFibonacci(i))
+//             i++
+//         }
+
+//         printLn()
+//         print(fibMoivreBinet(0))
+
+//         i = 0
+//         while(i <= 10)
+//         {
+//             print(", " + getFibonacci(i))
+//             i++
+//         }
+//     }
+
+//     // returns the fibonacci number at n
+//     private int getFibonacci(int n)
+//     {
+//         if(n == 0)
+//             return 0
+//         else if(n == 1)
+//             return 1
+//         else
+//             return getFibonacci(n - 1) + getFibonacci(n - 2)
+//     }
+
+//     // like the one above, but using a different algorithm
+//     private int fibMoivreBinet(int n)
+//     {
+//         return (
+//             (1 / 5) * (
+//                 (pow(
+//                     (1 + sqrt(5)
+//                 ) / 2, n))
+//                  -
+//                 (pow(
+//                     (1 - sqrt(5)
+//                 ) / 2, n))
+//             ))
+//     }
+// }

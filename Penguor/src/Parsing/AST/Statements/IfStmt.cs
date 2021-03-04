@@ -13,7 +13,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of IfStmt
         /// </summary>
-        public IfStmt(int id, int offset, Expr condition, Stmt ifc, List<Stmt> elif, Stmt? elsec)
+        public IfStmt(int id, int offset, Expr condition, Stmt ifc, List<ElifStmt> elif, Stmt? elsec)
         {
             Id = id;
             Offset = offset;
@@ -24,7 +24,7 @@ namespace Penguor.Compiler.Parsing.AST
         }
         public Expr Condition { get; init; }
         public Stmt IfC { get; init; }
-        public List<Stmt> Elif { get; init; }
+        public List<ElifStmt> Elif { get; init; }
         public Stmt? ElseC { get; init; }
 
         public override string ToString() => "if statement";

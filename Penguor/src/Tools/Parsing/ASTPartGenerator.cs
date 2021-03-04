@@ -74,6 +74,7 @@ namespace Penguor.Compiler.Parsing.AST
     {{
         public int Id {{ get; init; }}
         public int Offset {{ get; init; }}
+        public ASTAttribute? Attribute {{ get; set; }}
 
         /// <summary>
         /// <c>Accept</c> returns the visit method for the {mode}
@@ -139,7 +140,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of {name.ToUppercase()}{mode}
         /// </summary>
-        public {name.ToUppercase()}{mode}(int id, int offset{(types.Count == 0 ? "" : ", " )}");
+        public {name.ToUppercase()}{mode}(int id, int offset{(types.Count == 0 ? "" : ", ")}");
 
                             for (int i = 0; i < types.Count; i++)
                             {

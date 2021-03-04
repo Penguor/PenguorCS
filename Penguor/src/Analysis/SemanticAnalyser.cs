@@ -313,9 +313,9 @@ namespace Penguor.Compiler.Analysis
                 Stmt ifC = stmt.IfC.Accept(this);
                 scopes[0].Pop();
 
-                List<Stmt> elif = new(stmt.Elif.Count);
+                List<ElifStmt> elif = new(stmt.Elif.Count);
                 foreach (var i in stmt.Elif)
-                    elif.Add(i.Accept(this));
+                    elif.Add((ElifStmt)i.Accept(this));
 
                 scopes[0].Push(new AddressFrame($".else{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
@@ -528,7 +528,10 @@ namespace Penguor.Compiler.Analysis
         public Expr Visit(VarExpr expr)
         {
             expr.Type.Accept(this);
-            return expr;
+            return expr with
+            {
+                Attribute = new ExprAttribute(builder.TableManager.GetStateBySymbol(State.FromCall(expr.Type), scopes.ToArray()) ?? throw new NullReferenceException())
+            };
         }
 
         public Call Visit(FunctionCall call)

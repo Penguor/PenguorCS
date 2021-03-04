@@ -10,6 +10,7 @@ namespace Penguor.Compiler.Parsing.AST
     {
         public int Id { get; init; }
         public int Offset { get; init; }
+        public ASTAttribute? Attribute { get; set; }
 
         /// <summary>
         /// <c>Accept</c> returns the visit method for the Decl
