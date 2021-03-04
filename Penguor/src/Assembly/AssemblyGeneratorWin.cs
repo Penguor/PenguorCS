@@ -45,16 +45,17 @@ namespace Penguor.Compiler.Assembly
 
         private void GetRegisters(IRFunction function)
         {
-            List<(int, BitArray)> lifetimes = ComputeLifetime(function);
+            (int[] statements, BitArray[] lifetimes) = ComputeLifetime(function);
 
-            int[,] weight = ComputeWeight(lifetimes, function);
+            int[,] weight = ComputeWeight(lifetimes, statements);
 
-            ComputeRegisters(lifetimes, weight);
+            ComputeRegisters(weight, statements);
         }
 
-        private List<(int, BitArray)> ComputeLifetime(IRFunction function)
+        private (int[], BitArray[]) ComputeLifetime(IRFunction function)
         {
-            List<(int, BitArray)> lifetimes = new();
+            List<int> statements = new();
+            List<BitArray> lifetimes = new();
 
             for (int i = 0; i < function.Statements.Count; i++)
             {
@@ -86,14 +87,17 @@ namespace Penguor.Compiler.Assembly
 
                 // do not add variables whose only occurrence are themselves
                 if (refCount > 1)
-                    lifetimes.Add((i, bits));
+                {
+                    statements.Add(i);
+                    lifetimes.Add(bits);
+                }
             }
 
             Console.WriteLine(function.Statements[0].ToString());
-            foreach (var row in lifetimes)
+            for (int i = 0; i < lifetimes.Count; i++)
             {
-                Console.Write(string.Format("{0,-4}", row.Item1));
-                foreach (var item in row.Item2)
+                Console.Write(string.Format("{0,-4}", statements[i]));
+                foreach (var item in lifetimes[i])
                 {
                     Console.Write(item.ToString() == "True" ? 1 : 0);
                     Console.Write(' ');
@@ -102,27 +106,27 @@ namespace Penguor.Compiler.Assembly
             }
             Console.WriteLine();
 
-            return lifetimes;
+            return (statements.ToArray(), lifetimes.ToArray());
         }
 
-        private int[,] ComputeWeight(List<(int, BitArray)> lifetime, IRFunction function)
+        private int[,] ComputeWeight(BitArray[] lifetimes, int[] statements)
         {
-            int[,] weight = new int[lifetime.Count, function.Statements.Count];
+            int[,] weight = new int[lifetimes.Length, lifetimes[0].Length];
 
-            for (int y = 0; y < lifetime.Count; y++)
+            for (int y = 0; y < lifetimes.Length; y++)
             {
                 int localWeight = 0;
                 bool first = true;
-                for (int x = 0; x < function.Statements.Count; x++)
+                for (int x = 0; x < weight.GetLength(1); x++)
                 {
-                    if (lifetime[y].Item2[x] && !first)
+                    if (lifetimes[y][x] && !first)
                     {
                         for (; localWeight > 0; localWeight--)
                         {
                             weight[y, x - localWeight] = localWeight;
                         }
                     }
-                    else if (lifetime[y].Item2[x] && first)
+                    else if (lifetimes[y][x] && first)
                     {
                         for (; localWeight > 0; localWeight--)
                         {
@@ -138,10 +142,10 @@ namespace Penguor.Compiler.Assembly
                 }
             }
 
-            Console.WriteLine(function.Statements[0].ToString());
-            for (int y = 0; y < lifetime.Count; y++)
+            Console.WriteLine();
+            for (int y = 0; y < weight.GetLength(0); y++)
             {
-                for (int x = 0; x < function.Statements.Count; x++)
+                for (int x = 0; x < weight.GetLength(1); x++)
                 {
                     Console.Write(string.Format("{0,-4}", weight[y, x].ToString("+0;-#")));
                 }
@@ -151,25 +155,25 @@ namespace Penguor.Compiler.Assembly
             return weight;
         }
 
-        private int[,] ComputeRegisters(List<(int, BitArray)> lifetimes, int[,] weight)
+        private int[,] ComputeRegisters(int[,] weight, int[] statements)
         {
-            if (lifetimes.Count == 0) return new int[0, 0];
+            if (statements.Length == 0) return new int[0, 0];
             int registerCount = 3;
 
             int[] registerOccupied = new int[registerCount];
-            int[,] registerMap = new int[lifetimes.Count, lifetimes[0].Item2.Count];
+            int[,] registerMap = new int[weight.GetLength(0), weight.GetLength(1)];
 
-            int xMax = lifetimes[0].Item2.Count;
+            int xMax = weight.GetLength(1);
             List<int> finished = new();
             for (int x = 0; x < xMax; x++)
             {
 
-                for (int y = 0; y < lifetimes.Count; y++)
+                for (int y = 0; y < statements.Length; y++)
                 {
                     if (!finished.Contains(y))
                     {
-                        (int statement, BitArray row) = lifetimes[y];
-                        if (row[x])
+                        int statement = statements[y];
+                        if (weight[y, x] == 0)
                         {
                             if (registerMap[y, x - 1] <= 0)
                             {
@@ -188,9 +192,9 @@ namespace Penguor.Compiler.Assembly
                                 {
                                     int highestWeight = 0;
                                     int highestY = 0;
-                                    for (int innerY = 0; innerY < lifetimes.Count; innerY++)
+                                    for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
                                     {
-                                        if (lifetimes[innerY].Item1 != statement && weight[innerY, x] > highestWeight)
+                                        if (statements[innerY] != statement && weight[innerY, x] > highestWeight)
                                         {
                                             highestWeight = weight[innerY, x];
                                             highestY = innerY;
