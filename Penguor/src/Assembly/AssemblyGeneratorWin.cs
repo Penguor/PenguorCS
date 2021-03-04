@@ -16,7 +16,6 @@ namespace Penguor.Compiler.Assembly
         private readonly Builder builder;
         private readonly List<IRFunction> functions;
         private AsmProgram program = new AsmProgram();
-        private int i;
 
         private readonly Dictionary<IRReference, IRArgument> loaded = new();
 

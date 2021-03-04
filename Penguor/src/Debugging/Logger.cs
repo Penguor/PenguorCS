@@ -50,6 +50,8 @@ namespace Penguor.Compiler.Debugging
     {
         private static FLogger? fLogger;
 
+        public static bool Blocked { get; set; }
+
         private static readonly Dictionary<uint, (LogLevel, string)> pgrcsMessages = new Dictionary<uint, (LogLevel, string)>
         {
             {1, (LogLevel.Error, "An unexpected error occurred")},
@@ -101,6 +103,7 @@ namespace Penguor.Compiler.Debugging
 
         public static void Log(Notification notification)
         {
+            if (Blocked) return;
             (LogLevel level, string debugMessage) = notification.Type switch
             {
                 MsgType.PGR => pgrMessages.GetValueOrDefault(

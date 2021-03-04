@@ -60,12 +60,25 @@ namespace Penguor.Compiler
         }
 
         /// <summary>
-        /// create a new State from a string array
+        /// create a new State from an AddresFrame array
         /// </summary>
         /// <param name="frames"></param>
         public State(AddressFrame[] frames)
         {
             addressFrames = new List<AddressFrame>(frames);
+        }
+
+        /// <summary>
+        /// create a new State from a string
+        /// </summary>
+        /// <param name="state">the string which is to be converted into a State</param>
+        public State(string state)
+        {
+            string[] strings = state.Split('.');
+            List<AddressFrame> frames = new(strings.Length);
+            foreach (var i in strings)
+                frames.Add(new(i, AddressType.IdfCall));
+            addressFrames = frames;
         }
 
         /// <summary>

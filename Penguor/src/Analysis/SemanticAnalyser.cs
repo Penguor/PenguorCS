@@ -15,7 +15,7 @@ namespace Penguor.Compiler.Analysis
 
         private readonly ProgramDecl program;
 
-        private readonly List<State> scopes;
+        private List<State> scopes;
 
         private byte pass;
 
@@ -30,8 +30,12 @@ namespace Penguor.Compiler.Analysis
         public Decl Analyse(byte pass)
         {
             this.pass = pass;
+            Logger.Blocked = pass == 1;
+            scopes = new();
             scopes.Add(new State());
-            return program.Accept(this);
+            var newProgram = program.Accept(this);
+            Logger.Blocked = false;
+            return newProgram;
         }
 
         private void AddVarExpr(VarExpr expr)
@@ -248,17 +252,7 @@ namespace Penguor.Compiler.Analysis
         public Stmt Visit(ElifStmt stmt)
         {
             Expr condition = stmt.Condition.Accept(this);
-            if (condition is BooleanExpr
-                || (condition is CallExpr cExpr
-                    && builder.TableManager.GetSymbol(State.FromCall(cExpr), scopes.ToArray())?.DataType?.ToString() == "bool")
-                || (condition is BinaryExpr bExpr && (bExpr.Op is TokenType.LESS
-                                                           or TokenType.GREATER
-                                                           or TokenType.LESS_EQUALS
-                                                           or TokenType.GREATER_EQUALS
-                                                           or TokenType.EQUALS
-                                                           or TokenType.NEQUALS
-                                                           or TokenType.AND
-                                                           or TokenType.OR)))
+            if (((ExprAttribute?)condition.Attribute)!.Type.Equals(new State("bool")))
             {
                 scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
@@ -296,17 +290,7 @@ namespace Penguor.Compiler.Analysis
         public Stmt Visit(IfStmt stmt)
         {
             Expr condition = stmt.Condition.Accept(this);
-            if (condition is BooleanExpr
-                || (condition is CallExpr cExpr
-                    && builder.TableManager.GetSymbol(State.FromCall(cExpr), scopes.ToArray())?.DataType?.ToString() == "bool")
-                || (condition is BinaryExpr bExpr && (bExpr.Op is TokenType.LESS
-                                                           or TokenType.GREATER
-                                                           or TokenType.LESS_EQUALS
-                                                           or TokenType.GREATER_EQUALS
-                                                           or TokenType.EQUALS
-                                                           or TokenType.NEQUALS
-                                                           or TokenType.AND
-                                                           or TokenType.OR)))
+            if (((ExprAttribute?)condition.Attribute)!.Type.Equals(new State(new AddressFrame("bool", AddressType.IdfCall))))
             {
                 scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
@@ -352,17 +336,7 @@ namespace Penguor.Compiler.Analysis
             scopes[0].Push(new AddressFrame($".while{stmt.Id}", AddressType.Control));
             builder.TableManager.AddTable(scopes[0]);
             Expr condition = stmt.Condition.Accept(this);
-            if (condition is BooleanExpr
-                || (condition is CallExpr cExpr
-                    && builder.TableManager.GetSymbol(State.FromCall(cExpr), scopes.ToArray())?.DataType?.ToString() == "bool")
-                || (condition is BinaryExpr bExpr && (bExpr.Op is TokenType.LESS
-                                                           or TokenType.GREATER
-                                                           or TokenType.LESS_EQUALS
-                                                           or TokenType.GREATER_EQUALS
-                                                           or TokenType.EQUALS
-                                                           or TokenType.NEQUALS
-                                                           or TokenType.AND
-                                                           or TokenType.OR)))
+            if (((ExprAttribute?)condition.Attribute)!.Type.Equals(new State(new AddressFrame("bool", AddressType.IdfCall))))
             {
                 var content = stmt.Content.Accept(this);
                 scopes[0].Pop();
@@ -370,6 +344,7 @@ namespace Penguor.Compiler.Analysis
             }
             else
             {
+                scopes[0].Pop();
                 return builder.Except(stmt, 1, stmt.Offset);
             }
         }
@@ -379,7 +354,7 @@ namespace Penguor.Compiler.Analysis
             //todo: verify operators
             var lhs = expr.Lhs.Accept(this);
             var rhs = expr.Value.Accept(this);
-            return expr with { Lhs = (CallExpr)lhs, Value = rhs };
+            return expr with { Lhs = (CallExpr)lhs, Value = rhs, Attribute = new ExprAttribute(State.FromCall(expr.Lhs)) };
         }
 
         public Expr Visit(BinaryExpr expr)
@@ -387,69 +362,96 @@ namespace Penguor.Compiler.Analysis
             var lhs = expr.Lhs.Accept(this);
             var rhs = expr.Rhs.Accept(this);
 
+            State type;
+
             if (expr.Op == TokenType.LESS)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State("bool");
             }
             else if (expr.Op == TokenType.GREATER)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State("bool");
             }
             else if (expr.Op == TokenType.LESS_EQUALS)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State("bool");
             }
             else if (expr.Op == TokenType.GREATER_EQUALS)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State("bool");
             }
             else if (expr.Op == TokenType.AND)
             {
                 if (lhs is NumExpr && rhs is NumExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State("bool");
             }
             else if (expr.Op == TokenType.OR)
             {
                 if (lhs is NumExpr && rhs is NumExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State("bool");
             }
             else if (expr.Op == TokenType.PLUS)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State(new AddressFrame("double", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.MINUS)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State(new AddressFrame("double", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.MUL)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State(new AddressFrame("double", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.DIV)
             {
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State(new AddressFrame("double", AddressType.IdfCall));
             }
-            return expr with { Lhs = lhs, Rhs = rhs };
+            else
+            {
+                throw new Exception();
+            }
+
+            return expr with { Lhs = lhs, Rhs = rhs, Attribute = new ExprAttribute(type) };
         }
 
-        public Expr Visit(BooleanExpr expr) => expr;
+        public Expr Visit(BooleanExpr expr) => expr with { Attribute = new ExprAttribute(new State(new AddressFrame("bool", AddressType.IdfCall))) };
 
         public Expr Visit(CallExpr expr)
         {
@@ -466,7 +468,7 @@ namespace Penguor.Compiler.Analysis
             foreach (var i in expr.Callee)
                 callee.Add(i.Accept(this));
 
-            return expr with { Callee = callee };
+            return expr with { Callee = callee, Attribute = new ExprAttribute(builder.TableManager.GetStateBySymbol(e, scopes.ToArray()) ?? throw new NullReferenceException()) };
         }
 
         public Expr Visit(GroupingExpr expr)
@@ -514,15 +516,15 @@ namespace Penguor.Compiler.Analysis
             }
         }
 
-        public Expr Visit(StringExpr expr) => expr;
+        public Expr Visit(StringExpr expr) => expr with { Attribute = new ExprAttribute(new State(new AddressFrame("string", AddressType.IdfCall))) };
 
         public Expr Visit(UnaryExpr expr)
         {
             Expr e = expr.Rhs.Accept(this);
-            if (expr.Op == null) return expr with { Rhs = e };
-            else if (e is NumExpr && expr.Op is TokenType.MINUS or TokenType.PLUS or TokenType.BW_NOT or TokenType.DPLUS or TokenType.DMINUS) return expr with { Rhs = e };
-            else if (e is BooleanExpr booleanExpr && expr.Op is TokenType.EXCL_MARK) return booleanExpr with { Value = !booleanExpr.Value };
-            else throw new Exception();
+            if (expr.Op == null) return e;
+            else if (((ExprAttribute?)e.Attribute)!.Type.ToString() is "byte" or "short" or "int" or "long" or "float" or "double" && expr.Op is TokenType.MINUS or TokenType.PLUS or TokenType.BW_NOT or TokenType.DPLUS or TokenType.DMINUS) return expr with { Rhs = e, Attribute = new ExprAttribute(((ExprAttribute?)e.Attribute)!.Type) };
+            else if (((ExprAttribute?)e.Attribute)!.Type.ToString() is "bool" && expr.Op is TokenType.EXCL_MARK) return expr with { Rhs = e, Attribute = new ExprAttribute(new State("bool")) };
+            else return builder.Except(expr, new Notification(builder.SourceFile, expr.Offset, 1, MsgType.PGRCS));
         }
 
         public Expr Visit(VarExpr expr)
