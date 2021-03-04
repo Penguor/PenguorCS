@@ -23,24 +23,11 @@ namespace Penguor.Compiler.Build
             set => tableManager = value;
         }
 
-        /// <summary> temporary </summary>
-        public static StringBuilder asmPre;
-        /// <summary> temporary </summary>
-        public static StringBuilder asmText;
-        /// <summary> temporary </summary>
-        public static StringBuilder asmData;
-        /// <summary> temporary </summary>
-        public static StringBuilder asmBss;
-
         private static bool run;
 
         static BuildManager()
         {
             tableManager = new SymbolTableManager();
-            asmPre = new StringBuilder("global main\nextern printf");
-            asmText = new();
-            asmData = new();
-            asmBss = new();
         }
 
         /// <summary>
@@ -48,6 +35,7 @@ namespace Penguor.Compiler.Build
         /// </summary>
         /// <param name="path">the file/project to build</param>
         /// <param name="stdLib">the path of the standard library</param>
+        /// <param name="run">whether the program should be executed after building</param>
         public static void SmartBuild(string path, string? stdLib, bool run = true)
         {
             BuildManager.run = run;
@@ -100,17 +88,10 @@ namespace Penguor.Compiler.Build
                 b.Analyse();
             foreach (var b in builders)
                 b.GenerateIR();
-            try
-            {
-                foreach (var b in builders)
-                    b.GenerateAsm();
-            }
-            finally
-            {
-                // Console.WriteLine(asmPre.ToString() + "\nsection .data\n\n" + asmData.ToString() + "\nsection .bss\n\n" + asmBss.ToString() + "\nsection .text\n\n" + asmText.ToString());
-            }
-            asm = asmPre.ToString() + "\nsection .data\n\n" + asmData.ToString() + "\nsection .bss\n\n" + asmBss.ToString() + "\nsection .text\n\n" + asmText.ToString();
+            foreach (var b in builders)
+                b.GenerateAsm();
 
+            asm = "";
 
             string buildPath = Path.Combine(Path.GetDirectoryName(project) ?? throw new Exception(), "build");
             Directory.CreateDirectory(buildPath);

@@ -3,19 +3,36 @@ using System.Collections.Generic;
 
 namespace Penguor.Compiler.IR
 {
+    /// <summary>
+    /// A basic block in penguor ir code
+    /// </summary>
     public class IRBlock
     {
+        /// <summary>
+        /// the id of the block, used to uniquely identify it
+        /// </summary>
         public BlockID ID { get; set; }
+        /// <summary>
+        /// a list of all direct predecessors of a block
+        /// </summary>
         public List<BlockID> Predecessors { get; } = new();
 
+        /// <summary>
+        /// creates a new instance of IRBlock
+        /// </summary>
+        /// <param name="id">the id used to identify this IRBlock</param>
         public IRBlock(BlockID id)
         {
             ID = id;
         }
 
+        /// <summary>
+        /// Adds a predecessor to the list
+        /// </summary>
+        /// <param name="pred">the id of the predecessor</param>
         public void AddPredecessor(BlockID pred) => Predecessors.Add(pred);
 
-
+        /// <inheritdoc/>
         public override bool Equals(object? obj)
         {
             if (obj == null || GetType() != obj.GetType())
@@ -27,6 +44,7 @@ namespace Penguor.Compiler.IR
             return false;
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             var hashCode = 254837322 + ID.GetHashCode();
@@ -36,5 +54,8 @@ namespace Penguor.Compiler.IR
         }
     }
 
+    /// <summary>
+    /// BlockID uniquely identifies exactly one IRBlock
+    /// </summary>
     public record BlockID(int ID, State State);
 }
