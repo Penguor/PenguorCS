@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 
 namespace Penguor.Compiler.Assembly
 {
@@ -15,7 +16,14 @@ namespace Penguor.Compiler.Assembly
 
         public override string Emit(AsmSyntax syntax)
         {
-            throw new System.NotImplementedException();
+            StringBuilder builder = new();
+            builder.AppendLine("section .text\n");
+
+            foreach (var function in Functions)
+            {
+                builder.AppendLine(function.Emit(syntax));
+            }
+            return builder.ToString();
         }
     }
 }

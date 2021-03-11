@@ -26,6 +26,6 @@ namespace Penguor.Compiler.Assembly
         /// <summary>
         /// Generate the Assembly
         /// </summary>
-        public abstract void Generate();
+        public abstract AsmProgram Generate();
     }
 }

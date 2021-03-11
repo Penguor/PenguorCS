@@ -1,5 +1,18 @@
 # Naming Convention
 
-File in this directory should be named as follows:
+Files in this directory should be named as follows:
 
-`NameOfFile OperatingSystem Architecture`
+`BaseClass`
+
+Inside of those files, the code for the class and all subclasses should reside.
+The naming convention for classes is:
+
+`BaseClassOperatingSystemArchitecture`
+
+supported operating systems:
+
+- Windows
+
+Supported architectures:
+
+- Amd64

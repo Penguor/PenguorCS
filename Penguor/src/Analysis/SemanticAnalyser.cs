@@ -141,14 +141,16 @@ namespace Penguor.Compiler.Analysis
             if (parent != null)
             {
                 var c = State.FromCall((CallExpr)parent);
-                var s = builder.TableManager.GetSymbol(c, scopes.ToArray())!;
-                s.Parent = c;
+                var parentSymbol = builder.TableManager.GetSymbol(c, scopes.ToArray())!;
+                parentSymbol.Parent = c;
                 IsAccessible(scopes[0] + new State(decl.Name), c, decl.Offset);
             }
 
             scopes[0].Push(decl.Name);
             var content = decl.Content.Accept(this);
             scopes[0].Pop();
+
+            builder.TableManager.GetSymbol(decl.Name, scopes.ToArray())!.DataType = builder.TableManager.GetStateBySymbol(decl.Name, scopes.ToArray());
 
             return decl with { Parent = (CallExpr?)parent, Content = (BlockDecl)content };
         }
@@ -396,6 +398,10 @@ namespace Penguor.Compiler.Analysis
 
                 type = new State("bool");
             }
+            else if (expr.Op == TokenType.EQUALS)
+            {
+                type = new State("bool");
+            }
             else if (expr.Op == TokenType.AND)
             {
                 if (lhs is NumExpr && rhs is NumExpr) throw new Exception();
@@ -445,6 +451,7 @@ namespace Penguor.Compiler.Analysis
             }
             else
             {
+                Console.WriteLine(expr.Op);
                 throw new Exception();
             }
 
@@ -468,7 +475,8 @@ namespace Penguor.Compiler.Analysis
             foreach (var i in expr.Callee)
                 callee.Add(i.Accept(this));
 
-            return expr with { Callee = callee, Attribute = new ExprAttribute(builder.TableManager.GetStateBySymbol(e, scopes.ToArray()) ?? throw new NullReferenceException()) };
+            if (pass == 1) return expr;
+            return expr with { Callee = callee, Attribute = new ExprAttribute(builder.TableManager.GetSymbol(e, scopes.ToArray())?.DataType ?? throw new NullReferenceException()) };
         }
 
         public Expr Visit(GroupingExpr expr)
@@ -497,7 +505,7 @@ namespace Penguor.Compiler.Analysis
                 number += Math.Pow(expr.NumBase, iteration - dotPosition) * GetNumberFromChar(expr.Value[i]);
                 iteration++;
             }
-            return expr with { NumBase = 10, NumValue = number };
+            return expr with { NumBase = 10, NumValue = number, Attribute = new ExprAttribute(new State("type")) };
 
             // return the numeric (base-10) representation of the digit
             double GetNumberFromChar(char chr)

@@ -6,6 +6,12 @@ namespace Penguor.Compiler.IR
     public record IRFunction
     {
         public List<IRStatement> Statements { get; init; } = new();
+        public State Name { get; init; }
+
+        public IRFunction(State name)
+        {
+            Name = name;
+        }
 
         public void Add(IRStatement statement) => Statements.Add(statement);
 

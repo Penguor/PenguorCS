@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using Penguor.Compiler.Build;
-using Penguor.Compiler.Debugging;
 using Penguor.Compiler.IR;
 using static Penguor.Compiler.Assembly.RegisterAmd64;
 namespace Penguor.Compiler.Assembly
@@ -31,24 +29,28 @@ namespace Penguor.Compiler.Assembly
         }
 
         /// <inheritdoc/>
-        public override void Generate()
+        public override AsmProgram Generate()
         {
-            program.AddGlobalLabel("main");
+            program.AddGlobalLabel(new State("main"));
+
+            AsmTextSection text = new();
 
             foreach (var i in functions)
             {
-                GetRegisters(i);
+                (var registers, var statements) = GetRegisters(i);
+                text.AddFunction(GenerateAssembly(i, registers, statements));
             }
+
+            return new AsmProgram { Text = text };
         }
 
-
-        private void GetRegisters(IRFunction function)
+        private (int[,], int[]) GetRegisters(IRFunction function)
         {
             (int[] statements, BitArray[] lifetimes) = ComputeLifetime(function);
 
-            int[,] weight = ComputeWeight(lifetimes, statements);
+            int[,] weight = ComputeWeight(lifetimes);
 
-            ComputeRegisters(weight, statements);
+            return ComputeRegisters(weight, statements, function);
         }
 
         private (int[], BitArray[]) ComputeLifetime(IRFunction function)
@@ -84,8 +86,13 @@ namespace Penguor.Compiler.Assembly
                     bits[j] = referenced;
                 }
 
+                if (function.Statements[i].Code is IROPCode.LOADARG or IROPCode.LOADPARAM or IROPCode.BCALL or IROPCode.CALL)
+                {
+                    statements.Add(i);
+                    lifetimes.Add(bits);
+                }
                 // do not add variables whose only occurrence are themselves
-                if (refCount > 1)
+                else if (refCount > 1)
                 {
                     statements.Add(i);
                     lifetimes.Add(bits);
@@ -96,9 +103,9 @@ namespace Penguor.Compiler.Assembly
             for (int i = 0; i < lifetimes.Count; i++)
             {
                 Console.Write(string.Format("{0,-4}", statements[i]));
-                foreach (var item in lifetimes[i])
+                foreach (bool item in lifetimes[i])
                 {
-                    Console.Write(item.ToString() == "True" ? 1 : 0);
+                    Console.Write(Convert.ToByte(item));
                     Console.Write(' ');
                 }
                 Console.WriteLine();
@@ -108,8 +115,9 @@ namespace Penguor.Compiler.Assembly
             return (statements.ToArray(), lifetimes.ToArray());
         }
 
-        private int[,] ComputeWeight(BitArray[] lifetimes, int[] statements)
+        private int[,] ComputeWeight(BitArray[] lifetimes)
         {
+            if (lifetimes.Length == 0) return new int[0, 0];
             int[,] weight = new int[lifetimes.Length, lifetimes[0].Length];
 
             for (int y = 0; y < lifetimes.Length; y++)
@@ -154,19 +162,24 @@ namespace Penguor.Compiler.Assembly
             return weight;
         }
 
-        private int[,] ComputeRegisters(int[,] weight, int[] statements)
+        private (int[,], int[]) ComputeRegisters(int[,] weight, int[] statements, IRFunction function)
         {
-            if (statements.Length == 0) return new int[0, 0];
-            int registerCount = 3;
+            if (statements.Length == 0) return (new int[0, 0], statements);
+
+            int registerCount = 10;
 
             int[] registerOccupied = new int[registerCount];
             int[,] registerMap = new int[weight.GetLength(0), weight.GetLength(1)];
 
             int xMax = weight.GetLength(1);
+
+            Stack<int> calls = new();
+            int paramCount = 1;
+            int argCount = 1;
+
             List<int> finished = new();
             for (int x = 0; x < xMax; x++)
             {
-
                 for (int y = 0; y < statements.Length; y++)
                 {
                     if (!finished.Contains(y))
@@ -174,7 +187,71 @@ namespace Penguor.Compiler.Assembly
                         int statement = statements[y];
                         if (weight[y, x] == 0)
                         {
-                            if (registerMap[y, x - 1] <= 0)
+                            if (function.Statements[y].Code is IROPCode.BCALL)
+                            {
+                                calls.Push(argCount);
+                                argCount = 1;
+                            }
+                            else if (function.Statements[y].Code is IROPCode.CALL)
+                            {
+                                argCount = calls.Pop();
+                            }
+
+                            if (function.Statements[y].Code is IROPCode.LOADPARAM)
+                            {
+                                int newRegister = 0;
+                                switch (function.Statements[y].Operands[0].ToString())
+                                {
+                                    case "byte" or "short" or "int" or "long":
+                                        newRegister = paramCount switch
+                                        {
+                                            1 => (int)RCX,
+                                            2 => (int)RDX,
+                                            3 => (int)R8,
+                                            4 => (int)R9,
+                                            _ => (int)STACK,
+                                        };
+                                        break;
+                                }
+                                if (registerOccupied[newRegister - 1] != 0)
+                                {
+                                    int highestWeight = 0;
+                                    int highestY = 0;
+                                    int newY = Array.IndexOf(statements, registerOccupied[newRegister - 1]);
+                                    for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
+                                    {
+                                        if (innerY > newY && weight[innerY, x] > highestWeight && registerMap[innerY, x - 1] != -1)
+                                        {
+                                            highestWeight = weight[innerY, x - 1];
+                                            highestY = innerY;
+                                        }
+                                        else if (innerY < newY && weight[innerY, x] > highestWeight && registerMap[innerY, x] != -1)
+                                        {
+                                            highestWeight = weight[innerY, x];
+                                            highestY = innerY;
+                                        }
+                                    }
+
+                                    int register = 0;
+                                    if (highestY > newY)
+                                    {
+                                        register = registerMap[highestY, x - 1];
+                                        registerMap[highestY, x - 1] = -1;
+                                    }
+                                    else
+                                    {
+                                        register = registerMap[highestY, x];
+                                        registerMap[highestY, x] = -1;
+                                    }
+
+                                    registerMap[newY, x] = register;
+                                    registerOccupied[register - 1] = statements[newY];
+                                }
+                                registerMap[y, x] = newRegister;
+                                registerOccupied[newRegister - 1] = statement;
+                                paramCount++;
+                            }
+                            else if (registerMap[y, x - 1] <= 0)
                             {
                                 bool foundEmpty = false;
                                 for (int i = 0; i < registerOccupied.Length; i++)
@@ -193,7 +270,12 @@ namespace Penguor.Compiler.Assembly
                                     int highestY = 0;
                                     for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
                                     {
-                                        if (statements[innerY] != statement && weight[innerY, x] > highestWeight)
+                                        if (innerY > y && weight[innerY, x] > highestWeight && registerMap[innerY, x - 1] != -1)
+                                        {
+                                            highestWeight = weight[innerY, x - 1];
+                                            highestY = innerY;
+                                        }
+                                        else if (innerY < y && weight[innerY, x] > highestWeight && registerMap[innerY, x] != -1)
                                         {
                                             highestWeight = weight[innerY, x];
                                             highestY = innerY;
@@ -245,12 +327,39 @@ namespace Penguor.Compiler.Assembly
                 Console.WriteLine();
             }
 
-            return registerMap;
+            return (registerMap, statements);
         }
 
-        // generate assembly for one statement
-        private void GenerateStatement()
+        private AsmFunctionAmd64 GenerateAssembly(IRFunction irFunction, int[,] registers, int[] statements)
         {
+            AsmFunctionAmd64 function = new AsmFunctionAmd64(irFunction.Name.ToString());
+
+            int x = 0;
+            foreach (var statement in irFunction.Statements)
+            {
+                switch (statement.Code)
+                {
+                    case IROPCode.FUNC:
+                    case IROPCode.LABEL:
+                        function.AddInstruction(new AsmLabelAmd64(((IRState)statement.Operands[0]).State));
+                        break;
+                    case IROPCode.ASM:
+                        function.AddInstruction(new AsmRawInstructionAmd64(((IRString)statement.Operands[0]).Value));
+                        break;
+                    case IROPCode.ADD:
+                        break;
+                        // if (registers[DecodeStatement(x), x])
+                        // function.AddInstruction(new AsmInstructionAmd64(AsmMnemonicAmd64.))
+                }
+                x++;
+            }
+
+            return function;
+
+            int DecodeStatement(int index)
+            {
+                return Array.IndexOf(statements, index);
+            }
         }
     }
 }

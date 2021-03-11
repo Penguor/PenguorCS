@@ -85,7 +85,9 @@ namespace Penguor.Compiler.Build
             foreach (var b in builders)
                 b.Parse();
             foreach (var b in builders)
-                b.Analyse();
+                b.Analyse(1);
+            foreach (var b in builders)
+                b.Analyse(2);
             foreach (var b in builders)
                 b.GenerateIR();
             foreach (var b in builders)
@@ -93,10 +95,11 @@ namespace Penguor.Compiler.Build
 
             asm = "";
 
-            string buildPath = Path.Combine(Path.GetDirectoryName(project) ?? throw new Exception(), "build");
+            string buildPath = Path.Combine(Path.GetDirectoryName(project)!, "build");
             Directory.CreateDirectory(buildPath);
 
-            File.WriteAllText(Path.Combine(buildPath, "out.asm"), asm);
+            foreach (var b in builders)
+                b.Emit(Path.GetDirectoryName(project)!);
 
             if (OperatingSystem.IsWindows())
             {

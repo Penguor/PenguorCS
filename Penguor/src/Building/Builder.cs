@@ -25,6 +25,7 @@ namespace Penguor.Compiler.Build
         private List<Token>? tokens;
         private ProgramDecl? program;
         private IRProgram? ir;
+        private AsmProgram? asmProgram;
 
         /// <summary>
         /// has the lexer run?
@@ -79,7 +80,8 @@ namespace Penguor.Compiler.Build
         {
             Lex();
             Parse();
-            Analyse();
+            Analyse(1);
+            Analyse(2);
             GenerateIR();
             return ExitCode;
         }
@@ -126,16 +128,16 @@ namespace Penguor.Compiler.Build
         /// <summary>
         /// perform semantic analysis on the abstract syntax tree
         /// </summary>
-        public void Analyse()
+        public void Analyse(byte pass)
         {
             if (!lexerFinished) Lex();
             if (!parserFinished) Parse();
 
             SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(nameof(program)), this);
 
-            analyser.Analyse(1);
-            program = (ProgramDecl)analyser.Analyse(2);
+            program = (ProgramDecl)analyser.Analyse(pass);
         }
+
 
         /// <summary>
         /// Generate IR code from the ast
@@ -152,7 +154,16 @@ namespace Penguor.Compiler.Build
         public void GenerateAsm()
         {
             AssemblyGeneratorWinAmd64 generator = new AssemblyGeneratorWinAmd64(ir ?? throw new ArgumentNullException(nameof(program)), this);
-            generator.Generate();
+            asmProgram = generator.Generate();
+        }
+
+        /// <summary>
+        /// emit the generated assembly
+        /// </summary>
+        public void Emit(string directory)
+        {
+            string assembly = asmProgram!.Emit(AsmSyntax.NASM);
+            File.WriteAllText(Path.Combine(directory, "build/", Path.GetFileNameWithoutExtension(SourceFile) + ".asm"), assembly);
         }
 
         /// <summary>

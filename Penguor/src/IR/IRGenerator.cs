@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Penguor.Compiler.Analysis;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Parsing;
@@ -173,7 +174,7 @@ namespace Penguor.Compiler.IR
 
         private void BeginFunction()
         {
-            currentFunction = new IRFunction();
+            currentFunction = new IRFunction((State)scopes[0].Clone());
         }
 
         private void EndFunction()
@@ -250,10 +251,11 @@ namespace Penguor.Compiler.IR
             AddStmt(IROPCode.FUNC, new IRState(scopes[0]));
             foreach (var parameter in decl.Parameters)
             {
-                parameter.Accept(this);
+                AddStmt(IROPCode.LOADPARAM, new IRState(((ExprAttribute)parameter.Attribute!).Type));
+                WriteVariable(builder.TableManager.GetStateBySymbol(parameter.Name, scopes)!, currentBlock, GetLastNumber());
             }
             decl.Content.Accept(this);
-            if (statements[(uint)statements.Count - 1].Code != IROPCode.RET) AddStmt(IROPCode.RETN);
+            if (statements[(uint)statements.Count - 1].Code != IROPCode.RET && statements[(uint)statements.Count - 1].Code != IROPCode.RETN) AddStmt(IROPCode.RETN);
             scopes[0].Pop();
             EndFunction();
             SealBlock(currentBlock);
@@ -546,25 +548,17 @@ namespace Penguor.Compiler.IR
 
         public IRReference Visit(CallExpr expr)
         {
+            AddStmt(IROPCode.BCALL);
             if (expr.Callee[^1] is IdfCall)
             {
                 return ReadVariable(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception(), currentBlock);
             }
             else if (expr.Callee[^1] is FunctionCall fCall)
             {
-                for (int a = 0; a < fCall.Args.Count; a++)
+                foreach (var item in fCall.Args)
                 {
-                    if (fCall.Args[a] is StringExpr strExpr)
-                    {
-                        AddStmt(IROPCode.LOADARG, new IRString(strExpr.Value), new IRInt(a + 1));
-                    }
-                    else if (fCall.Args[a] is NumExpr numExpr)
-                    {
-                        if (numExpr.Value.Contains('.')) AddStmt(IROPCode.LOADARG, new IRDouble(numExpr.NumValue ?? throw new Exception()), new IRInt(a + 1));
-                        else AddStmt(IROPCode.LOADARG, new IRInt((int?)numExpr.NumValue ?? throw new Exception()), new IRInt(a + 1));
-                    }
-                    fCall.Args[a].Accept(this);
-                    AddStmt(IROPCode.LOADARG, GetLastNumber(), new IRInt(a + 1));
+                    item.Accept(this);
+                    AddStmt(IROPCode.LOADARG, GetLastNumber(), new IRState(((ExprAttribute)item.Attribute!).Type));
                 }
                 return AddReference(AddStmt(IROPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception())));
             }

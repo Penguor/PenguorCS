@@ -3,9 +3,8 @@ using System.Text;
 
 namespace Penguor.Compiler.Assembly
 {
-    public class AsmFunctionAmd64
+    public class AsmFunctionAmd64 : IEmitter
     {
-
         public string Name { get; set; }
         List<AsmInstructionAmd64> Instructions { get; }
 
@@ -16,11 +15,16 @@ namespace Penguor.Compiler.Assembly
         }
 
         public void AddInstruction(AsmInstructionAmd64 instruction) => Instructions.Add(instruction);
-        public void AddInstruction(AsmOPCodeAmd64 opCode, params AsmOperand[] operands) => Instructions.Add(new AsmInstructionAmd64(opCode, operands));
+        public void AddInstruction(AsmMnemonicAmd64 opCode, params AsmOperand[] operands) => Instructions.Add(new AsmInstructionAmd64(opCode, operands));
 
         public string Emit(AsmSyntax syntax)
         {
-            throw new System.NotImplementedException();
+            StringBuilder builder = new();
+            foreach (var instruction in Instructions)
+            {
+                builder.AppendLine(instruction.Emit(syntax));
+            }
+            return builder.ToString();
         }
     }
 }

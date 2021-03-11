@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using System.Text;
 
 namespace Penguor.Compiler.Assembly
 {
     public class AsmProgram : IEmitter
     {
-        public List<string> GlobalLabels { get; }
+        public List<State> GlobalLabels { get; }
 
         public AsmTextSection Text { get; set; }
 
@@ -15,11 +16,14 @@ namespace Penguor.Compiler.Assembly
             Text = new();
         }
 
-        public void AddGlobalLabel(string label) => GlobalLabels.Add(label);
+        public void AddGlobalLabel(State label) => GlobalLabels.Add(label);
 
         public string Emit(AsmSyntax syntax)
         {
-            throw new System.NotImplementedException();
+            StringBuilder builder = new();
+            builder.AppendJoin(", ", GlobalLabels).AppendLine();
+            builder.AppendLine(Text.Emit(syntax));
+            return builder.ToString();
         }
     }
 }
