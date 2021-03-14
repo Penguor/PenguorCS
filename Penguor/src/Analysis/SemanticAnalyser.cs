@@ -70,7 +70,15 @@ namespace Penguor.Compiler.Analysis
                         accessable = true;
                         break;
                     case TokenType.PRIVATE:
-                        accessable = callee.IsChildOf(called);
+                        var calleeState = builder.TableManager.GetStateBySymbol(callee, scopes.ToArray());
+                        var calledState = builder.TableManager.GetStateBySymbol(called, scopes.ToArray());
+                        if (calledState == null || calleeState == null)
+                        {
+                            accessable = false;
+                            break;
+                        }
+                        calledState.Pop();
+                        accessable = calleeState.IsChildOf(calledState);
                         break;
                     case TokenType.PROTECTED:
                         accessable = calleeSymbol.Parent == callee;

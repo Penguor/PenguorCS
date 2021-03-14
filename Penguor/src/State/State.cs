@@ -279,6 +279,13 @@ namespace Penguor.Compiler
             return false;
         }
 
+        public bool ContainsAdType(params AddressType[] type)
+        {
+            foreach (var i in addressFrames)
+                if (Array.Exists(type, s => s == i.Type)) return true;
+            return false;
+        }
+
         /// <summary>
         /// copy the State to a new AddressFrame array
         /// </summary>
@@ -303,8 +310,8 @@ namespace Penguor.Compiler
         /// <param name="item">the State which should be compared to</param>
         public bool IsChildOf(State item)
         {
-            if (item.Count <= Count) return false;
-            for (int i = 0; i < Count; i++)
+            if (item.Count >= Count) return false;
+            for (int i = 0; i < item.Count; i++)
             {
                 if (addressFrames[i] == item[i]) continue;
                 else return false;

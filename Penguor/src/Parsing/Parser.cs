@@ -175,7 +175,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.FunctionDecl);
             AddressFrame name = variable.Name;
-            AddSymbol(name, accessMod ?? PROTECTED, nonAccessMods);
+            AddSymbol(name, accessMod ?? (state.ContainsAdType(AddressType.SystemDecl, AddressType.DataDecl, AddressType.TypeDecl) ? PROTECTED : RESTRICTED), nonAccessMods);
             state.Push(name);
             AddTable();
 
