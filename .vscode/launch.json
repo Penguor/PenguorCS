@@ -14,7 +14,7 @@
       "args": "build -i \"${input:buildFile}\" --stdlib \"${input:stdLib}\"",
       "cwd": "${workspaceFolder}/Penguor",
       // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-      "console": "internalConsole",
+      "console": "integratedTerminal",
       "stopAtEntry": false
     },
     {

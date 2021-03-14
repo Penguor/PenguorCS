@@ -9,9 +9,9 @@ namespace Penguor.Compiler.IR
     {
         public List<IRReference> Operands { get; } = new();
         public List<IRReference> Users { get; } = new();
-        public BlockID Block { get; }
+        public State Block { get; }
 
-        public IRPhi(BlockID block)
+        public IRPhi(State block)
         {
             Block = block;
         }

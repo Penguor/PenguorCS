@@ -10,7 +10,7 @@ namespace Penguor.Compiler.IR
         /// <summary>
         /// the instrution number
         /// </summary>
-        public uint Number { get; init; }
+        public int Number { get; init; }
 
         /// <summary>
         /// the OPCode of this statement
@@ -28,7 +28,7 @@ namespace Penguor.Compiler.IR
         /// <param name="number">the instrution number</param>
         /// <param name="code">the OPCode of this IRStatement</param>
         /// <param name="operands">the operands of this IRStatement</param>
-        public IRStatement(uint number, IROPCode code, params IRArgument[] operands)
+        public IRStatement(int number, IROPCode code, params IRArgument[] operands)
         {
             Number = number;
             Code = code;

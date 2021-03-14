@@ -11,17 +11,17 @@ namespace Penguor.Compiler.IR
         /// <summary>
         /// the id of the block, used to uniquely identify it
         /// </summary>
-        public BlockID ID { get; set; }
+        public State ID { get; set; }
         /// <summary>
         /// a list of all direct predecessors of a block
         /// </summary>
-        public List<BlockID> Predecessors { get; } = new();
+        public List<State> Predecessors { get; } = new();
 
         /// <summary>
         /// creates a new instance of IRBlock
         /// </summary>
         /// <param name="id">the id used to identify this IRBlock</param>
-        public IRBlock(BlockID id)
+        public IRBlock(State id)
         {
             ID = id;
         }
@@ -30,7 +30,7 @@ namespace Penguor.Compiler.IR
         /// Adds a predecessor to the list
         /// </summary>
         /// <param name="pred">the id of the predecessor</param>
-        public void AddPredecessor(BlockID pred) => Predecessors.Add(pred);
+        public void AddPredecessor(State pred) => Predecessors.Add(pred);
 
         /// <inheritdoc/>
         public override bool Equals(object? obj)
@@ -53,9 +53,4 @@ namespace Penguor.Compiler.IR
             return hashCode;
         }
     }
-
-    /// <summary>
-    /// BlockID uniquely identifies exactly one IRBlock
-    /// </summary>
-    public record BlockID(int ID, State State);
 }
