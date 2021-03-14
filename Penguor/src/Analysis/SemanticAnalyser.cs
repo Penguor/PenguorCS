@@ -505,7 +505,8 @@ namespace Penguor.Compiler.Analysis
                 number += Math.Pow(expr.NumBase, iteration - dotPosition) * GetNumberFromChar(expr.Value[i]);
                 iteration++;
             }
-            return expr with { NumBase = 10, NumValue = number, Attribute = new ExprAttribute(new State("type")) };
+            //todo: assign correct type based on if it's a floating point number
+            return expr with { NumBase = 10, NumValue = number, Attribute = new ExprAttribute(new State("int")) };
 
             // return the numeric (base-10) representation of the digit
             double GetNumberFromChar(char chr)

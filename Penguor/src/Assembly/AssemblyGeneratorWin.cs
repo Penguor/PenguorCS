@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Penguor.Compiler.Build;
+using Penguor.Compiler.Debugging;
 using Penguor.Compiler.IR;
 using static Penguor.Compiler.Assembly.RegisterAmd64;
 namespace Penguor.Compiler.Assembly
@@ -60,7 +61,7 @@ namespace Penguor.Compiler.Assembly
 
             for (int i = 0; i < function.Statements.Count; i++)
             {
-                uint number = function.Statements[i].Number;
+                int number = function.Statements[i].Number;
                 IRReference numReference = new IRReference(number);
 
                 var bits = new BitArray(function.Statements.Count);
@@ -166,9 +167,10 @@ namespace Penguor.Compiler.Assembly
         {
             if (statements.Length == 0) return (new int[0, 0], statements);
 
-            int registerCount = 10;
+            Dictionary<RegisterAmd64, int> registerOccupied = new();
+            foreach (RegisterAmd64 register in (RegisterAmd64[])Enum.GetValues(typeof(RegisterAmd64)))
+                registerOccupied[register] = 0;
 
-            int[] registerOccupied = new int[registerCount];
             int[,] registerMap = new int[weight.GetLength(0), weight.GetLength(1)];
 
             int xMax = weight.GetLength(1);
@@ -187,116 +189,37 @@ namespace Penguor.Compiler.Assembly
                         int statement = statements[y];
                         if (weight[y, x] == 0)
                         {
-                            if (function.Statements[y].Code is IROPCode.BCALL)
+                            if (function.Statements[x].Code is IROPCode.BCALL)
                             {
                                 calls.Push(argCount);
                                 argCount = 1;
                             }
-                            else if (function.Statements[y].Code is IROPCode.CALL)
+                            else if (function.Statements[x].Code is IROPCode.CALL)
                             {
                                 argCount = calls.Pop();
                             }
-
-                            if (function.Statements[y].Code is IROPCode.LOADPARAM)
+                            else if (function.Statements[x].Code is IROPCode.LOADPARAM)
                             {
-                                int newRegister = 0;
-                                switch (function.Statements[y].Operands[0].ToString())
+                                RegisterAmd64 newRegister = 0;
+                                switch (function.Statements[x].Operands[0].ToString())
                                 {
                                     case "byte" or "short" or "int" or "long":
                                         newRegister = paramCount switch
                                         {
-                                            1 => (int)RCX,
-                                            2 => (int)RDX,
-                                            3 => (int)R8,
-                                            4 => (int)R9,
-                                            _ => (int)STACK,
+                                            1 => RCX,
+                                            2 => RDX,
+                                            3 => R8,
+                                            4 => R9,
+                                            _ => STACK,
                                         };
                                         break;
                                 }
-                                if (registerOccupied[newRegister - 1] != 0)
-                                {
-                                    int highestWeight = 0;
-                                    int highestY = 0;
-                                    int newY = Array.IndexOf(statements, registerOccupied[newRegister - 1]);
-                                    for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
-                                    {
-                                        if (innerY > newY && weight[innerY, x] > highestWeight && registerMap[innerY, x - 1] != -1)
-                                        {
-                                            highestWeight = weight[innerY, x - 1];
-                                            highestY = innerY;
-                                        }
-                                        else if (innerY < newY && weight[innerY, x] > highestWeight && registerMap[innerY, x] != -1)
-                                        {
-                                            highestWeight = weight[innerY, x];
-                                            highestY = innerY;
-                                        }
-                                    }
-
-                                    int register = 0;
-                                    if (highestY > newY)
-                                    {
-                                        register = registerMap[highestY, x - 1];
-                                        registerMap[highestY, x - 1] = -1;
-                                    }
-                                    else
-                                    {
-                                        register = registerMap[highestY, x];
-                                        registerMap[highestY, x] = -1;
-                                    }
-
-                                    registerMap[newY, x] = register;
-                                    registerOccupied[register - 1] = statements[newY];
-                                }
-                                registerMap[y, x] = newRegister;
-                                registerOccupied[newRegister - 1] = statement;
+                                AssignRegister(x, y, newRegister);
                                 paramCount++;
                             }
                             else if (registerMap[y, x - 1] <= 0)
                             {
-                                bool foundEmpty = false;
-                                for (int i = 0; i < registerOccupied.Length; i++)
-                                {
-                                    if (registerOccupied[i] == 0)
-                                    {
-                                        registerMap[y, x] = i + 1;
-                                        registerOccupied[i] = statement;
-                                        foundEmpty = true;
-                                        i = registerOccupied.Length;
-                                    }
-                                }
-                                if (!foundEmpty)
-                                {
-                                    int highestWeight = 0;
-                                    int highestY = 0;
-                                    for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
-                                    {
-                                        if (innerY > y && weight[innerY, x] > highestWeight && registerMap[innerY, x - 1] != -1)
-                                        {
-                                            highestWeight = weight[innerY, x - 1];
-                                            highestY = innerY;
-                                        }
-                                        else if (innerY < y && weight[innerY, x] > highestWeight && registerMap[innerY, x] != -1)
-                                        {
-                                            highestWeight = weight[innerY, x];
-                                            highestY = innerY;
-                                        }
-                                    }
-
-                                    int register = 0;
-                                    if (highestY > y)
-                                    {
-                                        register = registerMap[highestY, x - 1];
-                                        registerMap[highestY, x - 1] = -1;
-                                    }
-                                    else
-                                    {
-                                        register = registerMap[highestY, x];
-                                        registerMap[highestY, x] = -1;
-                                    }
-
-                                    registerMap[y, x] = register;
-                                    registerOccupied[register - 1] = statement;
-                                }
+                                AssignRegister(x, y, (RegisterAmd64)FindAndEmptyRegister(y, x));
                             }
                             else
                             {
@@ -305,7 +228,7 @@ namespace Penguor.Compiler.Assembly
                         }
                         else if (weight[y, x] == -2)
                         {
-                            registerOccupied[registerMap[y, x - 1] - 1] = 0;
+                            registerOccupied[(RegisterAmd64)registerMap[y, x - 1]] = 0;
                             finished.Add(y);
                         }
                         else if (x != 0)
@@ -314,20 +237,130 @@ namespace Penguor.Compiler.Assembly
                         }
                     }
                 }
-
             }
 
-            Console.WriteLine();
-            for (int y = 0; y < registerMap.Length / xMax; y++)
+            PrintRegisters();
+
+            for (int x = 0; x < xMax; x++)
             {
-                for (int x = 0; x < xMax; x++)
+                HashSet<int> ints = new HashSet<int>(registerMap.Length);
+                for (int y = 0; y < registerMap.Length / xMax; y++)
                 {
-                    Console.Write(string.Format("{0,-3}", registerMap[y, x]));
+                    if (registerMap[y, x] != 0 && !ints.Add(registerMap[y, x]))
+                        throw new Exception();
                 }
-                Console.WriteLine();
             }
 
             return (registerMap, statements);
+
+            void PrintRegisters()
+            {
+                Console.WriteLine();
+                for (int y = 0; y < registerMap.Length / xMax; y++)
+                {
+                    for (int x = 0; x < xMax; x++)
+                    {
+                        Console.Write(string.Format("{0,-3}", registerMap[y, x]));
+                    }
+                    Console.WriteLine();
+                }
+            }
+
+            void AssignRegister(int x, int y, RegisterAmd64 register)
+            {
+                if (registerOccupied[register] == 0)
+                {
+                    registerMap[y, x] = (int)register;
+                    registerOccupied[register] = statements[y];
+                }
+                else
+                {
+                    int newY = Array.IndexOf(statements, registerOccupied[register]);
+                    var newRegister = FindAndEmptyRegister(newY, x);
+
+                    registerMap[newY, x] = newRegister;
+                    registerOccupied[(RegisterAmd64)newRegister] = statements[newY];
+                }
+                registerMap[y, x] = (int)register;
+                registerOccupied[register - 1] = statements[y];
+            }
+
+            int FindAndEmptyRegister(int y, int x)
+            {
+                IRStatement statement = function.Statements[statements[y]];
+
+                RegisterAmd64[] validRegisters = GetRegisterSetFromStatement(statement);
+                int newRegister = 0;
+
+                foreach ((var register, var currentStatement) in registerOccupied)
+                {
+                    if (Array.Exists(validRegisters, element => element == register) && currentStatement == 0)
+                    {
+                        newRegister = (int)register;
+                        break;
+                    }
+                }
+
+                if (newRegister != 0) return newRegister;
+
+                int highestWeight = 0;
+                int highestY = 0;
+
+                for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
+                {
+                    if (innerY > y && weight[innerY, x] > highestWeight && registerMap[innerY, x - 1] != -1)
+                    {
+                        highestWeight = weight[innerY, x - 1];
+                        highestY = innerY;
+                    }
+                    else if (innerY < y && weight[innerY, x] > highestWeight && registerMap[innerY, x] != -1)
+                    {
+                        highestWeight = weight[innerY, x];
+                        highestY = innerY;
+                    }
+                }
+
+                if (highestY > y)
+                {
+                    newRegister = registerMap[highestY, x - 1];
+                    registerMap[highestY, x - 1] = -1;
+                }
+                else
+                {
+                    newRegister = registerMap[highestY, x];
+                    registerMap[highestY, x] = -1;
+                }
+
+                return newRegister;
+            }
+
+            RegisterAmd64[] GetRegisterSetFromStatement(IRStatement statement)
+            {
+                // Console.WriteLine(statement);
+                return statement.Code switch
+                {
+                    IROPCode.LOADARG or IROPCode.LOADPARAM => statement.Operands[0].ToString() switch
+                    {
+                        "byte" or "short" or "int" or "long" or "string" => RegisterSetAmd64.GeneralPurpose,
+                        "double" => RegisterSetAmd64.XMM
+                    },
+                    IROPCode.LOAD => statement.Operands[0] switch
+                    {
+                        IRInt or IRString => RegisterSetAmd64.GeneralPurpose,
+                    },
+                    IROPCode.PHI => GetRegisterSetFromStatement(
+                            function.Statements.Find(s => s.Number == ((IRPhi)statement.Operands[0]).Operands[0].Referenced) ?? throw new NullReferenceException()),
+                    IROPCode.ADD or IROPCode.MUL or IROPCode.SUB or IROPCode.DIV => GetRegisterSetFromStatement(
+                            function.Statements.Find(s => s.Number == ((IRReference)statement.Operands[0]).Referenced) ?? throw new NullReferenceException()),
+                    IROPCode.CALL => builder.TableManager.GetSymbol(((IRState)statement.Operands[0]).State).DataType?.ToString() switch
+                    {
+                        "byte" or "short" or "int" or "long" or "string" or "void" => RegisterSetAmd64.Return64,
+                        null => throw new NullReferenceException(),
+                        string s => throw new PenguorCSException(s)
+                    },
+                    _ => throw new PenguorCSException(statement.ToString())
+                };
+            }
         }
 
         private AsmFunctionAmd64 GenerateAssembly(IRFunction irFunction, int[,] registers, int[] statements)

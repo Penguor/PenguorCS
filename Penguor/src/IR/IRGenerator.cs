@@ -560,7 +560,8 @@ namespace Penguor.Compiler.IR
                 AddStmt(IROPCode.BCALL);
                 foreach (var item in fCall.Args)
                 {
-                    AddStmt(IROPCode.LOADARG, new IRState(((ExprAttribute)item.Attribute!).Type), item.Accept(this));
+                    var reference = item.Accept(this);
+                    AddStmt(IROPCode.LOADARG, new IRState(((ExprAttribute)item.Attribute!).Type), reference);
                 }
                 return AddReference(AddStmt(IROPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception())));
             }
