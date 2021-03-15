@@ -75,8 +75,11 @@ namespace Penguor.Compiler.Assembly
                     {
                         foreach (var operand in function.Statements[j].Operands)
                         {
-                            referenced = (operand is IRPhi phiOperand && phiOperand.Operands.Contains(numReference))
-                                || (operand is IRReference refOperand && refOperand == numReference);
+                            if (!referenced)
+                            {
+                                referenced = (operand is IRPhi phiOperand && phiOperand.Operands.Contains(numReference))
+                                    || (operand is IRReference refOperand && refOperand == numReference);
+                            }
                         }
                     }
                     else
@@ -380,9 +383,17 @@ namespace Penguor.Compiler.Assembly
                         function.AddInstruction(new AsmRawInstructionAmd64(((IRString)statement.Operands[0]).Value));
                         break;
                     case IROPCode.ADD:
+                        function.AddInstruction(new AsmInstructionAmd64(
+                            AsmMnemonicAmd64.MOV,
+                            new AsmRegister((RegisterAmd64)registers[DecodeStatement(x), x]),
+                            new AsmRegister((RegisterAmd64)registers[DecodeStatementFromReference(statement.Operands[0]), x])
+                        ));
+                        function.AddInstruction(new AsmInstructionAmd64(
+                            AsmMnemonicAmd64.ADD,
+                            new AsmRegister((RegisterAmd64)registers[DecodeStatement(x), x]),
+                            new AsmRegister((RegisterAmd64)registers[DecodeStatementFromReference(statement.Operands[1]), x])
+                        ));
                         break;
-                        // if (registers[DecodeStatement(x), x])
-                        // function.AddInstruction(new AsmInstructionAmd64(AsmMnemonicAmd64.))
                 }
                 x++;
             }
@@ -392,6 +403,14 @@ namespace Penguor.Compiler.Assembly
             int DecodeStatement(int index)
             {
                 return Array.IndexOf(statements, index);
+            }
+
+            int DecodeStatementFromReference(IRArgument argument)
+            {
+                if (argument is not IRReference reference)
+                    throw new Exception();
+                else
+                    return Array.IndexOf(statements, irFunction.Statements.FindIndex(s => s.Number == reference.Referenced));
             }
         }
     }

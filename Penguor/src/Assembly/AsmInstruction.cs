@@ -15,8 +15,17 @@ namespace Penguor.Compiler.Assembly
 
         public virtual string Emit(AsmSyntax syntax)
         {
-            //todo: implement
-            throw new System.NotImplementedException();
+            StringBuilder builder = new();
+            builder.Append(OPCode.ToString());
+            builder.Append(' ');
+            foreach (var i in Operands)
+            {
+                builder.Append(i.Emit(syntax));
+                builder.Append(", ");
+            }
+            builder.Remove(builder.Length - 2, 2);
+
+            return builder.ToString();
         }
     }
 }
