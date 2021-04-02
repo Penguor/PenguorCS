@@ -18,6 +18,11 @@ namespace Penguor.Compiler.IR
         public List<State> Predecessors { get; } = new();
 
         /// <summary>
+        /// the <see cref="IRReference"/> of the first statement the block
+        /// </summary>
+        public IRReference? First { get; set; }
+
+        /// <summary>
         /// creates a new instance of IRBlock
         /// </summary>
         /// <param name="id">the id used to identify this IRBlock</param>

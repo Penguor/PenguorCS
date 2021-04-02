@@ -101,9 +101,12 @@ namespace Penguor.Compiler.Build
             foreach (var b in builders)
                 b.Emit(Path.GetDirectoryName(project)!);
 
+            foreach (var b in builders)
+                b.Assemble(Path.GetDirectoryName(project)!);
+
+
             if (OperatingSystem.IsWindows())
             {
-                Process.Start("nasm", $" -fwin64 -g {Path.Combine(buildPath, "out.asm")}").WaitForExit();
                 Process.Start("gcc", $"{Path.Combine(buildPath, "out.obj")} -o {Path.Combine(buildPath, "out.exe")}").WaitForExit();
                 if (run)
                 {

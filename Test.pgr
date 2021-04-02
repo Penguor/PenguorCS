@@ -27,14 +27,18 @@ void pow(int a, int b)
     return result
 }
 
+void main() { 
+    pow(2,2)
+    print("Hello World")
+}
 
-/*void print() {
+void print() {
         asm
 "SUB rsp, 32
 CALL printf"
 }
 
-public system Fibonacci
+/*public system Fibonacci
 {
 
     void printLn()

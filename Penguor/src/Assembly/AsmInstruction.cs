@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 
 namespace Penguor.Compiler.Assembly
@@ -18,12 +19,11 @@ namespace Penguor.Compiler.Assembly
             StringBuilder builder = new();
             builder.Append(OPCode.ToString());
             builder.Append(' ');
-            foreach (var i in Operands)
+            for (int i = 0; i < Operands.Length; i++)
             {
-                builder.Append(i.Emit(syntax));
-                builder.Append(", ");
+                builder.Append(Operands[i].Emit(syntax));
+                if (i != Operands.Length - 1) builder.Append(", ");
             }
-            builder.Remove(builder.Length - 2, 2);
 
             return builder.ToString();
         }

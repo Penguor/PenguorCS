@@ -15,11 +15,22 @@ namespace Penguor.Compiler.Assembly
             return Value;
         }
     }
+    public class AsmNumber : AsmOperand
+    {
+        double Value { get; set; }
+        public AsmNumber(double value) => Value = value;
+
+        public override string Emit(AsmSyntax syntax)
+        {
+            return Value.ToString();
+        }
+    }
 
     public class AsmRegister : AsmOperand
     {
         RegisterAmd64 Value { get; set; }
         public AsmRegister(RegisterAmd64 value) => Value = value;
+        public AsmRegister(int register) => Value = (RegisterAmd64)register;
 
         public override string Emit(AsmSyntax syntax)
         {

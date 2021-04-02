@@ -30,6 +30,7 @@ namespace Penguor.Compiler.IR
             scopes.Add(new State());
             scopes.Add(new State());
             currentBlock = CreateBlock(new State(), false, false);
+            blocks[currentBlock].First = new IRReference(0);
         }
 
         //ssa related stuff
@@ -140,6 +141,7 @@ namespace Penguor.Compiler.IR
         private State BeginBlock(State newBlock, bool labelled)
         {
             currentBlock = CreateBlock(newBlock, true, labelled);
+            blocks[currentBlock].First = new IRReference(_instructionNumber);
             return currentBlock;
         }
 
@@ -231,7 +233,33 @@ namespace Penguor.Compiler.IR
             {
                 program.Accept(this);
                 foreach (var function in irProgram.Functions)
+                {
+                    Dictionary<IRStatement, State> phis = new();
+                    foreach (var statement in function.Statements)
+                    {
+                        if (statement.Code is IROPCode.PHI)
+                        {
+                            phis.Add(statement, ((IRPhi)statement.Operands[0]).Block);
+                        }
+                    }
+                    Dictionary<State, IRStatement> firstStatements = new(blocks.Count);
+                    foreach (var block in blocks)
+                    {
+                        if (block.Value.First!.Referenced >= function.First.Referenced && block.Value.First.Referenced <= function.Statements[^1].Number)
+                        {
+                            firstStatements.Add(block.Key, function.Statements.Find(s =>
+                            s.Number.Equals(block.Value.First!.Referenced)) ?? throw new NullReferenceException("outer"));
+                        }
+                    }
+                    foreach (var phi in phis)
+                    {
+                        function.Statements.Remove(phi.Key);
+                        function.Statements.Insert(function.Statements.FindIndex(s => s.Equals(firstStatements[phi.Value])) + 1, phi.Key);
+                    }
+
                     function.ResolveReroutes();
+                    function.ResolveReroutes();
+                }
             }
             finally
             {
@@ -406,10 +434,19 @@ namespace Penguor.Compiler.IR
             scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
             var conditionBlock = BeginBlock(scopes[0] + new AddressFrame(".c", AddressType.Control), true);
             stmt.Condition.Accept(this);
+            IROPCode jumpCode = statements[^1].Code switch
+            {
+                IROPCode.LOAD => IROPCode.JTR,
+                IROPCode.LESS => IROPCode.JL,
+                IROPCode.LESS_EQUALS => IROPCode.JLE,
+                IROPCode.GREATER => IROPCode.JG,
+                IROPCode.GREATER_EQUALS => IROPCode.JGE,
+                IROPCode.EQUALS => IROPCode.JE
+            };
             if (hasElse)
-                AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".else", AddressType.Control)));
+                AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".else", AddressType.Control)));
             else
-                AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
+                AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
             SealBlock(conditionBlock);
 
             //content
@@ -482,7 +519,16 @@ namespace Penguor.Compiler.IR
             var conditionBlock = AddLabel();
             scopes[0].Pop();
             stmt.Condition.Accept(this);
-            AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
+            IROPCode jumpCode = statements[^1].Code switch
+            {
+                IROPCode.LOAD => IROPCode.JFL,
+                IROPCode.LESS => IROPCode.JNL,
+                IROPCode.LESS_EQUALS => IROPCode.JNLE,
+                IROPCode.GREATER => IROPCode.JNG,
+                IROPCode.GREATER_EQUALS => IROPCode.JNGE,
+                IROPCode.EQUALS => IROPCode.JNE
+            };
+            AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
 
             // content
             var contentBlock = AddLabel();
@@ -558,12 +604,16 @@ namespace Penguor.Compiler.IR
             else if (expr.Callee[^1] is FunctionCall fCall)
             {
                 AddStmt(IROPCode.BCALL);
-                foreach (var item in fCall.Args)
+
+                IRArgument[] arguments = new IRArgument[fCall.Args.Count + 1];
+                for (int i = 0; i < fCall.Args.Count; i++)
                 {
-                    var reference = item.Accept(this);
-                    AddStmt(IROPCode.LOADARG, new IRState(((ExprAttribute)item.Attribute!).Type), reference);
+                    var reference = fCall.Args[i].Accept(this);
+                    AddStmt(IROPCode.LOADARG, new IRState(((ExprAttribute)fCall.Args[i].Attribute!).Type), reference);
+                    arguments[i + 1] = GetLastNumber();
                 }
-                return AddReference(AddStmt(IROPCode.CALL, new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception())));
+                arguments[0] = new IRState(builder.TableManager.GetStateBySymbol(State.FromCall(expr), scopes.ToArray()) ?? throw new Exception());
+                return AddReference(AddStmt(IROPCode.CALL, arguments));
             }
             else
             {

@@ -1,0 +1,66 @@
+Register Allocation
+===================
+
+Does:
+Allocates registers to an ssa-based ir
+
+Global Input:
+- Function with ir blocks containing statements and phis -> IRFunction
+- Sets of valid registers for different data types -> RegisterSets
+
+AnalyseLifetime
+--------------
+
+Does:
+Analyses the lifetime of variables with respect to loops and jumps
+
+Input: 
+- IRFunction
+
+Output:
+- 2D Array with lifetime information -> LifetimeMap
+
+ComputeWeight
+-------------
+
+Does:
+Computes how long it will take until the variable is used next and
+when it is first and last used.
+Is needed to determine which variables can be spilled to memory.
+
+Input:
+- LifetimeMap
+
+Output:
+- 2D Array containing information when the variable will be used next -> WeightMap
+
+Comment:
+- Should respect loops, at branches the lower weight is used for calculation
+
+ComputeSuggestedRegisters
+-------------------------
+
+Does:
+Computes a map containing information which register would be most optimal
+to prevent mov operations.
+
+Input:
+- WeightMap
+
+Output:
+- 2D Array containing information on where to optimally store the variable at any point in time -> SuggestedRegisters
+
+
+ComputeRegisters
+----------------
+
+Does:
+Computes in which register the variables are during the program execution.
+
+Input:
+- WeightMap
+- SuggestedRegisters
+
+Comment:
+- needs to pay attention to calling convention and loops
+- might have to be done in 2 passes

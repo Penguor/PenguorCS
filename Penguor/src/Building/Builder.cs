@@ -1,6 +1,6 @@
-
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Penguor.Compiler.Analysis;
 using Penguor.Compiler.Assembly;
@@ -164,6 +164,11 @@ namespace Penguor.Compiler.Build
         {
             string assembly = asmProgram!.Emit(AsmSyntax.NASM);
             File.WriteAllText(Path.Combine(directory, "build/", Path.GetFileNameWithoutExtension(SourceFile) + ".asm"), assembly);
+        }
+
+        public void Assemble(string directory)
+        {
+            Process.Start("nasm", $" -fwin64 -g {Path.Combine(directory, "build/", $"{Path.GetFileNameWithoutExtension(SourceFile)}.asm")}").WaitForExit();
         }
 
         /// <summary>
