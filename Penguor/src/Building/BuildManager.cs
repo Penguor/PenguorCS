@@ -104,10 +104,16 @@ namespace Penguor.Compiler.Build
             foreach (var b in builders)
                 b.Assemble(Path.GetDirectoryName(project)!);
 
+            StringBuilder objects = new();
+            foreach (var b in builders)
+            {
+                if (File.Exists($"{Path.Combine(buildPath, Path.GetFileNameWithoutExtension(b.SourceFile))}.obj"))
+                    objects.Append(' ').Append(Path.Combine(buildPath, Path.GetFileNameWithoutExtension(b.SourceFile))).Append(".obj ");
+            }
 
             if (OperatingSystem.IsWindows())
             {
-                Process.Start("gcc", $"{Path.Combine(buildPath, "out.obj")} -o {Path.Combine(buildPath, "out.exe")}").WaitForExit();
+                Process.Start("gcc", $"{objects} -o {Path.Combine(buildPath, "out.exe")}").WaitForExit();
                 if (run)
                 {
                     using Process process = new Process();
@@ -120,11 +126,9 @@ namespace Penguor.Compiler.Build
 
                     StreamReader reader = process.StandardOutput;
 
-                    string output = reader.ReadToEnd();
-
-                    Console.WriteLine(output);
-
                     process.WaitForExit();
+
+                    Console.WriteLine(reader.ReadToEnd());
                 }
             }
         }

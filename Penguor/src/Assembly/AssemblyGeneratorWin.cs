@@ -539,6 +539,8 @@ namespace Penguor.Compiler.Assembly
                         function.AddInstruction(AsmMnemonicAmd64.RET);
                         break;
                     case IROPCode.RETN:
+                        function.AddInstruction(AsmMnemonicAmd64.MOV, new AsmRegister(RSP), new AsmRegister(RBP));
+                        function.AddInstruction(AsmMnemonicAmd64.POP, new AsmRegister(RBP));
                         function.AddInstruction(AsmMnemonicAmd64.RET);
                         break;
                     case IROPCode.LOADARG:

@@ -51,6 +51,9 @@ namespace Penguor.Compiler.Build
         /// </summary>
         public int ExitCode { get; private set; }
 
+        //todo: replace this
+        public bool Assembled { get; private set; }
+
         /// <summary>
         /// create a new instance of the Builder class
         /// </summary>
