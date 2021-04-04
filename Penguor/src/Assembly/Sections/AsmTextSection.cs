@@ -7,7 +7,7 @@ namespace Penguor.Compiler.Assembly
     {
         public List<AsmFunctionAmd64> Functions { get; }
 
-        public AsmTextSection() : base("text")
+        public AsmTextSection() : base("data")
         {
             Functions = new();
         }

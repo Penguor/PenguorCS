@@ -15,20 +15,20 @@
 
 // void print(int a): return a + a
 
-void pow(int a, int b)
-{
-    int i = 0;
-    int result = a;
-    while(i < b)
-    {
-        result *= a
-        i+= 1
-    }
-    return result
-}
+// void pow(int a, int b)
+// {
+//     int i = 0;
+//     int result = a;
+//     while(i < b)
+//     {
+//         result *= a
+//         i+= 1
+//     }
+//     return result
+// }
 
 void main() { 
-    pow(2,2)
+    // pow(2,2)
     print("Hello World")
 }
 

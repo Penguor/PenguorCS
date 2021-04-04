@@ -33,6 +33,7 @@ namespace Penguor.Compiler.Assembly
         public override AsmProgram Generate()
         {
             program.AddGlobalLabel(new State("main"));
+            program.AddExtern(new State("printf"));
 
             AsmTextSection text = new();
 
@@ -42,7 +43,9 @@ namespace Penguor.Compiler.Assembly
                 text.AddFunction(GenerateAssembly(i, registers));
             }
 
-            return new AsmProgram { Text = text };
+            program.Text = text;
+
+            return program;
         }
 
         private RegisterAmd64[,] GetRegisters(IRFunction function)
@@ -211,12 +214,12 @@ namespace Penguor.Compiler.Assembly
                             Console.WriteLine("call " + function.Statements[x].Number + " " + calls.Count);
                             argCount = calls.Pop();
                         }
-                        else if (function.Statements[x].Code is IROPCode.LOADPARAM)
+                        else if (function.Statements[x].Code is IROPCode.LOADPARAM or IROPCode.LOADARG)
                         {
                             RegisterAmd64 newRegister = 0;
                             switch (function.Statements[x].Operands[0].ToString())
                             {
-                                case "byte" or "short" or "int" or "long":
+                                case "byte" or "short" or "int" or "long" or "string":
                                     newRegister = paramCount switch
                                     {
                                         1 => RCX,
@@ -458,6 +461,11 @@ namespace Penguor.Compiler.Assembly
                 switch (statement.Code)
                 {
                     case IROPCode.FUNC:
+                        function.AddInstruction(new AsmLabelAmd64(((IRState)statement.Operands[0]).State));
+                        //stack frame
+                        function.AddInstruction(AsmMnemonicAmd64.PUSH, new AsmRegister(RBP));
+                        function.AddInstruction(AsmMnemonicAmd64.MOV, new AsmRegister(RBP), new AsmRegister(RSP));
+                        break;
                     case IROPCode.LABEL:
                         function.AddInstruction(new AsmLabelAmd64(((IRState)statement.Operands[0]).State));
                         break;
@@ -483,6 +491,7 @@ namespace Penguor.Compiler.Assembly
                             statement.Operands[0] switch
                             {
                                 IRInt num => new AsmNumber(num.Value),
+                                IRString str => new AsmString(GetString(str)),
                                 _ => new AsmString("0")
                             }
                         ));
@@ -520,6 +529,8 @@ namespace Penguor.Compiler.Assembly
                         );
                         break;
                     case IROPCode.RET:
+                        function.AddInstruction(AsmMnemonicAmd64.MOV, new AsmRegister(RSP), new AsmRegister(RBP));
+                        function.AddInstruction(AsmMnemonicAmd64.POP, new AsmRegister(RBP));
                         function.AddInstruction(
                             AsmMnemonicAmd64.MOV,
                             new AsmRegister(RAX),
@@ -558,6 +569,48 @@ namespace Penguor.Compiler.Assembly
                     throw new Exception();
                 else
                     return irFunction.Statements.FindIndex(s => s.Number == reference.Referenced);
+            }
+        }
+
+        private readonly Dictionary<string, int> stringConstants = new();
+        private int _stringNum;
+        private int StringNum { get => _stringNum++; }
+
+        private string GetString(IRString s)
+        {
+            if (!stringConstants.ContainsKey(s.Value))
+            {
+                string[] values = s.Value.Split('\\');
+                var labelNum = StringNum;
+                var labelName = $"@string{labelNum}";
+                stringConstants.Add(s.Value, labelNum);
+
+                List<string> processedValues = new();
+
+                for (int i2 = 0; i2 < values.Length; i2++)
+                {
+                    if (i2 == 0)
+                    {
+                        if (values[i2].Length > 0) processedValues.Add($"'{values[i2]}'");
+                    }
+                    else
+                    {
+                        processedValues.Add(values[i2][0] switch
+                        {
+                            'n' => "10",
+                            //todo: proper offset for ir statements
+                            char escape => builder.Except("error", 16, 0, escape.ToString())
+                        });
+                    }
+                }
+                processedValues.Add("0");
+
+                program.Data.AddFunction(new AsmVariableAmd64(labelName, "db", processedValues.ToArray()));
+                return labelName;
+            }
+            else
+            {
+                return $"@string{stringConstants[s.Value]}";
             }
         }
     }
