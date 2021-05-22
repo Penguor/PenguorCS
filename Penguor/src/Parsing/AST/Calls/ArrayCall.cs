@@ -6,46 +6,46 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A Var Decl
+    /// A Array Call
     /// </summary>
-    public sealed record VarDecl : Decl
+    public sealed record ArrayCall : Call
     {
         /// <summary>
-        /// creates a new instance of VarDecl
+        /// creates a new instance of ArrayCall
         /// </summary>
-        public VarDecl(int id, int offset, CallExpr type, AddressFrame name, Expr? init)
+        public ArrayCall(int id, int offset, AddressFrame name, Expr index, TokenType? postfix)
         {
             Id = id;
             Offset = offset;
-            Type = type;
             Name = name;
-            Init = init;
+            Index = index;
+            Postfix = postfix;
         }
-        public CallExpr Type { get; init; }
         public AddressFrame Name { get; init; }
-        public Expr? Init { get; init; }
+        public Expr Index { get; init; }
+        public TokenType? Postfix { get; init; }
 
-        public override string ToString() => "var declaration";
+        public override string ToString() => "array call";
 
         /// <summary>
         /// returns Visit() of this instance
         /// </summary>
         /// <param name="visitor">the visitor which should visit this instance</param>
         /// <returns>Visit() of this instance</returns>
-        public override T Accept<T>(IDeclVisitor<T> visitor)
+        public override T Accept<T>(ICallVisitor<T> visitor)
         {
             return visitor.Visit(this);
         }
     }
 
     /// <summary>
-    /// Contains methods to visit all Declarations
+    /// Contains methods to visit all Calls
     /// </summary>
-    public partial interface IDeclVisitor<T>
+    public partial interface ICallVisitor<T>
     {
         /// <summary>
-        /// visit a VarDecl
+        /// visit a ArrayCall
         /// </summary>
-        T Visit(VarDecl decl);
+        T Visit(ArrayCall call);
     }
 }

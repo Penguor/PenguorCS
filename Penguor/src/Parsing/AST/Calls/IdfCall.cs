@@ -13,13 +13,15 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of IdfCall
         /// </summary>
-        public IdfCall(int id, int offset, AddressFrame name)
+        public IdfCall(int id, int offset, AddressFrame name, TokenType? postfix)
         {
             Id = id;
             Offset = offset;
             Name = name;
+            Postfix = postfix;
         }
         public AddressFrame Name { get; init; }
+        public TokenType? Postfix { get; init; }
 
         public override string ToString() => "idf call";
 

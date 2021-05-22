@@ -13,15 +13,17 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of FunctionCall
         /// </summary>
-        public FunctionCall(int id, int offset, AddressFrame name, List<Expr> args)
+        public FunctionCall(int id, int offset, AddressFrame name, List<Expr> args, TokenType? postfix)
         {
             Id = id;
             Offset = offset;
             Name = name;
             Args = args;
+            Postfix = postfix;
         }
         public AddressFrame Name { get; init; }
         public List<Expr> Args { get; init; }
+        public TokenType? Postfix { get; init; }
 
         public override string ToString() => "function call";
 

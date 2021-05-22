@@ -1,3 +1,4 @@
+;; "Penguor\src\Parsing\AST"
 ; Expression Expr "Penguor\src\Parsing\AST\Expressions"
 Assign CallExpr lhs TokenType op Expr value
 Binary Expr lhs TokenType op Expr rhs
@@ -26,14 +27,17 @@ Expr Expr expr
 ; Declaration Decl "Penguor\src\Parsing\AST\Declarations"
 Program List<Decl> declarations
 Using CallExpr lib
-System TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
-Data TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
-Type TokenType? accessMod TokenType[] nonAccessMod AddressFrame name CallExpr? parent BlockDecl content
-Function TokenType? accessMod TokenType[] nonAccessMod CallExpr returns AddressFrame name List<VarExpr> parameters Decl content
-Library TokenType? accessMod TokenType[] nonAccessMod State name BlockDecl content
-Var TokenType? accessMod TokenType[] nonAccessMod CallExpr type AddressFrame name Expr? init
+Modified TokenType? accessMod TokenType? nonAccessMod Decl declaration
+System AddressFrame name CallExpr? parent BlockDecl content
+Data AddressFrame name CallExpr? parent BlockDecl content
+Type AddressFrame name CallExpr? parent BlockDecl content
+Function CallExpr returns AddressFrame name List<VarExpr> parameters Decl content
+Library State name BlockDecl content
+Var CallExpr type AddressFrame name Expr? init
+StmtBlock List<Decl> content
 Block List<Decl> content
 Stmt Stmt stmt
 ; Call Call "Penguor\src\Parsing\AST\Calls"
-Function AddressFrame name List<Expr> args
-Idf AddressFrame name
+Function AddressFrame name List<Expr> args TokenType? postfix
+Idf AddressFrame name TokenType? postfix
+Array AddressFrame name Expr index TokenType? postfix

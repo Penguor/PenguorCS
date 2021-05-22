@@ -6,28 +6,26 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A Function Decl
+    /// A Modified Decl
     /// </summary>
-    public sealed record FunctionDecl : Decl
+    public sealed record ModifiedDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of FunctionDecl
+        /// creates a new instance of ModifiedDecl
         /// </summary>
-        public FunctionDecl(int id, int offset, CallExpr returns, AddressFrame name, List<VarExpr> parameters, Decl content)
+        public ModifiedDecl(int id, int offset, TokenType? accessmod, TokenType? nonaccessmod, Decl declaration)
         {
             Id = id;
             Offset = offset;
-            Returns = returns;
-            Name = name;
-            Parameters = parameters;
-            Content = content;
+            AccessMod = accessmod;
+            NonAccessMod = nonaccessmod;
+            Declaration = declaration;
         }
-        public CallExpr Returns { get; init; }
-        public AddressFrame Name { get; init; }
-        public List<VarExpr> Parameters { get; init; }
-        public Decl Content { get; init; }
+        public TokenType? AccessMod { get; init; }
+        public TokenType? NonAccessMod { get; init; }
+        public Decl Declaration { get; init; }
 
-        public override string ToString() => "function declaration";
+        public override string ToString() => "modified declaration";
 
         /// <summary>
         /// returns Visit() of this instance
@@ -46,8 +44,8 @@ namespace Penguor.Compiler.Parsing.AST
     public partial interface IDeclVisitor<T>
     {
         /// <summary>
-        /// visit a FunctionDecl
+        /// visit a ModifiedDecl
         /// </summary>
-        T Visit(FunctionDecl decl);
+        T Visit(ModifiedDecl decl);
     }
 }

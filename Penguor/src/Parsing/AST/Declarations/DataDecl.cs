@@ -13,18 +13,14 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of DataDecl
         /// </summary>
-        public DataDecl(int id, int offset, TokenType? accessmod, TokenType[] nonaccessmod, AddressFrame name, CallExpr? parent, BlockDecl content)
+        public DataDecl(int id, int offset, AddressFrame name, CallExpr? parent, BlockDecl content)
         {
             Id = id;
             Offset = offset;
-            AccessMod = accessmod;
-            NonAccessMod = nonaccessmod;
             Name = name;
             Parent = parent;
             Content = content;
         }
-        public TokenType? AccessMod { get; init; }
-        public TokenType[] NonAccessMod { get; init; }
         public AddressFrame Name { get; init; }
         public CallExpr? Parent { get; init; }
         public BlockDecl Content { get; init; }

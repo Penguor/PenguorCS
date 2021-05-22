@@ -6,28 +6,22 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A Function Decl
+    /// A StmtBlock Decl
     /// </summary>
-    public sealed record FunctionDecl : Decl
+    public sealed record StmtBlockDecl : Decl
     {
         /// <summary>
-        /// creates a new instance of FunctionDecl
+        /// creates a new instance of StmtBlockDecl
         /// </summary>
-        public FunctionDecl(int id, int offset, CallExpr returns, AddressFrame name, List<VarExpr> parameters, Decl content)
+        public StmtBlockDecl(int id, int offset, List<Decl> content)
         {
             Id = id;
             Offset = offset;
-            Returns = returns;
-            Name = name;
-            Parameters = parameters;
             Content = content;
         }
-        public CallExpr Returns { get; init; }
-        public AddressFrame Name { get; init; }
-        public List<VarExpr> Parameters { get; init; }
-        public Decl Content { get; init; }
+        public List<Decl> Content { get; init; }
 
-        public override string ToString() => "function declaration";
+        public override string ToString() => "stmtblock declaration";
 
         /// <summary>
         /// returns Visit() of this instance
@@ -46,8 +40,8 @@ namespace Penguor.Compiler.Parsing.AST
     public partial interface IDeclVisitor<T>
     {
         /// <summary>
-        /// visit a FunctionDecl
+        /// visit a StmtBlockDecl
         /// </summary>
-        T Visit(FunctionDecl decl);
+        T Visit(StmtBlockDecl decl);
     }
 }
