@@ -1,4 +1,3 @@
-
 #pragma warning disable 1591
 
 namespace Penguor.Compiler.Parsing.AST
@@ -6,12 +5,8 @@ namespace Penguor.Compiler.Parsing.AST
     /// <summary>
     /// Base class for penguor Call
     /// </summary>
-    public abstract record Call
+    public abstract record Call : ASTNode
     {
-        public int Id { get; init; }
-        public int Offset { get; init; }
-        public ASTAttribute? Attribute { get; set; }
-
         /// <summary>
         /// <c>Accept</c> returns the visit method for the Call
         /// </summary>
