@@ -117,29 +117,31 @@ namespace Penguor.Compiler.Parsing
                 hasModifier = true;
             }
 
+            Decl decl = ModifiableDeclaration();
+            (var declName, var defaultAccessMod) = decl switch
+            {
+                SystemDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
+                DataDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
+                TypeDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
+                FunctionDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, state.ContainsAdType(AddressType.SystemDecl, AddressType.DataDecl, AddressType.TypeDecl) ? PROTECTED : RESTRICTED),
+                VarDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
+                _ => new Tuple<AddressFrame?, TokenType?>(null, null)
+            };
+
+            if (declName != null)
+            {
+                var symbol = builder.TableManager.GetSymbol(declName, state) ?? throw new Exception();
+                symbol.AccessMod = accessMod ?? defaultAccessMod;
+                symbol.NonAccessMod = nonAccessMod;
+            }
+
             if (hasModifier)
             {
-                Decl decl = ModifiableDeclaration();
-                (var declName, var defaultAccessMod) = decl switch
-                {
-                    SystemDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
-                    DataDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
-                    TypeDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
-                    FunctionDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, state.ContainsAdType(AddressType.SystemDecl, AddressType.DataDecl, AddressType.TypeDecl) ? PROTECTED : RESTRICTED),
-                    VarDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
-                    _ => new Tuple<AddressFrame?, TokenType?>(null, null)
-                };
-
-                if (declName != null)
-                {
-                    AddSymbol(declName, accessMod ?? defaultAccessMod, nonAccessMod);
-                }
-
-                return new ModifiedDecl(id, GetCurrent().Offset, accessMod, nonAccessMod, ModifiableDeclaration());
+                return new ModifiedDecl(id, GetCurrent().Offset, accessMod, nonAccessMod, decl);
             }
             else
             {
-                return ModifiableDeclaration();
+                return decl;
             }
         }
 
@@ -156,6 +158,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.SystemDecl);
             CallExpr? parent = GetParent();
+            AddSymbol(name);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
@@ -168,6 +171,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.DataDecl);
             CallExpr? parent = GetParent();
+            AddSymbol(name);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
@@ -180,6 +184,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.TypeDecl);
             CallExpr? parent = GetParent();
+            AddSymbol(name);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
@@ -194,6 +199,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.FunctionDecl);
             AddressFrame name = variable.Name;
+            AddSymbol(name);
             state.Push(name);
             AddTable();
 
@@ -222,6 +228,7 @@ namespace Penguor.Compiler.Parsing
         {
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.VarDecl);
+            AddSymbol(variable.Name);
             VarDecl dec = new VarDecl(ID, offset, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
             return dec;
