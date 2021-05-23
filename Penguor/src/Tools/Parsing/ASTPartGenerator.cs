@@ -25,6 +25,12 @@ namespace Penguor.Compiler.Tools
                 {
                     mode = "groupHead";
                     Advance();
+
+                    if (current == ';')
+                    {
+                        mode = "base";
+                        Advance();
+                    }
                 }
 
                 List<string> types;
@@ -33,6 +39,36 @@ namespace Penguor.Compiler.Tools
                 string tmp;
                 switch (mode)
                 {
+                    case "base":
+                        tmp = "";
+                        while (!Match('"')) Advance();
+                        while (!Match('"'))
+                        {
+                            tmp += current;
+                            Advance();
+                        }
+                        folder = tmp;
+                        Directory.CreateDirectory(folder);
+                        using (StreamWriter writer = new StreamWriter(Path.Combine(folder, "ASTNode.cs")))
+                        {
+                            writer.Write(
+@"#pragma warning disable 1591
+
+namespace Penguor.Compiler.Parsing.AST
+{
+    /// <summary>
+    /// Base class for penguor ast nodes
+    /// </summary>
+    public abstract record ASTNode
+    {
+        public int Id { get; init; }
+        public int Offset { get; init; }
+        public ASTAttribute? Attribute { get; set; }
+    }
+}
+");
+                        }
+                        break;
                     case "groupHead":
                         tmp = "";
                         while (char.IsWhiteSpace(current)) Advance();
@@ -62,20 +98,16 @@ namespace Penguor.Compiler.Tools
                         Directory.CreateDirectory(folder);
                         using (StreamWriter writer = new StreamWriter(Path.Combine(folder, mode + ".cs")))
                         {
-                            writer.Write($@"
-#pragma warning disable 1591
+                            writer.Write(
+$@"#pragma warning disable 1591
 
 namespace Penguor.Compiler.Parsing.AST
 {{
     /// <summary>
     /// Base class for penguor {mode}
     /// </summary>
-    public abstract record {mode}
+    public abstract record {mode} : ASTNode
     {{
-        public int Id {{ get; init; }}
-        public int Offset {{ get; init; }}
-        public ASTAttribute? Attribute {{ get; set; }}
-
         /// <summary>
         /// <c>Accept</c> returns the visit method for the {mode}
         /// </summary>
@@ -125,8 +157,8 @@ namespace Penguor.Compiler.Parsing.AST
                         {
                             writer.AutoFlush = true;
 
-                            writer.Write($@"
-#pragma warning disable 1591
+                            writer.Write(
+$@"#pragma warning disable 1591
 
 using System.Collections.Generic;
 

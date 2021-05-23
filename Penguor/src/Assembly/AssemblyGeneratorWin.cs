@@ -412,7 +412,7 @@ namespace Penguor.Compiler.Assembly
                     },
                     IROPCode.LOAD => statement.Operands[0] switch
                     {
-                        IRInt or IRString => RegisterSetAmd64.GeneralPurpose,
+                        IRInt or IRString or IRBool => RegisterSetAmd64.GeneralPurpose,
                     },
                     IROPCode.PHI => GetRegisterSetFromStatement(
                             function.Statements.Find(s => s.Number == ((IRPhi)statement.Operands[0]).Operands[0].Referenced) ?? throw new NullReferenceException()),
@@ -424,6 +424,7 @@ namespace Penguor.Compiler.Assembly
                         null => throw new NullReferenceException(),
                         string s => throw new PenguorCSException(s)
                     },
+                    IROPCode.LESS => new RegisterAmd64[] { 0 },
                     _ => throw new PenguorCSException(statement.ToString())
                 };
             }
@@ -434,6 +435,9 @@ namespace Penguor.Compiler.Assembly
             AsmFunctionAmd64 function = new AsmFunctionAmd64(irFunction.Name.ToString());
 
             int x = 0;
+
+            int stackCounter = 0;
+
             foreach (var statement in irFunction.Statements)
             {
                 for (int y = 0; y < registers.GetLength(0); y++)
@@ -444,9 +448,12 @@ namespace Penguor.Compiler.Assembly
                         {
                             continue;
                         }
-                        else if (registers[y, x - 1] == STACK)
+                        else if (registers[y, x - 1] == STACK && registers[y, x] != STACK)
                         {
-                            //todo: implement stack
+                        }
+                        else if (registers[y, x - 1] != STACK && registers[y, x] == STACK)
+                        {
+
                         }
                         else
                         {
@@ -492,6 +499,7 @@ namespace Penguor.Compiler.Assembly
                             {
                                 IRInt num => new AsmNumber(num.Value),
                                 IRString str => new AsmString(GetString(str)),
+                                IRBool bl => new AsmNumber(bl.Value ? 1 : 0),
                                 _ => new AsmString("0")
                             }
                         ));
@@ -556,9 +564,17 @@ namespace Penguor.Compiler.Assembly
                             new AsmString(statement.Operands[0].ToString())
                         );
                         break;
+                    // case IROPCode.JFL:
+                    //     var register = registers[DecodeStatementFromReference(statement.Operands[1]), x - 1];
+                    //     function.AddInstruction(o)
+                    //     function.AddInstruction(
+                    //         AsmMnemonicAmd64.JZ,
+
+
+                    //     );
+                    //     break;
                     default:
                         throw new PenguorCSException(statement.ToString());
-                        break;
                 }
                 x++;
             }

@@ -120,7 +120,6 @@ namespace Penguor.Compiler.Parsing
             TYPE => "type",
             LIBRARY => "library",
             IF => "if",
-            ELIF => "elif",
             ELSE => "else",
             FOR => "for",
             WHILE => "while",

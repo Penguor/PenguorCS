@@ -562,5 +562,20 @@ namespace Penguor.Compiler.Analysis
         }
 
         public Call Visit(IdfCall call) => call;
+
+        public Call Visit(ArrayCall call)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Decl Visit(StmtBlockDecl decl)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Decl Visit(ModifiedDecl decl)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

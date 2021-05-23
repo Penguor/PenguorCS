@@ -2,10 +2,9 @@
 
 using System.Collections.Generic;
 using System.Text;
-
 using Penguor.Compiler.Build;
-using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Debugging;
+using Penguor.Compiler.Parsing;
 
 namespace Penguor.Compiler.Lexing
 {
@@ -82,9 +81,6 @@ namespace Penguor.Compiler.Lexing
                             continue;
                         case "if":
                             AddToken(TokenType.IF);
-                            continue;
-                        case "elif":
-                            AddToken(TokenType.ELIF);
                             continue;
                         case "else":
                             AddToken(TokenType.ELSE);
@@ -279,8 +275,7 @@ namespace Penguor.Compiler.Lexing
                         AddToken(TokenType.RBRACE);
                         break;
                     case '[':
-                        while (char.IsWhiteSpace(Peek())) Advance();
-                        AddToken(Match(']') ? TokenType.ARRAY : TokenType.LBRACK);
+                        AddToken(TokenType.LBRACK);
                         break;
                     case ']':
                         AddToken(TokenType.RBRACK);

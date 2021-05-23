@@ -25,9 +25,9 @@ namespace Penguor.Compiler
         /// </summary>
         public TokenType? AccessMod { get; set; }
         /// <summary>
-        /// the non-accessmods, e.g. static
+        /// the non-accessmod, e.g. static
         /// </summary>
-        public TokenType[]? NonAccessMods { get; set; }
+        public TokenType? NonAccessMod { get; set; }
 
         /// <summary>
         /// if the symbol is a declaration, this represents the parent declaration it inherits from

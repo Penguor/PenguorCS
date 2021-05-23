@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": ".NET Core Launch (console)",
+      "name": "Build Penguor File",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
@@ -13,6 +13,19 @@
       "program": "${workspaceFolder}/Penguor/bin/Debug/net5.0/Penguor.dll",
       "args": "build -i \"${input:buildFile}\" --stdlib \"${input:stdLib}\"",
       "cwd": "${workspaceFolder}/Penguor",
+      // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Generate AST Nodes",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      // If you have changed target frameworks, make sure to update the program path.
+      "program": "${workspaceFolder}/Penguor/bin/Debug/net5.0/Penguor.dll",
+      "args": "tools generateAST \"${input:astGenFile}\"",
+      "cwd": "${workspaceFolder}",
       // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
       "console": "integratedTerminal",
       "stopAtEntry": false
@@ -30,6 +43,12 @@
       "type": "promptString",
       "default": "../Test.pgr",
       "description": "The Penguor file to build"
+    },
+    {
+      "id": "astGenFile",
+      "type": "promptString",
+      "default": "",
+      "description": "The file containing the information for the ast node generation"
     },
     {
       "id": "stdLib",

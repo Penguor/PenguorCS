@@ -180,9 +180,12 @@ namespace Penguor.Compiler.IR
             sealedBlocks.Add(block);
         }
 
-        private State AddJumpStmt(IROPCode code, IRState jumpTo)
+        private State AddJumpStmt(IROPCode code, IRState jumpTo, params IRArgument[] args)
         {
-            AddStmt(code, jumpTo);
+            IRArgument[] allArguments = new IRArgument[args.Length + 1];
+            allArguments[0] = new IRState((State)jumpTo.State.Clone());
+            Array.Copy(args, 0, allArguments, 1, args.Length);
+            AddStmt(code, allArguments);
             return CreateBlock(jumpTo.State, true, true);
         }
 
@@ -528,7 +531,7 @@ namespace Penguor.Compiler.IR
                 IROPCode.GREATER_EQUALS => IROPCode.JNGE,
                 IROPCode.EQUALS => IROPCode.JNE
             };
-            AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
+            AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)), GetLastNumber());
 
             // content
             var contentBlock = AddLabel();
@@ -657,6 +660,16 @@ namespace Penguor.Compiler.IR
                 new IRState(builder.TableManager.GetStateBySymbol(expr.Name, scopes) ?? throw new NullReferenceException()));
             WriteVariable(builder.TableManager.GetStateBySymbol(expr.Name, scopes) ?? throw new NullReferenceException(), currentBlock, GetLastNumber());
             return GetLastNumber();
+        }
+
+        public int Visit(StmtBlockDecl decl)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Visit(ModifiedDecl decl)
+        {
+            throw new NotImplementedException();
         }
     }
 }

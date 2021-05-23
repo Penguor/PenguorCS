@@ -18,6 +18,7 @@ namespace Penguor.Compiler.Parsing
         private int current; // the position of the current token in the tokens list
 
         private readonly State state;
+        private bool errored = false;
 
         private int id;
         private int ID { get => id++; }
@@ -32,6 +33,16 @@ namespace Penguor.Compiler.Parsing
             this.builder = builder;
             this.tokens = tokens;
             state = new State();
+
+            Logger.OnTryLogged += GetLoggedErrors;
+        }
+
+        /// <summary>
+        /// deconstructor for the parser
+        /// </summary>
+        ~Parser()
+        {
+            Logger.OnTryLogged -= GetLoggedErrors;
         }
 
         private void CheckBraces(Stmt content, string name)
@@ -54,70 +65,81 @@ namespace Penguor.Compiler.Parsing
             return new ProgramDecl(ID, GetCurrent().Offset, declarations);
         }
 
-        private Decl Declaration(bool allowStmtDecl = false)
+        private Decl Declaration()
+        {
+            return Either(ModifiedDecl, EmbeddedDeclaration);
+        }
+
+        private Decl ModifiableDeclaration()
+        {
+            if (Match(SYSTEM)) return SystemDecl();
+            if (Match(DATA)) return DataDecl();
+            if (Match(TYPE)) return TypeDecl();
+            if (Match(LIBRARY)) return LibraryDecl();
+            if (Check(IDF) && Check(IDF, 1) && Check(LPAREN, 2))
+                return FunctionDecl();
+            if (Check(IDF) && LookAhead(1).Type == IDF) return VarDecl();
+
+            if (Match(HASHTAG))
+            {
+                CompilerStmt stmt = CompilerStmt();
+                return Except(new StmtDecl(ID, stmt.Offset, stmt), 13, stmt.ToString());
+            }
+            else
+            {
+                StmtDecl decl = StmtDecl();
+                return Except(decl, 6, decl.Stmt.ToString(), state[^1].Type.ToString());
+            }
+        }
+
+        private Decl EmbeddedDeclaration()
+        {
+            if (Match(USING)) return UsingDecl();
+            if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
+                return FunctionDecl();
+            return StmtDecl();
+        }
+
+        private Decl ModifiedDecl()
         {
             TokenType? accessMod = null;
-            bool hasAccessMod = false;
-            TokenType[] nonAccessMods = new TokenType[3];
+            TokenType? nonAccessMod = null;
+            bool hasModifier = false;
 
             if (Match(PUBLIC, PRIVATE, PROTECTED, RESTRICTED))
             {
                 accessMod = GetPrevious().Type;
-                hasAccessMod = true;
+                hasModifier = true;
             }
-            if (Check(STATIC) != Check(DYNAMIC))
+            if (Match(STATIC, DYNAMIC, ABSTRACT, CONST))
             {
-                nonAccessMods[0] = Advance().Type;
-                hasAccessMod = true;
-            }
-            if (Check(ABSTRACT))
-            {
-                nonAccessMods[1] = Advance().Type;
-                hasAccessMod = true;
-            }
-            if (Check(CONST))
-            {
-                nonAccessMods[2] = Advance().Type;
-                hasAccessMod = true;
+                nonAccessMod = GetPrevious().Type;
+                hasModifier = true;
             }
 
-            if (!hasAccessMod)
+            if (hasModifier)
             {
-                if (Match(USING)) return UsingDecl();
-                if (Match(SYSTEM)) return SystemDecl(null, Array.Empty<TokenType>());
-                if (Match(DATA)) return DataDecl(null, Array.Empty<TokenType>());
-                if (Match(TYPE)) return TypeDecl(null, Array.Empty<TokenType>());
-                if (Match(LIBRARY)) return LibraryDecl(null, Array.Empty<TokenType>());
-                if (Match(HASHTAG)) return new StmtDecl(ID, GetPrevious().Offset, CompilerStmt());
-                if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
-                    return FunctionDecl(null, Array.Empty<TokenType>());
-                else if (!state.ContainsAdType(AddressType.FunctionDecl) && Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(null, Array.Empty<TokenType>());
-                if (!allowStmtDecl)
+                Decl decl = ModifiableDeclaration();
+                (var declName, var defaultAccessMod) = decl switch
                 {
-                    StmtDecl decl = StmtDecl();
-                    return Except(decl, 6, decl.Stmt.ToString(), state[^1].Type.ToString());
+                    SystemDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
+                    DataDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
+                    TypeDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
+                    FunctionDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, state.ContainsAdType(AddressType.SystemDecl, AddressType.DataDecl, AddressType.TypeDecl) ? PROTECTED : RESTRICTED),
+                    VarDecl d => new Tuple<AddressFrame?, TokenType?>(d.Name, RESTRICTED),
+                    _ => new Tuple<AddressFrame?, TokenType?>(null, null)
+                };
+
+                if (declName != null)
+                {
+                    AddSymbol(declName, accessMod ?? defaultAccessMod, nonAccessMod);
                 }
-                return StmtDecl();
+
+                return new ModifiedDecl(id, GetCurrent().Offset, accessMod, nonAccessMod, ModifiableDeclaration());
             }
             else
             {
-                if (Match(SYSTEM)) return SystemDecl(accessMod, nonAccessMods);
-                if (Match(DATA)) return DataDecl(accessMod, nonAccessMods);
-                if (Match(TYPE)) return TypeDecl(accessMod, nonAccessMods);
-                if (Match(LIBRARY)) return LibraryDecl(accessMod, nonAccessMods);
-                if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
-                    return FunctionDecl(accessMod, nonAccessMods);
-                if (!state.ContainsAdType(AddressType.FunctionDecl) && Check(IDF) && LookAhead(1).Type == IDF) return VarDecl(accessMod, nonAccessMods);
-                if (Match(HASHTAG))
-                {
-                    CompilerStmt stmt = CompilerStmt();
-                    return Except(new StmtDecl(ID, stmt.Offset, stmt), 13, stmt.ToString());
-                }
-                else
-                {
-                    StmtDecl decl = StmtDecl();
-                    return Except(decl, 6, decl.Stmt.ToString(), state[^1].Type.ToString());
-                }
+                return ModifiableDeclaration();
             }
         }
 
@@ -129,53 +151,49 @@ namespace Penguor.Compiler.Parsing
             return new UsingDecl(ID, offset, call);
         }
 
-        private SystemDecl SystemDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        private SystemDecl SystemDecl()
         {
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.SystemDecl);
             CallExpr? parent = GetParent();
-            AddSymbol(name, accessMod ?? RESTRICTED, nonAccessMods);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
-            return new SystemDecl(ID, offset, accessMod, nonAccessMods, name, parent, content);
+            return new SystemDecl(ID, offset, name, parent, content);
         }
 
-        private Decl DataDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        private Decl DataDecl()
         {
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.DataDecl);
             CallExpr? parent = GetParent();
-            AddSymbol(name, accessMod ?? RESTRICTED, nonAccessMods);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
-            return new DataDecl(ID, offset, accessMod, nonAccessMods, name, parent, content);
+            return new DataDecl(ID, offset, name, parent, content);
         }
 
-        private Decl TypeDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        private Decl TypeDecl()
         {
             int offset = GetCurrent().Offset;
             AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.TypeDecl);
             CallExpr? parent = GetParent();
-            AddSymbol(name, accessMod ?? RESTRICTED, nonAccessMods);
             state.Push(name);
             AddTable();
             BlockDecl content = BlockDecl();
             state.Pop();
-            return new TypeDecl(ID, offset, accessMod, nonAccessMods, name, parent, content);
+            return new TypeDecl(ID, offset, name, parent, content);
         }
 
         private CallExpr? GetParent() => Match(LESS) ? CallExpr() : null;
 
-        private FunctionDecl FunctionDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        private FunctionDecl FunctionDecl()
         {
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.FunctionDecl);
             AddressFrame name = variable.Name;
-            AddSymbol(name, accessMod ?? (state.ContainsAdType(AddressType.SystemDecl, AddressType.DataDecl, AddressType.TypeDecl) ? PROTECTED : RESTRICTED), nonAccessMods);
             state.Push(name);
             AddTable();
 
@@ -197,20 +215,19 @@ namespace Penguor.Compiler.Parsing
             Decl content = DeclContent();
 
             state.Pop();
-            return new FunctionDecl(ID, offset, accessMod, nonAccessMods, variable.Type, name, parameters, content);
+            return new FunctionDecl(ID, offset, variable.Type, name, parameters, content);
         }
 
-        private VarDecl VarDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        private VarDecl VarDecl()
         {
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.VarDecl);
-            AddSymbol(variable.Name, accessMod ?? RESTRICTED, nonAccessMods);
-            VarDecl dec = new VarDecl(ID, offset, accessMod, nonAccessMods, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
+            VarDecl dec = new VarDecl(ID, offset, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
             return dec;
         }
 
-        private LibraryDecl LibraryDecl(TokenType? accessMod, TokenType[] nonAccessMods)
+        private LibraryDecl LibraryDecl()
         {
             int offset = GetCurrent().Offset;
             State name = new State { new AddressFrame(Consume(IDF).Name, AddressType.LibraryDecl) };
@@ -223,23 +240,39 @@ namespace Penguor.Compiler.Parsing
 
             state.Remove(name);
 
-            return new LibraryDecl(ID, offset, accessMod, nonAccessMods, name, content);
+            return new LibraryDecl(ID, offset, name, content);
         }
 
         // returns either a StmtDecl or a BlockDecl
         private Decl DeclContent()
         {
-            if (Check(LBRACE)) return BlockDecl(true);
+            if (Check(LBRACE)) return StmtBlockDecl();
             if (Match(COLON)) return StmtDecl();
             return Except(new StmtDecl(ID, GetCurrent().Offset, null!), 12);
         }
 
-        private BlockDecl BlockDecl(bool allowStmt = false)
+        private BlockDecl BlockDecl()
         {
             int offset = Consume(LBRACE).Offset;
             List<Decl> declarations = new List<Decl>();
 
-            while (!Match(RBRACE)) declarations.Add(Declaration(allowStmt));
+            while (!Match(RBRACE))
+            {
+                var declaration = Declaration();
+                if (declaration is StmtDecl)
+                    Except(23);
+                declarations.Add(declaration);
+            }
+
+            return new BlockDecl(ID, offset, declarations);
+        }
+
+        private BlockDecl StmtBlockDecl()
+        {
+            int offset = Consume(LBRACE).Offset;
+            List<Decl> declarations = new List<Decl>();
+
+            while (!Match(RBRACE)) declarations.Add(Declaration());
 
             return new BlockDecl(ID, offset, declarations);
         }
@@ -546,22 +579,34 @@ namespace Penguor.Compiler.Parsing
                 Token idf = Consume(IDF);
                 if (Match(DOT))
                 {
-                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall)));
+                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall), null));
                     continue;
                 }
                 else if (Match(LPAREN))
                 {
                     callee.Add(FunctionCall(new AddressFrame(idf.Name, AddressType.FunctionCall)));
-                    if (Match(DOT)) continue;
+
+                    if (GetPrevious().Type is DPLUS or DMINUS && Check(DOT)) Except(22);
+                    else if (Match(DOT)) continue;
                 }
-                else if (Match(DPLUS, DMINUS, ARRAY))
+                else if (Match(DPLUS, DMINUS))
                 {
                     postfix = GetPrevious().Type;
-                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall)));
+                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall), postfix));
+                    if (Match(DOT))
+                        Except(22);
+                }
+                else if (Match(LBRACK))
+                {
+                    while (!Match(RBRACK))
+                    {
+
+                    }
+                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall), ARRAY));
                 }
                 else
                 {
-                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall)));
+                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall), null));
                 }
                 break;
             }
@@ -573,13 +618,13 @@ namespace Penguor.Compiler.Parsing
                 int offset = GetCurrent().Offset;
                 List<Expr> args = new List<Expr>();
                 if (!Match(RPAREN)) args.Add(Expression());
-                else return new FunctionCall(ID, offset, name, new List<Expr>());
+                else return new FunctionCall(ID, offset, name, new List<Expr>(), Match(DPLUS, DMINUS) ? GetPrevious().Type : null);
                 while (Match(COMMA))
                 {
                     args.Add(Expression());
                 }
                 Consume(RPAREN);
-                return new FunctionCall(ID, offset, name, args);
+                return new FunctionCall(ID, offset, name, args, Match(DPLUS, DMINUS) ? GetPrevious().Type : null);
             }
         }
 
@@ -605,12 +650,12 @@ namespace Penguor.Compiler.Parsing
             if (!succeeded) throw new PenguorCSException();
         }
 
-        private void AddSymbol(AddressFrame frame, TokenType? accessMod, TokenType[]? nonAccessMods)
+        private void AddSymbol(AddressFrame frame, TokenType? accessMod, TokenType? nonAccessMod)
         {
             bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(frame.Symbol, frame.Type)
             {
                 AccessMod = accessMod,
-                NonAccessMods = nonAccessMods,
+                NonAccessMod = nonAccessMod,
             });
             if (!succeeded) throw new PenguorCSException();
         }
@@ -719,6 +764,38 @@ namespace Penguor.Compiler.Parsing
                 return true;
             }
             return false;
+        }
+
+        private T Either<T>(Func<T> first, Func<T> second) where T : ASTNode
+        {
+            return Try(first) ?? second();
+        }
+
+        private T? Try<T>(Func<T> parser) where T : ASTNode
+        {
+            int savedCurrent = current;
+            bool saveErrored = errored;
+            errored = false;
+
+            Logger.Blocked = true;
+
+            T result = parser();
+            if (errored)
+            {
+                current = savedCurrent;
+                errored = saveErrored;
+                return null;
+            }
+            errored = saveErrored;
+            return result;
+        }
+
+        private void GetLoggedErrors(object? sender, OnLoggedEventArgs e)
+        {
+            if (e.LogLevel == LogLevel.Error && e.SourceFile == builder.SourceFile)
+            {
+                errored = true;
+            }
         }
 
         private void Except(uint msg, params string[] args) => Logger.Log(new Notification(builder.SourceFile, GetCurrent().Offset, msg, MsgType.PGR, args));

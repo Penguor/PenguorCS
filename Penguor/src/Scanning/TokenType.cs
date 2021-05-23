@@ -37,7 +37,7 @@ namespace Penguor.Compiler.Parsing
         , USING
         , DATA, SYSTEM, TYPE
         , LIBRARY
-        , IF, ELIF, ELSE
+        , IF, ELSE
         , FOR, WHILE, DO
         , SWITCH, CASE, DEFAULT
         , RETURN

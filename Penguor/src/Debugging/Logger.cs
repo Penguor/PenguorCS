@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Penguor.Compiler.Debugging
@@ -87,8 +88,12 @@ namespace Penguor.Compiler.Debugging
             {18, (LogLevel.Warn, "Consider wrapping the contents of this {0} in braces")},
             {19, (LogLevel.Error, "{0} is not accessible from {1}")},
             {20, (LogLevel.Error, "The symbol '{0}' does not exist in the current scope")},
-            {21, (LogLevel.Error, "Could not find library '{0}'")}
+            {21, (LogLevel.Error, "Could not find library '{0}'")},
+            {22, (LogLevel.Error, "Postfixed calls may not be chained")},
+            {23, (LogLevel.Error, "You may not put statement inside of this block")}
         };
+
+        public static event EventHandler<OnLoggedEventArgs>? OnTryLogged;
 
         /// <summary>
         /// Log a single line of text with the given Log level
@@ -97,13 +102,28 @@ namespace Penguor.Compiler.Debugging
         /// <param name="logLevel">The loglevel</param>
         public static void Log(string logText, LogLevel logLevel)
         {
+            OnTryLogged?.Invoke(null, new OnLoggedEventArgs(null, logLevel));
+            if (Blocked) return;
+            CLogger.Log(logText, logLevel);
+            fLogger?.Log(logText, logLevel);
+        }
+
+        /// <summary>
+        /// Log a single line of text with the given Log level
+        /// </summary>
+        /// <param name="logText">The text to log</param>
+        /// <param name="sourceFile">The text to log</param>
+        /// <param name="logLevel">The loglevel</param>
+        public static void Log(string logText, string sourceFile, LogLevel logLevel)
+        {
+            OnTryLogged?.Invoke(null, new OnLoggedEventArgs(sourceFile, logLevel));
+            if (Blocked) return;
             CLogger.Log(logText, logLevel);
             fLogger?.Log(logText, logLevel);
         }
 
         public static void Log(Notification notification)
         {
-            if (Blocked) return;
             (LogLevel level, string debugMessage) = notification.Type switch
             {
                 MsgType.PGR => pgrMessages.GetValueOrDefault(
@@ -114,7 +134,7 @@ namespace Penguor.Compiler.Debugging
                     (LogLevel.Error, "this notification is not supposed to exist. Please create an issue at https://github.com/Penguor/PenguorCS/issues/new/choose/issues/new/choose")),
                 _ => (LogLevel.Error, "this notification type is not supposed to exist. Please create an issue at https://github.com/Penguor/PenguorCS/issues/new/choose")
             };
-            Log(notification.Format(debugMessage), level);
+            Log(notification.Format(debugMessage), notification.File, level);
         }
 
         public static void EnableFileLogger(string file)
