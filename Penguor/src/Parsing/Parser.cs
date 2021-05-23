@@ -270,9 +270,9 @@ namespace Penguor.Compiler.Parsing
         private BlockDecl StmtBlockDecl()
         {
             int offset = Consume(LBRACE).Offset;
-            List<Decl> declarations = new List<Decl>();
+            List<Decl> declarations = new();
 
-            while (!Match(RBRACE)) declarations.Add(Declaration());
+            while (!Match(RBRACE)) declarations.Add(EmbeddedDeclaration());
 
             return new BlockDecl(ID, offset, declarations);
         }
