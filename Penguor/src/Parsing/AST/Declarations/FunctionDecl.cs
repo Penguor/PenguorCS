@@ -12,7 +12,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of FunctionDecl
         /// </summary>
-        public FunctionDecl(int id, int offset, CallExpr returns, AddressFrame name, List<VarExpr> parameters, Decl content)
+        public FunctionDecl(int id, int offset, TypeCallExpr returns, AddressFrame name, List<VarExpr> parameters, Decl content)
         {
             Id = id;
             Offset = offset;
@@ -21,7 +21,7 @@ namespace Penguor.Compiler.Parsing.AST
             Parameters = parameters;
             Content = content;
         }
-        public CallExpr Returns { get; init; }
+        public TypeCallExpr Returns { get; init; }
         public AddressFrame Name { get; init; }
         public List<VarExpr> Parameters { get; init; }
         public Decl Content { get; init; }

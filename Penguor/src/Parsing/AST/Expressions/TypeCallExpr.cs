@@ -5,24 +5,24 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A Var Expr
+    /// A TypeCall Expr
     /// </summary>
-    public sealed record VarExpr : Expr
+    public sealed record TypeCallExpr : Expr
     {
         /// <summary>
-        /// creates a new instance of VarExpr
+        /// creates a new instance of TypeCallExpr
         /// </summary>
-        public VarExpr(int id, int offset, TypeCallExpr type, AddressFrame name)
+        public TypeCallExpr(int id, int offset, State name, List<uint> dimensions)
         {
             Id = id;
             Offset = offset;
-            Type = type;
             Name = name;
+            Dimensions = dimensions;
         }
-        public TypeCallExpr Type { get; init; }
-        public AddressFrame Name { get; init; }
+        public State Name { get; init; }
+        public List<uint> Dimensions { get; init; }
 
-        public override string ToString() => "var expression";
+        public override string ToString() => "typecall expression";
 
         /// <summary>
         /// returns Visit() of this instance
@@ -41,8 +41,8 @@ namespace Penguor.Compiler.Parsing.AST
     public partial interface IExprVisitor<T>
     {
         /// <summary>
-        /// visit a VarExpr
+        /// visit a TypeCallExpr
         /// </summary>
-        T Visit(VarExpr expr);
+        T Visit(TypeCallExpr expr);
     }
 }

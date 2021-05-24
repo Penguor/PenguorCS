@@ -104,6 +104,29 @@ namespace Penguor.Compiler
         }
 
         /// <summary>
+        /// create a State from a CallExpr
+        /// </summary>
+        /// <param name="type">the CallExpr to create the state from</param>
+        public static State FromTypeCall(TypeCallExpr type)
+        {
+            var callees = (Call[])type.Name.ToArray().Clone();
+            List<AddressFrame> frames = new List<AddressFrame>(type.Name.Count);
+            for (int i = 0; i < type.Name.Count; i++)
+            {
+                Call c = callees[i];
+                frames.Add(c switch
+                {
+                    IdfCall a => a.Name,
+                    FunctionCall a => a.Name,
+                    _ => throw new ArgumentException("this call is not known to the parser")
+                });
+            }
+
+            return new State(frames.ToArray());
+        }
+
+
+        /// <summary>
         /// create a State from a Stack
         /// </summary>
         /// <param name="stack">the Stack to create the state from</param>

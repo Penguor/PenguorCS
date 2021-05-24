@@ -12,7 +12,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of VarDecl
         /// </summary>
-        public VarDecl(int id, int offset, CallExpr type, AddressFrame name, Expr? init)
+        public VarDecl(int id, int offset, TypeCallExpr type, AddressFrame name, Expr? init)
         {
             Id = id;
             Offset = offset;
@@ -20,7 +20,7 @@ namespace Penguor.Compiler.Parsing.AST
             Name = name;
             Init = init;
         }
-        public CallExpr Type { get; init; }
+        public TypeCallExpr Type { get; init; }
         public AddressFrame Name { get; init; }
         public Expr? Init { get; init; }
 

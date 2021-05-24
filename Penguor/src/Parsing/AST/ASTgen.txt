@@ -4,16 +4,17 @@ Assign CallExpr lhs TokenType op Expr value
 Binary Expr lhs TokenType op Expr rhs
 Unary TokenType? op Expr rhs
 Call List<Call> callee TokenType? postfix
+TypeCall State name List<uint> dimensions
 Boolean bool value
 Null
 Grouping Expr content
-Var CallExpr type AddressFrame name
+Var TypeCallExpr type AddressFrame name
 Num int numBase string value double? numValue
 String string value
 ; Statement Stmt "Penguor\src\Parsing\AST\Statements"
 Compiler TokenType dir Token[] val
 Block List<Stmt> content
-Var CallExpr type AddressFrame name Expr? init
+Var TypeCallExpr type AddressFrame name Expr? init
 If Expr condition Stmt ifC List<ElifStmt> elif Stmt? elseC
 Elif Expr condition Stmt content
 While Expr condition Stmt content
@@ -31,13 +32,13 @@ Modified TokenType? accessMod TokenType? nonAccessMod Decl declaration
 System AddressFrame name CallExpr? parent BlockDecl content
 Data AddressFrame name CallExpr? parent BlockDecl content
 Type AddressFrame name CallExpr? parent BlockDecl content
-Function CallExpr returns AddressFrame name List<VarExpr> parameters Decl content
+Function TypeCallExpr returns AddressFrame name List<VarExpr> parameters Decl content
 Library State name BlockDecl content
-Var CallExpr type AddressFrame name Expr? init
+Var TypeCallExpr type AddressFrame name Expr? init
 StmtBlock List<Decl> content
 Block List<Decl> content
 Stmt Stmt stmt
 ; Call Call "Penguor\src\Parsing\AST\Calls"
-Function AddressFrame name List<Expr> args TokenType? postfix
-Idf AddressFrame name TokenType? postfix
-Array AddressFrame name Expr index TokenType? postfix
+Idf AddressFrame name
+Function AddressFrame name List<Expr> args
+Array AddressFrame name List<List<Expr>> indices

@@ -671,5 +671,10 @@ namespace Penguor.Compiler.IR
         {
             throw new NotImplementedException();
         }
+
+        public IRReference Visit(TypeCallExpr expr)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

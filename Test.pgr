@@ -1,3 +1,5 @@
+using stdlib;
+
 void main() {
     int i = 4
     while(i < 5) {

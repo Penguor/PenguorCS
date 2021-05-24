@@ -11,6 +11,6 @@ namespace Penguor.Compiler
         VarDecl, VarExpr, VarStmt,
         BlockStmt,
         Control,
-        IdfCall, FunctionCall
+        IdfCall, FunctionCall, ArrayCall, TypeCall
     }
 }

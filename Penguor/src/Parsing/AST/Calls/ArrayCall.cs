@@ -12,17 +12,15 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of ArrayCall
         /// </summary>
-        public ArrayCall(int id, int offset, AddressFrame name, Expr index, TokenType? postfix)
+        public ArrayCall(int id, int offset, AddressFrame name, List<List<Expr>> indices)
         {
             Id = id;
             Offset = offset;
             Name = name;
-            Index = index;
-            Postfix = postfix;
+            Indices = indices;
         }
         public AddressFrame Name { get; init; }
-        public Expr Index { get; init; }
-        public TokenType? Postfix { get; init; }
+        public List<List<Expr>> Indices { get; init; }
 
         public override string ToString() => "array call";
 

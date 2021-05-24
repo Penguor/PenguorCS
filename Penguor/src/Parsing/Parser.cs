@@ -88,7 +88,7 @@ namespace Penguor.Compiler.Parsing
             else
             {
                 StmtDecl decl = StmtDecl();
-                return Except(decl, 6, decl.Stmt.ToString(), state[^1].Type.ToString());
+                return Except(decl, 6, decl.Stmt.ToString(), state.Count > 0 ? state[^1].Type.ToString() : "global scope");
             }
         }
 
@@ -578,61 +578,78 @@ namespace Penguor.Compiler.Parsing
         private CallExpr CallExpr()
         {
             int offset = GetCurrent().Offset;
-            List<Call> callee = new List<Call>();
-            TokenType? postfix = null;
+            List<Call> callees = new();
 
-            while (true)
+            do
             {
-                Token idf = Consume(IDF);
-                if (Match(DOT))
-                {
-                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall), null));
-                    continue;
-                }
-                else if (Match(LPAREN))
-                {
-                    callee.Add(FunctionCall(new AddressFrame(idf.Name, AddressType.FunctionCall)));
-
-                    if (GetPrevious().Type is DPLUS or DMINUS && Check(DOT)) Except(22);
-                    else if (Match(DOT)) continue;
-                }
-                else if (Match(DPLUS, DMINUS))
-                {
-                    postfix = GetPrevious().Type;
-                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall), postfix));
-                    if (Match(DOT))
-                        Except(22);
-                }
-                else if (Match(LBRACK))
-                {
-                    while (!Match(RBRACK))
-                    {
-
-                    }
-                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall), ARRAY));
-                }
+                if (Check(LPAREN, 1))
+                    callees.Add(FunctionCall());
+                else if (Check(LBRACK, 1))
+                    callees.Add(ArrayCall());
                 else
-                {
-                    callee.Add(new IdfCall(ID, idf.Offset, new AddressFrame(idf.Name, AddressType.IdfCall), null));
-                }
-                break;
-            }
+                    callees.Add(new IdfCall(id, GetCurrent().Offset, new AddressFrame(Consume(IDF).Name, AddressType.IdfCall)));
+            } while (Match(DOT));
 
-            return new CallExpr(ID, offset, callee, postfix);
+            return new CallExpr(id, offset, callees, null);
 
-            FunctionCall FunctionCall(AddressFrame name)
+            FunctionCall FunctionCall()
             {
                 int offset = GetCurrent().Offset;
-                List<Expr> args = new List<Expr>();
-                if (!Match(RPAREN)) args.Add(Expression());
-                else return new FunctionCall(ID, offset, name, new List<Expr>(), Match(DPLUS, DMINUS) ? GetPrevious().Type : null);
-                while (Match(COMMA))
+
+                AddressFrame name = new(Consume(IDF).Name, AddressType.FunctionCall);
+                List<Expr> args = new();
+
+                Consume(LPAREN);
+                do
                 {
                     args.Add(Expression());
-                }
+                } while (Match(COMMA));
                 Consume(RPAREN);
-                return new FunctionCall(ID, offset, name, args, Match(DPLUS, DMINUS) ? GetPrevious().Type : null);
+
+                return new FunctionCall(ID, offset, name, args);
             }
+
+            ArrayCall ArrayCall()
+            {
+                int offset = GetCurrent().Offset;
+
+                AddressFrame name = new(Consume(IDF).Name, AddressType.ArrayCall);
+                List<List<Expr>> indices = new();
+
+                Consume(LBRACK);
+                do
+                {
+                    List<Expr> expressions = new();
+                    do
+                    {
+                        expressions.Add(Expression());
+                    } while (Match(COMMA));
+                    Consume(RBRACK);
+                } while (Match(LBRACK));
+
+                return new ArrayCall(id, offset, name, indices);
+            }
+        }
+
+        private TypeCallExpr TypeCallExpr()
+        {
+            State name = new();
+            int offset = GetCurrent().Offset;
+
+            do
+            {
+                name.Add(new AddressFrame(Consume(IDF).Name, AddressType.TypeCall));
+            } while (Match(DOT));
+
+            List<uint> dimensions = new();
+            while (Match(LBRACK))
+            {
+                uint dim = 1;
+                while (Match(COMMA))
+                    dim++;
+            }
+
+            return new TypeCallExpr(id, offset, name, dimensions);
         }
 
         private GroupingExpr GroupingExpr()
@@ -644,7 +661,7 @@ namespace Penguor.Compiler.Parsing
             return new GroupingExpr(ID, offset, expr);
         }
 
-        private VarExpr VarExpr(AddressType type) => new VarExpr(ID, GetCurrent().Offset, CallExpr(), new AddressFrame(Consume(IDF).Name, type));
+        private VarExpr VarExpr(AddressType type) => new VarExpr(ID, GetCurrent().Offset, TypeCallExpr(), new AddressFrame(Consume(IDF).Name, type));
 
         private void AddTable()
         {
@@ -787,6 +804,7 @@ namespace Penguor.Compiler.Parsing
             Logger.Blocked = true;
 
             T result = parser();
+            Logger.Blocked = false;
             if (errored)
             {
                 current = savedCurrent;

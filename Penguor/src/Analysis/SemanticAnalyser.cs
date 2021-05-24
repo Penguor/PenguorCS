@@ -112,7 +112,7 @@ namespace Penguor.Compiler.Analysis
             if (!accessable) builder.Except(19, offset, called.GetRaw().ToString(), callee.GetRaw().ToString());
         }
 
-        private void SetDataType(AddressFrame name, CallExpr type)
+        private void SetDataType(AddressFrame name, TypeCallExpr type)
         {
             Symbol? e = builder.TableManager.GetSymbol(name, scopes);
             if (e != null) e.DataType = State.FromCall((CallExpr)type.Accept(this));
@@ -174,7 +174,7 @@ namespace Penguor.Compiler.Analysis
             foreach (var i in parameters)
             {
                 var symbol = builder.TableManager.GetSymbol(i.Name, scopes);
-                if (symbol != null) symbol.DataType = builder.TableManager.GetStateBySymbol(State.FromCall(i.Type), scopes.ToArray());
+                if (symbol != null) symbol.DataType = builder.TableManager.GetStateBySymbol(State.FromTypeCall(i.Type), scopes.ToArray());
             }
             var content = decl.Content.Accept(this);
 
@@ -549,7 +549,7 @@ namespace Penguor.Compiler.Analysis
             expr.Type.Accept(this);
             return expr with
             {
-                Attribute = new ExprAttribute(builder.TableManager.GetStateBySymbol(State.FromCall(expr.Type), scopes.ToArray()) ?? throw new NullReferenceException())
+                Attribute = new ExprAttribute(builder.TableManager.GetStateBySymbol(State.FromTypeCall(expr.Type), scopes.ToArray()) ?? throw new NullReferenceException())
             };
         }
 
@@ -574,6 +574,11 @@ namespace Penguor.Compiler.Analysis
         }
 
         public Decl Visit(ModifiedDecl decl)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Expr Visit(TypeCallExpr expr)
         {
             throw new NotImplementedException();
         }
