@@ -18,7 +18,7 @@ namespace Penguor.Compiler.Parsing
         private int current; // the position of the current token in the tokens list
 
         private readonly State state;
-        private bool errored = false;
+        private bool failed;
 
         private int id;
         private int ID { get => id++; }
@@ -104,17 +104,14 @@ namespace Penguor.Compiler.Parsing
         {
             TokenType? accessMod = null;
             TokenType? nonAccessMod = null;
-            bool hasModifier = false;
 
             if (Match(PUBLIC, PRIVATE, PROTECTED, RESTRICTED))
             {
                 accessMod = GetPrevious().Type;
-                hasModifier = true;
             }
             if (Match(STATIC, DYNAMIC, ABSTRACT, CONST))
             {
                 nonAccessMod = GetPrevious().Type;
-                hasModifier = true;
             }
 
             Decl decl = ModifiableDeclaration();
@@ -135,14 +132,7 @@ namespace Penguor.Compiler.Parsing
                 symbol.NonAccessMod = nonAccessMod;
             }
 
-            if (hasModifier)
-            {
-                return new ModifiedDecl(id, GetCurrent().Offset, accessMod, nonAccessMod, decl);
-            }
-            else
-            {
-                return decl;
-            }
+            return new ModifiedDecl(id, GetCurrent().Offset, accessMod, nonAccessMod, decl);
         }
 
         private Decl UsingDecl()
@@ -156,7 +146,7 @@ namespace Penguor.Compiler.Parsing
         private SystemDecl SystemDecl()
         {
             int offset = GetCurrent().Offset;
-            AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.SystemDecl);
+            AddressFrame name = new(Consume(IDF).Name, AddressType.SystemDecl);
             CallExpr? parent = GetParent();
             AddSymbol(name);
             state.Push(name);
@@ -169,7 +159,7 @@ namespace Penguor.Compiler.Parsing
         private Decl DataDecl()
         {
             int offset = GetCurrent().Offset;
-            AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.DataDecl);
+            AddressFrame name = new(Consume(IDF).Name, AddressType.DataDecl);
             CallExpr? parent = GetParent();
             AddSymbol(name);
             state.Push(name);
@@ -182,7 +172,7 @@ namespace Penguor.Compiler.Parsing
         private Decl TypeDecl()
         {
             int offset = GetCurrent().Offset;
-            AddressFrame name = new AddressFrame(Consume(IDF).Name, AddressType.TypeDecl);
+            AddressFrame name = new(Consume(IDF).Name, AddressType.TypeDecl);
             CallExpr? parent = GetParent();
             AddSymbol(name);
             state.Push(name);
@@ -229,7 +219,7 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             var variable = VarExpr(AddressType.VarDecl);
             AddSymbol(variable.Name);
-            VarDecl dec = new VarDecl(ID, offset, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
+            VarDecl dec = new(ID, offset, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
             GetEnding();
             return dec;
         }
@@ -237,9 +227,9 @@ namespace Penguor.Compiler.Parsing
         private LibraryDecl LibraryDecl()
         {
             int offset = GetCurrent().Offset;
-            State name = new State { new AddressFrame(Consume(IDF).Name, AddressType.LibraryDecl) };
+            State name = new() { new AddressFrame(Consume(IDF).Name, AddressType.LibraryDecl) };
             while (Match(DOT)) name.Add(new AddressFrame(Consume(IDF).Name, AddressType.LibraryDecl));
-            state.Append(name);
+            state.AddRange(name);
 
             AddTable();
 
@@ -261,7 +251,7 @@ namespace Penguor.Compiler.Parsing
         private BlockDecl BlockDecl()
         {
             int offset = Consume(LBRACE).Offset;
-            List<Decl> declarations = new List<Decl>();
+            List<Decl> declarations = new();
 
             while (!Match(RBRACE))
             {
@@ -284,7 +274,7 @@ namespace Penguor.Compiler.Parsing
             return new BlockDecl(ID, offset, declarations);
         }
 
-        private StmtDecl StmtDecl() => new StmtDecl(ID, GetCurrent().Offset, Statement());
+        private StmtDecl StmtDecl() => new(ID, GetCurrent().Offset, Statement());
 
         private Stmt Statement()
         {
@@ -324,7 +314,7 @@ namespace Penguor.Compiler.Parsing
         private BlockStmt BlockStmt()
         {
             int offset = Consume(LBRACE).Offset;
-            List<Stmt> statements = new List<Stmt>();
+            List<Stmt> statements = new();
             while (!Match(RBRACE)) statements.Add(Statement());
 
             return new BlockStmt(ID, offset, statements);
@@ -333,7 +323,7 @@ namespace Penguor.Compiler.Parsing
         private VarStmt VarStmt()
         {
             var variable = VarExpr(AddressType.VarStmt);
-            VarStmt stmt = new VarStmt(ID, GetCurrent().Offset, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
+            VarStmt stmt = new(ID, GetCurrent().Offset, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
             AddSymbol(stmt.Name);
             GetEnding();
             return stmt;
@@ -426,7 +416,7 @@ namespace Penguor.Compiler.Parsing
             Consume(RPAREN);
 
             Consume(LBRACE);
-            List<Stmt> cases = new List<Stmt>();
+            List<Stmt> cases = new();
             do
             {
                 Match(CASE);
@@ -450,7 +440,7 @@ namespace Penguor.Compiler.Parsing
 
             Consume(COLON);
 
-            List<Stmt> statements = new List<Stmt>();
+            List<Stmt> statements = new();
             while (!Check(CASE) && !Check(DEFAULT) && Check(RBRACE))
             {
                 statements.Add(Statement());
@@ -463,7 +453,6 @@ namespace Penguor.Compiler.Parsing
         {
             string assembly = Consume(STRING).Name;
             string[] strings = assembly.Split('\n');
-            Array.ForEach(strings, (s) => s.Trim());
             return new AsmStmt(ID, GetPrevious().Offset, strings);
         }
 
@@ -616,8 +605,7 @@ namespace Penguor.Compiler.Parsing
                 AddressFrame name = new(Consume(IDF).Name, AddressType.ArrayCall);
                 List<List<Expr>> indices = new();
 
-                Consume(LBRACK);
-                do
+                while (Match(LBRACK))
                 {
                     List<Expr> expressions = new();
                     do
@@ -625,7 +613,7 @@ namespace Penguor.Compiler.Parsing
                         expressions.Add(Expression());
                     } while (Match(COMMA));
                     Consume(RBRACK);
-                } while (Match(LBRACK));
+                }
 
                 return new ArrayCall(id, offset, name, indices);
             }
@@ -649,6 +637,8 @@ namespace Penguor.Compiler.Parsing
                     dim++;
             }
 
+            name.Add(name.Pop() with { ArrayDimensions = dimensions });
+
             return new TypeCallExpr(id, offset, name, dimensions);
         }
 
@@ -661,7 +651,7 @@ namespace Penguor.Compiler.Parsing
             return new GroupingExpr(ID, offset, expr);
         }
 
-        private VarExpr VarExpr(AddressType type) => new VarExpr(ID, GetCurrent().Offset, TypeCallExpr(), new AddressFrame(Consume(IDF).Name, type));
+        private VarExpr VarExpr(AddressType type) => new(ID, GetCurrent().Offset, TypeCallExpr(), new AddressFrame(Consume(IDF).Name, type));
 
         private void AddTable()
         {
@@ -671,16 +661,6 @@ namespace Penguor.Compiler.Parsing
         private void AddSymbol(AddressFrame frame)
         {
             bool succeeded = builder.TableManager.AddSymbol(state, frame);
-            if (!succeeded) throw new PenguorCSException();
-        }
-
-        private void AddSymbol(AddressFrame frame, TokenType? accessMod, TokenType? nonAccessMod)
-        {
-            bool succeeded = builder.TableManager.AddSymbol(state, new Symbol(frame.Symbol, frame.Type)
-            {
-                AccessMod = accessMod,
-                NonAccessMod = nonAccessMod,
-            });
             if (!succeeded) throw new PenguorCSException();
         }
 
@@ -798,20 +778,20 @@ namespace Penguor.Compiler.Parsing
         private T? Try<T>(Func<T> parser) where T : ASTNode
         {
             int savedCurrent = current;
-            bool saveErrored = errored;
-            errored = false;
+            bool saveFailed = failed;
+            failed = false;
 
             Logger.Blocked = true;
 
             T result = parser();
             Logger.Blocked = false;
-            if (errored)
+            if (failed)
             {
                 current = savedCurrent;
-                errored = saveErrored;
+                failed = saveFailed;
                 return null;
             }
-            errored = saveErrored;
+            failed = saveFailed;
             return result;
         }
 
@@ -819,7 +799,7 @@ namespace Penguor.Compiler.Parsing
         {
             if (e.LogLevel == LogLevel.Error && e.SourceFile == builder.SourceFile)
             {
-                errored = true;
+                failed = true;
             }
         }
 

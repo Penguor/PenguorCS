@@ -73,8 +73,6 @@ namespace Penguor.Compiler.Build
         /// <param name="singleFile">whether <paramref name="project"/> is a single file</param>
         public static void BuildProject(string project, string? stdLib, bool singleFile = false)
         {
-            string asm;
-
             List<string> files = singleFile ? new(new string[] { project }) : new(Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories));
             if (stdLib != null) files.AddRange(Directory.GetFiles(Path.GetDirectoryName(stdLib)!, "*.pgr", SearchOption.AllDirectories));
 
@@ -92,8 +90,6 @@ namespace Penguor.Compiler.Build
                 b.GenerateIR();
             foreach (var b in builders)
                 b.GenerateAsm();
-
-            asm = "";
 
             string buildPath = Path.Combine(Path.GetDirectoryName(project)!, "build");
             Directory.CreateDirectory(buildPath);

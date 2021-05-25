@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Penguor.Compiler
 {
     /// <summary>
@@ -14,6 +16,8 @@ namespace Penguor.Compiler
         /// The type of address
         /// </summary>
         public AddressType Type { get; init; }
+
+        public List<uint>? ArrayDimensions { get; init; }
 
         /// <summary>
         /// create a new instance of AddressFrame

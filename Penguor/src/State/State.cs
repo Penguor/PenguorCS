@@ -109,20 +109,8 @@ namespace Penguor.Compiler
         /// <param name="type">the CallExpr to create the state from</param>
         public static State FromTypeCall(TypeCallExpr type)
         {
-            var callees = (Call[])type.Name.ToArray().Clone();
-            List<AddressFrame> frames = new List<AddressFrame>(type.Name.Count);
-            for (int i = 0; i < type.Name.Count; i++)
-            {
-                Call c = callees[i];
-                frames.Add(c switch
-                {
-                    IdfCall a => a.Name,
-                    FunctionCall a => a.Name,
-                    _ => throw new ArgumentException("this call is not known to the parser")
-                });
-            }
-
-            return new State(frames.ToArray());
+            var callees = (AddressFrame[])type.Name.ToArray().Clone();
+            return new State(callees);
         }
 
 
@@ -230,13 +218,15 @@ namespace Penguor.Compiler
         /// </summary>
         public static State operator -(State minuend, State subtrahend)
         {
+            State temp = (State)minuend.Clone();
+            //! work on this
             //todo: this doesn't work the way it should
-            while (subtrahend.Count != 0 && minuend.Count != 0)
+            while (subtrahend.Count != 0 && temp.Count != 0)
             {
-                if (minuend[^1].Equals(subtrahend[^1])) minuend.Pop();
+                if (temp[^1].Equals(subtrahend[^1])) temp.Pop();
                 else break;
             }
-            return minuend;
+            return temp;
         }
 
         /// <summary>
@@ -276,7 +266,7 @@ namespace Penguor.Compiler
         /// Append multiple AddressFrames to the state
         /// </summary>
         /// <param name="item">an IEnumerable containing the AddressFrames to append</param>
-        public void Append(IEnumerable<AddressFrame> item) => addressFrames.AddRange(item);
+        public void AddRange(IEnumerable<AddressFrame> item) => addressFrames.AddRange(item);
 
         /// <summary>
         /// adds an AddressFrame to the end of the State
@@ -379,6 +369,7 @@ namespace Penguor.Compiler
         public AddressFrame this[int i]
         {
             get => addressFrames[i];
+            set => addressFrames[i] = value;
         }
 
         /// <summary>
@@ -388,8 +379,6 @@ namespace Penguor.Compiler
         {
             get
             {
-                if (addressFrames.Count < 2)
-                    return Array.Empty<AddressFrame>();
                 return addressFrames.ToArray()[r];
             }
         }

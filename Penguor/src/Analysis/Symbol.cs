@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Penguor.Compiler.Assembly;
 using Penguor.Compiler.Parsing;
 
@@ -34,10 +35,7 @@ namespace Penguor.Compiler
         /// </summary>
         public State? Parent { get; set; }
 
-        /// <summary>
-        /// contains information for assembly generation
-        /// </summary>
-        public AssemblyInfo? AsmInfo { get; set; }
+        public List<uint>? ArrayDimensions { get; set; }
 
         /// <summary>
         /// Initialize a new Instance of Symbol with the given values

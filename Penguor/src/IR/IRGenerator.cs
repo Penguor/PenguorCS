@@ -308,7 +308,7 @@ namespace Penguor.Compiler.IR
 
         public int Visit(LibraryDecl decl)
         {
-            scopes[0].Append(decl.Name);
+            scopes[0].AddRange(decl.Name);
             decl.Content.Accept(this);
             scopes[0].Remove(decl.Name);
             return 0;

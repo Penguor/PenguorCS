@@ -1,7 +1,5 @@
-using stdlib;
-
 void main() {
-    int i = 4
+    i32 i = 4
     while(i < 5) {
         print("Hello World")
         i += 1
