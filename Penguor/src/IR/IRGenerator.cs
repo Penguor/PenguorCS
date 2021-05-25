@@ -268,7 +268,39 @@ namespace Penguor.Compiler.IR
             {
                 if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
             }
-            return irProgram;
+            return DecodeSSA(irProgram);
+        }
+
+        private IRProgram DecodeSSA(IRProgram ir)
+        {
+            foreach (var function in ir.Functions)
+            {
+                List<Tuple<int, IRStatement>> insert = new();
+                foreach (var statement in function.Statements)
+                {
+                    if (statement.Code == IROPCode.PHI)
+                    {
+                        IRPhi phi = (IRPhi)statement.Operands[0];
+
+                        for (int i = 0; i < phi.Operands.Count; i++)
+                        {
+                            var referenced = function.Statements.Find(s => s.Number == phi.Operands[i].Referenced)?.Number ?? throw new Exception();
+                            insert.Add(new Tuple<int, IRStatement>(
+                                function.Statements.FindIndex(s => s.Number == phi.Operands[i].Referenced) + 1,
+                                new IRStatement(InstructionNumber, IROPCode.MOV, new IRReference(referenced), new IRReference(statement.Number))));
+                        }
+                    }
+                }
+
+                insert.Sort((Tuple<int, IRStatement> first, Tuple<int, IRStatement> second) => first.Item1.CompareTo(second.Item1));
+
+                for (int i = insert.Count - 1; i >= 0; i--)
+                {
+                    function.Statements.Insert(insert[i].Item1, insert[i].Item2);
+                }
+            }
+
+            return ir;
         }
 
         public int Visit(BlockDecl decl)
@@ -669,7 +701,8 @@ namespace Penguor.Compiler.IR
 
         public int Visit(ModifiedDecl decl)
         {
-            throw new NotImplementedException();
+            decl.Declaration.Accept(this);
+            return 0;
         }
 
         public IRReference Visit(TypeCallExpr expr)

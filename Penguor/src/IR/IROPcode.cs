@@ -27,6 +27,6 @@ namespace Penguor.Compiler.IR
         ERR, // invalid opcode, returned on error
         UNDEF, // undefined
         ASM,
-        PHI, REROUTE
+        PHI, REROUTE, MOV
     }
 }

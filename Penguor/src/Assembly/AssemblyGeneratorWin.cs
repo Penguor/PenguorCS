@@ -309,8 +309,9 @@ namespace Penguor.Compiler.Assembly
                     Console.Write(string.Format("{0,-6}", y));
                     for (int x = 0; x < xMax; x++)
                     {
-                        Console.Write(string.Format("{0,-4}", registerMap[y, x]));
+                        Console.Write(string.Format("{0,-5}", registerMap[y, x]));
                     }
+                    Console.Write(function.Statements[y]);
                     Console.WriteLine();
                 }
             }
@@ -512,6 +513,7 @@ namespace Penguor.Compiler.Assembly
                         ));
                         break;
                     case IROPCode.PHI:
+
                     case IROPCode.LOADPARAM:
                     case IROPCode.BCALL:
                         break;
@@ -562,6 +564,13 @@ namespace Penguor.Compiler.Assembly
                         function.AddInstruction(
                             AsmMnemonicAmd64.CALL,
                             new AsmString(statement.Operands[0].ToString())
+                        );
+                        break;
+                    case IROPCode.MOV:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.MOV,
+                            new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[1]), x]),
+                            new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[0]), x])
                         );
                         break;
                     // case IROPCode.JFL:

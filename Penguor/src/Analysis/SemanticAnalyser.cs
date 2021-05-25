@@ -483,14 +483,18 @@ namespace Penguor.Compiler.Analysis
             {
                 State tmp = new(e[0..i]);
 
-                if (!builder.TableManager.FindSymbol(tmp, scopes.ToArray()) && pass > 1)
+                if (builder.TableManager.FindSymbol(tmp, scopes.ToArray()) && pass > 1)
                 {
-                    builder.Except(20, expr.Offset, tmp.ToString());
+                    builder.TableManager.GetSymbol(tmp, scopes.ToArray());
                 }
             }
 
+            var callee = new List<Call>(expr.Callee.Count);
+            foreach (var i in expr.Callee)
+                callee.Add(i.Accept(this));
+
             if (pass == 1) return expr;
-            return expr with { Attribute = new ExprAttribute(builder.TableManager.GetSymbol(e, scopes.ToArray())?.DataType ?? throw new NullReferenceException()) };
+            return expr with { Callee = callee, Attribute = new ExprAttribute(builder.TableManager.GetSymbol(e, scopes.ToArray())?.DataType ?? throw new NullReferenceException()) };
         }
 
         public Expr Visit(GroupingExpr expr)
