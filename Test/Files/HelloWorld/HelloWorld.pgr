@@ -1,9 +1,9 @@
-void printLn(string a)
+void printLn(str a)
 {
     print(a); print("\n")
 }
 
-void print(string a) 
+void print(str a) 
 {    
     asm
 "sub rsp, 32

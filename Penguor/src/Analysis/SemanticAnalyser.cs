@@ -543,7 +543,7 @@ namespace Penguor.Compiler.Analysis
             }
         }
 
-        public Expr Visit(StringExpr expr) => expr with { Attribute = new ExprAttribute(new State(new AddressFrame("string", AddressType.IdfCall))) };
+        public Expr Visit(StringExpr expr) => expr with { Attribute = new ExprAttribute(new State(new AddressFrame("str", AddressType.IdfCall))) };
 
         public Expr Visit(TypeCallExpr expr)
         {

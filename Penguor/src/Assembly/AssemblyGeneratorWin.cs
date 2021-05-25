@@ -408,8 +408,8 @@ namespace Penguor.Compiler.Assembly
                 {
                     IROPCode.LOADARG or IROPCode.LOADPARAM => statement.Operands[0].ToString() switch
                     {
-                        "byte" or "short" or "int" or "long" or "string" => RegisterSetAmd64.GeneralPurpose,
-                        "double" => RegisterSetAmd64.XMM
+                        "i8" or "i16" or "i32" or "i64" or "u8" or "u16" or "u32" or "u64" or "str" => RegisterSetAmd64.GeneralPurpose,
+                        "f64" => RegisterSetAmd64.XMM
                     },
                     IROPCode.LOAD => statement.Operands[0] switch
                     {
