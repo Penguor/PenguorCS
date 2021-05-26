@@ -37,4 +37,16 @@ namespace Penguor.Compiler.Assembly
             return Value.ToString();
         }
     }
+
+    public class AsmAddress : AsmOperand
+    {
+        RegisterAmd64 Value { get; set; }
+        public AsmAddress(RegisterAmd64 value) => Value = value;
+        public AsmAddress(int register) => Value = (RegisterAmd64)register;
+
+        public override string Emit(AsmSyntax syntax)
+        {
+            return "[" + Value.ToString() + "]";
+        }
+    }
 }

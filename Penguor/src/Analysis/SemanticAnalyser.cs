@@ -524,7 +524,7 @@ namespace Penguor.Compiler.Analysis
                 iteration++;
             }
             //todo: assign correct type based on if it's a floating point number
-            return expr with { NumBase = 10, NumValue = number, Attribute = new ExprAttribute(new State("int")) };
+            return expr with { NumBase = 10, NumValue = number, Attribute = new ExprAttribute(new State("i32")) };
 
             // return the numeric (base-10) representation of the digit
             double GetNumberFromChar(char chr)
@@ -564,7 +564,7 @@ namespace Penguor.Compiler.Analysis
         {
             Expr e = expr.Rhs.Accept(this);
             if (expr.Op == null) return e;
-            else if (((ExprAttribute?)e.Attribute)!.Type.ToString() is "byte" or "short" or "int" or "long" or "float" or "double" && expr.Op is TokenType.MINUS or TokenType.PLUS or TokenType.BW_NOT or TokenType.DPLUS or TokenType.DMINUS) return expr with { Rhs = e, Attribute = new ExprAttribute(((ExprAttribute?)e.Attribute)!.Type) };
+            else if (((ExprAttribute?)e.Attribute)!.Type.ToString() is "i8" or "i16" or "i32" or "i64" or "u8" or "u16" or "u32" or "u64" or "str" or "f32" or "f64" && expr.Op is TokenType.MINUS or TokenType.PLUS or TokenType.BW_NOT or TokenType.DPLUS or TokenType.DMINUS) return expr with { Rhs = e, Attribute = new ExprAttribute(((ExprAttribute?)e.Attribute)!.Type) };
             else if (((ExprAttribute?)e.Attribute)!.Type.ToString() is "bool" && expr.Op is TokenType.EXCL_MARK) return expr with { Rhs = e, Attribute = new ExprAttribute(new State("bool")) };
             else return builder.Except(expr, new Notification(builder.SourceFile, expr.Offset, 1, MsgType.PGRCS));
         }

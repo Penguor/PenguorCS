@@ -4,6 +4,10 @@ void main() {
         print("Hello World\n")
         i += 1
     }
+
+    if(i==5) {
+        print("Hello World was printed 5 times")
+    }
 }
 
 void print(str text) {

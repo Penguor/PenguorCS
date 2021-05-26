@@ -298,8 +298,10 @@ namespace Penguor.Compiler.IR
                 {
                     function.Statements.Insert(insert[i].Item1, insert[i].Item2);
                 }
+
             }
 
+            if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
             return ir;
         }
 
@@ -472,11 +474,11 @@ namespace Penguor.Compiler.IR
             IROPCode jumpCode = statements[^1].Code switch
             {
                 IROPCode.LOAD => IROPCode.JTR,
-                IROPCode.LESS => IROPCode.JL,
-                IROPCode.LESS_EQUALS => IROPCode.JLE,
-                IROPCode.GREATER => IROPCode.JG,
-                IROPCode.GREATER_EQUALS => IROPCode.JGE,
-                IROPCode.EQUALS => IROPCode.JE
+                IROPCode.LESS => IROPCode.JNL,
+                IROPCode.LESS_EQUALS => IROPCode.JNLE,
+                IROPCode.GREATER => IROPCode.JNG,
+                IROPCode.GREATER_EQUALS => IROPCode.JNGE,
+                IROPCode.EQUALS => IROPCode.JNE
             };
             if (hasElse)
                 AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".else", AddressType.Control)));
