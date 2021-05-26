@@ -171,8 +171,7 @@ namespace Penguor.Compiler.Build
 
         public void Assemble(string directory)
         {
-            if (OperatingSystem.IsWindows())
-                Process.Start("nasm", $" -fwin64 -g {Path.Combine(directory, "build/", $"{Path.GetFileNameWithoutExtension(SourceFile)}.asm")}").WaitForExit();
+            Process.Start("nasm", $" -fwin64 -g {Path.Combine(directory, "build/", $"{Path.GetFileNameWithoutExtension(SourceFile)}.asm")}").WaitForExit();
         }
 
         /// <summary>

@@ -431,7 +431,7 @@ namespace Penguor.Compiler.Analysis
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
 
-                type = new State(new AddressFrame("double", AddressType.IdfCall));
+                type = new State(new AddressFrame("f64", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.MINUS)
             {
@@ -439,7 +439,7 @@ namespace Penguor.Compiler.Analysis
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
 
-                type = new State(new AddressFrame("double", AddressType.IdfCall));
+                type = new State(new AddressFrame("f64", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.MUL)
             {
@@ -447,7 +447,7 @@ namespace Penguor.Compiler.Analysis
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
 
-                type = new State(new AddressFrame("double", AddressType.IdfCall));
+                type = new State(new AddressFrame("f64", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.DIV)
             {
@@ -455,7 +455,7 @@ namespace Penguor.Compiler.Analysis
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
 
-                type = new State(new AddressFrame("double", AddressType.IdfCall));
+                type = new State(new AddressFrame("f64", AddressType.IdfCall));
             }
             else
             {
