@@ -127,6 +127,26 @@ namespace Penguor.Compiler.Build
                     Console.WriteLine(reader.ReadToEnd());
                 }
             }
+            if (OperatingSystem.IsLinux())
+            {
+                Process.Start("gcc", $"{objects} -o {Path.Combine(buildPath, "out")}").WaitForExit();
+                if (run)
+                {
+                    using Process process = new Process();
+                    process.StartInfo.FileName = ".\\build\\out";
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.StartInfo.CreateNoWindow = true;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.Start();
+
+                    StreamReader reader = process.StandardOutput;
+
+                    process.WaitForExit();
+
+                    Console.WriteLine(reader.ReadToEnd());
+                }
+            }
         }
 
         /// <summary>
