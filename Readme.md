@@ -3,6 +3,8 @@
 ![license](https://img.shields.io/github/license/Penguor/PenguorCS?style=flat-square)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Penguor/PenguorCS/.NET%20Core?style=flat-square)
 
+## This project is currently in an experimental stage and should not be used in production
+
 This repository contains the source code of the PenguorCS compiler for the Penguor language.
 
 ## Overview
