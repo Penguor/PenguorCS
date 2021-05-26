@@ -589,11 +589,14 @@ namespace Penguor.Compiler.Parsing
                 List<Expr> args = new();
 
                 Consume(LPAREN);
-                do
+                if (!Match(RPAREN))
                 {
-                    args.Add(Expression());
-                } while (Match(COMMA));
-                Consume(RPAREN);
+                    do
+                    {
+                        args.Add(Expression());
+                    } while (Match(COMMA));
+                    Consume(RPAREN);
+                }
 
                 return new FunctionCall(ID, offset, name, args);
             }
