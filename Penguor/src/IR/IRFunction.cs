@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,62 +18,69 @@ namespace Penguor.Compiler.IR
 
         public void ResolveReroutes()
         {
-            List<int> toRemove = new();
-            foreach (var statement in Statements)
+            SortedSet<int> toRemove = new();
+            int hitCount = 1;
+            while (hitCount > 0)
             {
-                if (statement.Code == IROPCode.REROUTE)
+                hitCount = 0;
+                foreach (var statement in Statements)
                 {
-                    IRReference rerouteReference = new IRReference(statement.Number);
-                    IRReference newReference = (IRReference)statement.Operands[0];
-                    for (int i = 0; i < Statements.Count; i++)
+                    if (statement.Code == IROPCode.REROUTE)
                     {
-                        if (statement.Code != Statements[i].Code)
+                        IRReference rerouteReference = new IRReference(statement.Number);
+                        IRReference newReference = (IRReference)statement.Operands[0];
+                        for (int i = 0; i < Statements.Count; i++)
                         {
-                            for (int i2 = 0; i2 < Statements[i].Operands.Length; i2++)
+                            if (statement.Code != Statements[i].Code)
                             {
-                                if (Statements[i].Operands[i2] is IRReference reference && reference.Equals(rerouteReference))
+                                for (int i2 = 0; i2 < Statements[i].Operands.Length; i2++)
                                 {
-                                    Statements[i].Operands[i2] = newReference with { };
+                                    if (Statements[i].Operands[i2] is IRReference reference && reference.Equals(rerouteReference))
+                                    {
+                                        hitCount++;
+                                        Statements[i].Operands[i2] = newReference with { };
+                                    }
+                                    else if (Statements[i].Operands[i2] is IRPhi newPhi && newPhi.Operands.Contains(rerouteReference))
+                                    {
+                                        hitCount++;
+                                        newPhi.Operands[newPhi.Operands.FindIndex(op => op.Equals(rerouteReference))] = newReference with { };
+                                        newPhi.Operands.Remove(rerouteReference);
+                                    }
                                 }
-                                else if (Statements[i].Operands[i2] is IRPhi newPhi && newPhi.Operands.Contains(rerouteReference))
+                            }
+                        }
+                        toRemove.Add(Statements.IndexOf(statement));
+                    }
+                    else if (statement.Code == IROPCode.PHI && statement.Operands[0] is IRPhi phi && phi.Operands.Count == 1)
+                    {
+                        hitCount++;
+                        IRReference rerouteReference = new IRReference(statement.Number);
+                        IRReference newReference = phi.Operands[0];
+                        for (int i = 0; i < Statements.Count; i++)
+                        {
+                            if (statement.Code != Statements[i].Code)
+                            {
+                                for (int i2 = 0; i2 < Statements[i].Operands.Length; i2++)
                                 {
-                                    newPhi.Operands[newPhi.Operands.FindIndex(op => op.Equals(rerouteReference))] = newReference with { };
-                                    newPhi.Operands.Remove(new IRReference(Statements[i].Number));
+                                    if (Statements[i].Operands[i2] is IRReference reference && reference.Equals(rerouteReference))
+                                    {
+                                        hitCount++;
+                                        Statements[i].Operands[i2] = newReference with { };
+                                    }
+                                    else if (Statements[i].Operands[i2] is IRPhi newPhi && newPhi.Operands.Contains(rerouteReference))
+                                    {
+                                        hitCount++;
+                                        newPhi.Operands[newPhi.Operands.FindIndex(op => op.Equals(rerouteReference))] = newReference with { };
+                                        newPhi.Operands.Remove(rerouteReference);
+                                    }
                                 }
                             }
                         }
                     }
-                    toRemove.Add(Statements.IndexOf(statement));
-                }
-                else if (statement.Code == IROPCode.PHI && statement.Operands[0] is IRPhi phi && phi.Operands.Count == 1)
-                {
-                    IRReference rerouteReference = new IRReference(statement.Number);
-                    IRReference newReference = phi.Operands[0];
-                    for (int i = 0; i < Statements.Count; i++)
-                    {
-                        if (statement.Code != Statements[i].Code)
-                        {
-                            for (int i2 = 0; i2 < Statements[i].Operands.Length; i2++)
-                            {
-                                if (Statements[i].Operands[i2] is IRReference reference && reference.Equals(rerouteReference))
-                                {
-                                    Statements[i].Operands[i2] = newReference with { };
-                                }
-                                else if (Statements[i].Operands[i2] is IRPhi newPhi && newPhi.Operands.Contains(rerouteReference))
-                                {
-                                    newPhi.Operands[newPhi.Operands.FindIndex(op => op.Equals(rerouteReference))] = newReference with { };
-                                    newPhi.Operands.Remove(new IRReference(Statements[i].Number));
-                                }
-                            }
-                        }
-                    }
-                    toRemove.Add(Statements.IndexOf(statement));
                 }
             }
-            for (int i = toRemove.Count - 1; i >= 0; i--)
-            {
-                Statements.RemoveAt(toRemove[i]);
-            }
+
+            Statements.RemoveAll(s => s.Code == IROPCode.REROUTE);
         }
 
         public void Add(IRStatement statement) => Statements.Add(statement);

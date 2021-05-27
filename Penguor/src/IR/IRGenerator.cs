@@ -248,7 +248,7 @@ namespace Penguor.Compiler.IR
                     Dictionary<State, IRStatement> firstStatements = new(blocks.Count);
                     foreach (var block in blocks)
                     {
-                        if (block.Value.First!.Referenced >= function.First.Referenced && block.Value.First.Referenced <= function.Statements[^1].Number)
+                        if (function.Statements.Exists(s => block.Value.First!.Referenced == s.Number))
                         {
                             firstStatements.Add(block.Key, function.Statements.Find(s =>
                             s.Number.Equals(block.Value.First!.Referenced)) ?? throw new NullReferenceException("outer"));
@@ -260,7 +260,6 @@ namespace Penguor.Compiler.IR
                         function.Statements.Insert(function.Statements.FindIndex(s => s.Equals(firstStatements[phi.Value])) + 1, phi.Key);
                     }
 
-                    function.ResolveReroutes();
                     function.ResolveReroutes();
                 }
             }

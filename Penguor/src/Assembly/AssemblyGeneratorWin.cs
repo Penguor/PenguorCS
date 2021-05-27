@@ -13,6 +13,13 @@ namespace Penguor.Compiler.Assembly
     /// </summary>
     public sealed class AssemblyGeneratorWinAmd64 : AssemblyGenerator
     {
+        private static readonly IROPCode[] jumpCodes = {
+                    IROPCode.JMP, IROPCode.JTR, IROPCode.JFL,
+        IROPCode.JL, IROPCode.JNL, IROPCode.JLE, IROPCode.JNLE,
+        IROPCode.JG, IROPCode.JNG, IROPCode.JGE, IROPCode.JNGE,
+        IROPCode.JE, IROPCode.JNE,
+        };
+
         private readonly Builder builder;
         private readonly List<IRFunction> functions;
         private AsmProgram program = new AsmProgram();
@@ -58,7 +65,9 @@ namespace Penguor.Compiler.Assembly
 
         private BitArray[] AnalyseLifetime(IRFunction function)
         {
-            List<BitArray> lifetimes = new();
+            List<BitArray> lifetimes = new(function.Statements.Count);
+
+            Tuple<int, int>[] ranges = new Tuple<int, int>[function.Statements.Count];
 
             for (int x = 0; x < function.Statements.Count; x++)
             {
@@ -72,22 +81,54 @@ namespace Penguor.Compiler.Assembly
                     if (x == y)
                     {
                         bits[y] = true;
-                        continue;
                     }
-
-                    bool referenced = false;
-                    foreach (var operand in function.Statements[y].Operands)
+                    else
                     {
-                        referenced = (operand is IRPhi phiOperand && phiOperand.Operands.Contains(numReference))
-                            || (operand is IRReference refOperand && refOperand == numReference);
-                        if (referenced) break;
+
+                        bool referenced = false;
+                        foreach (var operand in function.Statements[y].Operands)
+                        {
+                            referenced = (operand is IRPhi phiOperand && phiOperand.Operands.Contains(numReference))
+                                || (operand is IRReference refOperand && refOperand == numReference);
+                            if (referenced) break;
+                        }
+
+                        bits[y] = referenced;
                     }
 
-                    bits[y] = referenced;
+                    if (bits[y])
+                    {
+                        if (ranges[x] == null)
+                        {
+                            ranges[x] = new Tuple<int, int>(y, y);
+                        }
+                        else
+                        {
+                            ranges[x] = new Tuple<int, int>(ranges[x].Item1, y);
+                        }
+                    }
                 }
                 lifetimes.Add(bits);
             }
 
+            for (int x = 0; x < function.Statements.Count; x++)
+            {
+                if (jumpCodes.Contains(function.Statements[x].Code))
+                {
+                    Console.WriteLine(function.Statements[x]);
+                    var labelIndex = function.Statements.FindIndex(s => s.Operands.Length > 0 && s.Code == IROPCode.LABEL && s.Operands[0].Equals(function.Statements[x].Operands[0]));
+
+                    for (int y = 0; y < function.Statements.Count; y++)
+                    {
+                        if (x > labelIndex && ranges[y].Item1 < labelIndex && ranges[y].Item2 > labelIndex)
+                        {
+                            lifetimes[y][x] = true;
+                        }
+                    }
+                }
+            }
+
+#if false
             Console.WriteLine(function.Statements[0].ToString());
             for (int i = 0; i < lifetimes.Count; i++)
             {
@@ -99,7 +140,7 @@ namespace Penguor.Compiler.Assembly
                 Console.WriteLine();
             }
             Console.WriteLine();
-
+#endif
             return lifetimes.ToArray();
         }
 
@@ -142,15 +183,7 @@ namespace Penguor.Compiler.Assembly
                 if (refCount == 1 && !(function.Statements[y].Code is
                             IROPCode.BCALL or
                             IROPCode.CALL or
-                            IROPCode.LOADPARAM or
-                            IROPCode.JMP or
-                            IROPCode.JTR or
-                            IROPCode.JFL or
-                            IROPCode.JE or
-                            IROPCode.JG or
-                            IROPCode.JGE or
-                            IROPCode.JL or
-                            IROPCode.JLE))
+                            IROPCode.LOADPARAM || jumpCodes.Contains(function.Statements[y].Code)))
                 {
                     for (int x = 0; x < weight.GetLength(1); x++)
                     {
@@ -232,27 +265,19 @@ namespace Penguor.Compiler.Assembly
                             AssignRegister(x, y, newRegister);
                             argCount++;
                         }
-                        else if (function.Statements[x].Code is
-                            IROPCode.JMP or
-                            IROPCode.JTR or
-                            IROPCode.JFL or
-                            IROPCode.JE or
-                            IROPCode.JG or
-                            IROPCode.JGE or
-                            IROPCode.JL or
-                            IROPCode.JLE)
+                        else if (jumpCodes.Contains(function.Statements[x].Code))
                         {
                             var labelIndex = function.Statements.FindIndex(s => s.Operands.Length > 0 && s.Operands[0].Equals(function.Statements[x].Operands[0]));
 
                             if (labelIndex > x)
                             {
-                                for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
+                                /*for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
                                 {
                                     if (weight[innerY, x] > -1)
                                         AssignRegister(x, innerY, registerMap[innerY, x - 1]);
                                     if (weight[innerY, labelIndex] > -1)
                                         AssignRegister(labelIndex, innerY, registerMap[innerY, x]);
-                                }
+                                }*/
                             }
                             else
                             {
@@ -530,6 +555,7 @@ namespace Penguor.Compiler.Assembly
                         ));
                         break;
                     case IROPCode.LESS:
+                    case IROPCode.GREATER:
                     case IROPCode.EQUALS:
                         function.AddInstruction(new AsmInstructionAmd64(
                             AsmMnemonicAmd64.CMP,
@@ -559,6 +585,9 @@ namespace Penguor.Compiler.Assembly
                         break;
                     case IROPCode.JL:
                         function.AddInstruction(AsmMnemonicAmd64.JL, new AsmString(statement.Operands[0].ToString()));
+                        break;
+                    case IROPCode.JNG:
+                        function.AddInstruction(AsmMnemonicAmd64.JNG, new AsmString(statement.Operands[0].ToString()));
                         break;
                     case IROPCode.MUL:
                         function.AddInstruction(new AsmInstructionAmd64(

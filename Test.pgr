@@ -1,13 +1,33 @@
 void main() {
+    printHello(4)
+    printHello(5)
+    printHello(6)
+}
+
+void printHello(i32 c) {
+    print("Printing Hello World\n")
+
     i32 i = 0
-    while(i < 5) {
+    while(i < c) {
         print("Hello World\n")
         i += 1
     }
+    println()
 
-    if(i==5) {
+    if(i < 5) {
+        print("Hello World was printed less than 5 times")
+    }
+    if(i == 5) {
         print("Hello World was printed 5 times")
     }
+    if(i > 5) {
+        print("Hello World was printed more than 5 times")
+    }
+    println(); println()
+}
+
+void println() {
+    print("\n")
 }
 
 void print(str text) {
