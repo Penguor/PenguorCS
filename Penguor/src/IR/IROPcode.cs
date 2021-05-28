@@ -13,7 +13,7 @@ namespace Penguor.Compiler.IR
         DEF, DFE, ASSIGN, DFL, DFLE, // define, define empty, assign, define local
         BCALL, ECALL, CALL,
         RET, RETN,
-        ADD, SUB, MUL, DIV,
+        ADD, SUB, MUL, DIV, REMAINDER,
         INCR, DECR,
         LESS, GREATER, LESS_EQUALS, GREATER_EQUALS,
         EQUALS,

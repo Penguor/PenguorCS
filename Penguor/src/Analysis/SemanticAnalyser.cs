@@ -300,7 +300,7 @@ namespace Penguor.Compiler.Analysis
         public Stmt Visit(IfStmt stmt)
         {
             Expr condition = stmt.Condition.Accept(this);
-            if (((ExprAttribute?)condition.Attribute)!.Type.Equals(new State(new AddressFrame("bool", AddressType.IdfCall))))
+            if (pass == 1 || ((ExprAttribute?)condition.Attribute)!.Type.Equals(new State("bool")))
             {
                 scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
@@ -457,6 +457,14 @@ namespace Penguor.Compiler.Analysis
 
                 type = new State(new AddressFrame("f64", AddressType.IdfCall));
             }
+            else if (expr.Op == TokenType.PERCENT)
+            {
+                if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
+                if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
+                if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
+
+                type = new State(new AddressFrame("f64", AddressType.IdfCall));
+            }
             else
             {
                 Console.WriteLine(expr.Op);
@@ -545,6 +553,8 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(StringExpr expr) => expr with { Attribute = new ExprAttribute(new State(new AddressFrame("str", AddressType.IdfCall))) };
 
+        public Expr Visit(CharExpr expr) => expr with { Attribute = new ExprAttribute(new State(new AddressFrame("char", AddressType.IdfCall))) };
+
         public Expr Visit(TypeCallExpr expr)
         {
             var e = State.FromTypeCall(expr);
@@ -563,6 +573,10 @@ namespace Penguor.Compiler.Analysis
         public Expr Visit(UnaryExpr expr)
         {
             Expr e = expr.Rhs.Accept(this);
+            if (pass == 1)
+            {
+                return expr with { Rhs = e };
+            }
             if (expr.Op == null) return e;
             else if (((ExprAttribute?)e.Attribute)!.Type.ToString() is "i8" or "i16" or "i32" or "i64" or "u8" or "u16" or "u32" or "u64" or "str" or "f32" or "f64" && expr.Op is TokenType.MINUS or TokenType.PLUS or TokenType.BW_NOT or TokenType.DPLUS or TokenType.DMINUS) return expr with { Rhs = e, Attribute = new ExprAttribute(((ExprAttribute?)e.Attribute)!.Type) };
             else if (((ExprAttribute?)e.Attribute)!.Type.ToString() is "bool" && expr.Op is TokenType.EXCL_MARK) return expr with { Rhs = e, Attribute = new ExprAttribute(new State("bool")) };
@@ -602,5 +616,6 @@ namespace Penguor.Compiler.Analysis
         {
             return decl with { Declaration = decl.Declaration.Accept(this) };
         }
+
     }
 }

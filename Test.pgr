@@ -1,10 +1,40 @@
 void main() {
-    printHello(4)
-    printHello(5)
-    printHello(6)
+    FizzBuzz(100)
 }
 
-void printHello(i32 c) {
+void FizzBuzz(i32 count) {
+    i32 i = 1
+    while(i < count) {
+        bool fizzed = false
+        if(i % 3 == 0) {
+            print("Fizz")
+            fizzed = true
+        }
+        if(i % 5 == 0) {
+            print("Buzz")
+            fizzed = true
+        }
+
+        if(!fizzed) {
+            printItoa(i)
+        }
+
+        println()
+
+        i += 1
+    }
+}
+
+void printItoa(i32 i) {
+    while(i > 0) {
+        i32 c = i % 10
+        i /= 10
+
+        print(i + '0')
+    }
+}
+
+/*void printHello(i32 c) {
     print("Printing Hello World\n")
 
     i32 i = 0
@@ -24,7 +54,7 @@ void printHello(i32 c) {
         print("Hello World was printed more than 5 times")
     }
     println(); println()
-}
+}*/
 
 void println() {
     print("\n")

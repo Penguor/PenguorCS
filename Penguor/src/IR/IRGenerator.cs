@@ -477,7 +477,8 @@ namespace Penguor.Compiler.IR
                 IROPCode.LESS_EQUALS => IROPCode.JNLE,
                 IROPCode.GREATER => IROPCode.JNG,
                 IROPCode.GREATER_EQUALS => IROPCode.JNGE,
-                IROPCode.EQUALS => IROPCode.JNE
+                IROPCode.EQUALS => IROPCode.JNE,
+                IROPCode.INVERT => IROPCode.JTR
             };
             if (hasElse)
                 AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".else", AddressType.Control)));
@@ -600,6 +601,9 @@ namespace Penguor.Compiler.IR
                 case TokenType.MUL_ASSIGN:
                     AddStmt(IROPCode.MUL, ReadVariable(sym, currentBlock), value);
                     break;
+                case TokenType.DIV_ASSIGN:
+                    AddStmt(IROPCode.DIV, ReadVariable(sym, currentBlock), value);
+                    break;
                 default:
                     throw new Exception();
             }
@@ -623,6 +627,7 @@ namespace Penguor.Compiler.IR
                 TokenType.GREATER_EQUALS => IROPCode.GREATER_EQUALS,
                 TokenType.LESS_EQUALS => IROPCode.LESS_EQUALS,
                 TokenType.EQUALS => IROPCode.EQUALS,
+                TokenType.PERCENT => IROPCode.REMAINDER,
                 TokenType a => builder.Except(IROPCode.ERR, 9, expr.Offset, Token.ToString(a))
             }
             , addr1
@@ -667,6 +672,10 @@ namespace Penguor.Compiler.IR
         }
 
         public IRReference Visit(StringExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRString(expr.Value)));
+
+
+
+        public IRReference Visit(CharExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRChar(expr.Value)));
 
         public IRReference Visit(UnaryExpr expr)
         {

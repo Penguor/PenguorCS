@@ -216,6 +216,19 @@ namespace Penguor.Compiler.Lexing
                     continue;
                 }
 
+                // lex chars
+                if (Match('\''))
+                {
+                    AddToken(TokenType.CHAR, Advance().ToString());
+                    if (Peek() != '\'')
+                    {
+                        builder.Except(11, offset, "'", Peek().ToString());
+                        continue;
+                    }
+                    Advance();
+                    continue;
+                }
+
                 // lex all other tokens
                 char c;
                 if (!AtEnd()) c = Advance();

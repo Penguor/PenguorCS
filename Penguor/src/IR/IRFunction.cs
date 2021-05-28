@@ -18,7 +18,6 @@ namespace Penguor.Compiler.IR
 
         public void ResolveReroutes()
         {
-            SortedSet<int> toRemove = new();
             int hitCount = 1;
             while (hitCount > 0)
             {
@@ -49,11 +48,9 @@ namespace Penguor.Compiler.IR
                                 }
                             }
                         }
-                        toRemove.Add(Statements.IndexOf(statement));
                     }
                     else if (statement.Code == IROPCode.PHI && statement.Operands[0] is IRPhi phi && phi.Operands.Count == 1)
                     {
-                        hitCount++;
                         IRReference rerouteReference = new IRReference(statement.Number);
                         IRReference newReference = phi.Operands[0];
                         for (int i = 0; i < Statements.Count; i++)

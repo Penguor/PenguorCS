@@ -115,7 +115,6 @@ namespace Penguor.Compiler.Assembly
             {
                 if (jumpCodes.Contains(function.Statements[x].Code))
                 {
-                    Console.WriteLine(function.Statements[x]);
                     var labelIndex = function.Statements.FindIndex(s => s.Operands.Length > 0 && s.Code == IROPCode.LABEL && s.Operands[0].Equals(function.Statements[x].Operands[0]));
 
                     for (int y = 0; y < function.Statements.Count; y++)
@@ -128,19 +127,17 @@ namespace Penguor.Compiler.Assembly
                 }
             }
 
-#if false
-            Console.WriteLine(function.Statements[0].ToString());
-            for (int i = 0; i < lifetimes.Count; i++)
-            {
-                foreach (bool item in lifetimes[i])
-                {
-                    Console.Write(Convert.ToByte(item));
-                    Console.Write(' ');
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-#endif
+            // Console.WriteLine(function.Statements[0].ToString());
+            // for (int i = 0; i < lifetimes.Count; i++)
+            // {
+            //     foreach (bool item in lifetimes[i])
+            //     {
+            //         Console.Write(Convert.ToByte(item));
+            //         Console.Write(' ');
+            //     }
+            //     Console.WriteLine();
+            // }
+            // Console.WriteLine();
             return lifetimes.ToArray();
         }
 
@@ -197,15 +194,14 @@ namespace Penguor.Compiler.Assembly
                 }
             }
 
-            Console.WriteLine();
-            for (int y = 0; y < weight.GetLength(0); y++)
-            {
-                for (int x = 0; x < weight.GetLength(1); x++)
-                {
-                    Console.Write(string.Format("{0,-4}", weight[y, x].ToString("+0;-#")));
-                }
-                Console.WriteLine(function.Statements[y].ToString());
-            }
+            // for (int y = 0; y < weight.GetLength(0); y++)
+            // {
+            //     for (int x = 0; x < weight.GetLength(1); x++)
+            //     {
+            //         Console.Write(string.Format("{0,-4}", weight[y, x].ToString("+0;-#")));
+            //     }
+            //     Console.WriteLine(function.Statements[y].ToString());
+            // }
 
             return weight;
         }
@@ -244,7 +240,6 @@ namespace Penguor.Compiler.Assembly
                         else if (function.Statements[x].Code is IROPCode.CALL && x == y)
                         {
                             argCount = calls.Pop();
-                            Console.WriteLine(argCount);
                         }
                         else if (function.Statements[x].Code is IROPCode.LOADPARAM or IROPCode.LOADARG && x == y)
                         {
@@ -281,11 +276,7 @@ namespace Penguor.Compiler.Assembly
                             }
                             else
                             {
-                                for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
-                                {
-                                    if (weight[innerY, x] > -1)
-                                        AssignRegister(x, innerY, registerMap[innerY, labelIndex]);
-                                }
+                                AssignRegister(x, y, registerMap[y, labelIndex]);
                             }
                         }
                         else if (registerMap[y, x] == 0 && registerMap[y, x - 1] <= 0)
@@ -294,6 +285,7 @@ namespace Penguor.Compiler.Assembly
                         }
                         else if (x > 0)
                         {
+
                             registerMap[y, x] = registerMap[y, x - 1];
                             if (registerMap[y, x] != 0)
                                 registerOccupied[registerMap[y, x]][x] = y;
@@ -314,7 +306,7 @@ namespace Penguor.Compiler.Assembly
                 }
             }
 
-            PrintRegisters();
+            // PrintRegisters();
 
             for (int x = 0; x < xMax; x++)
             {
@@ -452,7 +444,6 @@ namespace Penguor.Compiler.Assembly
 
             RegisterAmd64[] GetRegisterSetFromStatement(IRStatement statement)
             {
-                // Console.WriteLine(statement);
                 return statement.Code switch
                 {
                     IROPCode.LOADARG or IROPCode.LOADPARAM => statement.Operands[0].ToString() switch
@@ -462,19 +453,21 @@ namespace Penguor.Compiler.Assembly
                     },
                     IROPCode.LOAD => statement.Operands[0] switch
                     {
-                        IRInt or IRString or IRBool => RegisterSetAmd64.GeneralPurpose,
+                        IRInt or IRString or IRBool or IRChar => RegisterSetAmd64.GeneralPurpose,
                     },
                     IROPCode.PHI => GetRegisterSetFromStatement(
                             function.Statements.Find(s => s.Number == ((IRPhi)statement.Operands[0]).Operands[0].Referenced) ?? throw new NullReferenceException()),
-                    IROPCode.ADD or IROPCode.MUL or IROPCode.SUB or IROPCode.DIV => GetRegisterSetFromStatement(
+                    IROPCode.ADD or IROPCode.MUL or IROPCode.SUB => GetRegisterSetFromStatement(
                             function.Statements.Find(s => s.Number == ((IRReference)statement.Operands[0]).Referenced) ?? throw new NullReferenceException()),
+                    IROPCode.DIV => new RegisterAmd64[] { RAX },
+                    IROPCode.REMAINDER => new RegisterAmd64[] { RDX },
                     IROPCode.CALL => builder.TableManager.GetSymbol(((IRState)statement.Operands[0]).State).DataType?.ToString() switch
                     {
                         "i8" or "i16" or "i32" or "i64" or "u8" or "u16" or "u32" or "u64" or "str" or "void" => RegisterSetAmd64.Return64,
                         null => throw new NullReferenceException(),
                         string s => throw new PenguorCSException(s)
                     },
-                    IROPCode.LESS => new RegisterAmd64[] { 0 },
+                    IROPCode.LESS or IROPCode.GREATER => new RegisterAmd64[] { 0 },
                     _ => throw new PenguorCSException(statement.ToString())
                 };
             }
@@ -550,9 +543,31 @@ namespace Penguor.Compiler.Assembly
                                 IRInt num => new AsmNumber(num.Value),
                                 IRString str => new AsmString(GetString(str)),
                                 IRBool bl => new AsmNumber(bl.Value ? 1 : 0),
+                                IRChar chr => new AsmNumber(chr.Value),
                                 _ => throw new Exception()
                             }
                         ));
+                        break;
+                    case IROPCode.INVERT:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.MOV,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[0]), x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.TEST,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.SETZ,
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.TEST,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[x, x])
+                        );
                         break;
                     case IROPCode.LESS:
                     case IROPCode.GREATER:
@@ -564,11 +579,13 @@ namespace Penguor.Compiler.Assembly
                         ));
                         break;
                     case IROPCode.PHI:
-
                     case IROPCode.LOADPARAM:
                     case IROPCode.BCALL:
                         break;
                     case IROPCode.JMP:
+                        function.AddInstruction(AsmMnemonicAmd64.JNZ, new AsmString(statement.Operands[0].ToString()));
+                        break;
+                    case IROPCode.JTR:
                         function.AddInstruction(AsmMnemonicAmd64.JMP, new AsmString(statement.Operands[0].ToString()));
                         break;
                     case IROPCode.JGE:
@@ -590,14 +607,35 @@ namespace Penguor.Compiler.Assembly
                         function.AddInstruction(AsmMnemonicAmd64.JNG, new AsmString(statement.Operands[0].ToString()));
                         break;
                     case IROPCode.MUL:
-                        function.AddInstruction(new AsmInstructionAmd64(
+                        function.AddInstruction(
                             AsmMnemonicAmd64.MOV,
                             new AsmRegister(registers[x, x]),
                             new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[0]), x])
-                        ));
+                        );
                         function.AddInstruction(
                             AsmMnemonicAmd64.IMUL,
                             new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[1]), x])
+                        );
+                        break;
+                    case IROPCode.REMAINDER:
+                    case IROPCode.DIV:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.PUSH,
+                            new AsmRegister(RDX)
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.XOR,
+                            new AsmRegister(RDX),
+                            new AsmRegister(RDX)
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.MOV,
+                            new AsmRegister(RAX),
+                            new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[0]), x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.IDIV,
                             new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[1]), x])
                         );
                         break;

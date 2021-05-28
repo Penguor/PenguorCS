@@ -11,6 +11,7 @@ Grouping Expr content
 Var TypeCallExpr type AddressFrame name
 Num int numBase string value double? numValue
 String string value
+Char char value
 ; Statement Stmt "Penguor\src\Parsing\AST\Statements"
 Compiler TokenType dir Token[] val
 Block List<Stmt> content

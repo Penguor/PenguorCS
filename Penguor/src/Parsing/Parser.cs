@@ -540,7 +540,7 @@ namespace Penguor.Compiler.Parsing
         {
             int offset = GetCurrent().Offset;
             Expr lhs = UnaryExpr();
-            if (Match(MUL, DIV)) return new BinaryExpr(ID, offset, lhs, GetPrevious().Type, MultiplicationExpr());
+            if (Match(MUL, DIV, PERCENT)) return new BinaryExpr(ID, offset, lhs, GetPrevious().Type, MultiplicationExpr());
             return lhs;
         }
 
@@ -549,8 +549,16 @@ namespace Penguor.Compiler.Parsing
             int offset = GetCurrent().Offset;
             TokenType? op = null;
             if (Match(EXCL_MARK, PLUS, MINUS, BW_NOT, DPLUS, DMINUS)) op = GetPrevious().Type;
-            if (Check(LPAREN)) return new UnaryExpr(ID, offset, op, GroupingExpr());
-            return BaseExpr();
+            if (op != null)
+            {
+                if (Check(LPAREN)) return new UnaryExpr(ID, offset, op, GroupingExpr());
+                return new UnaryExpr(ID, offset, op, BaseExpr());
+            }
+            else
+            {
+                if (Check(LPAREN)) return GroupingExpr();
+                return BaseExpr();
+            }
         }
 
         private Expr BaseExpr()
@@ -561,6 +569,7 @@ namespace Penguor.Compiler.Parsing
             if (Match(NULL)) return new NullExpr(ID, offset);
             if (Match(NUM_BASE)) return new NumExpr(ID, offset, int.Parse(GetPrevious().Name), Advance().Name, null);
             if (Match(STRING)) return new StringExpr(ID, offset, GetPrevious().Name);
+            if (Match(CHAR)) return new CharExpr(ID, offset, GetPrevious().Name[0]);
             return CallExpr();
         }
 

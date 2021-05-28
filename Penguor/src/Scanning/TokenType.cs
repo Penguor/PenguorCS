@@ -31,7 +31,7 @@ namespace Penguor.Compiler.Parsing
         , NULL
         , COLON, SEMICOLON, DOT, COMMA, EXCL_MARK
         , NUM, NUM_BASE
-        , STRING
+        , STRING, CHAR
         , IDF
         , TRUE, FALSE
         , USING
