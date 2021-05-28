@@ -264,19 +264,13 @@ namespace Penguor.Compiler.Assembly
                         {
                             var labelIndex = function.Statements.FindIndex(s => s.Operands.Length > 0 && s.Operands[0].Equals(function.Statements[x].Operands[0]));
 
-                            if (labelIndex > x)
+                            if (labelIndex < x)
                             {
-                                /*for (int innerY = 0; innerY < weight.GetLength(0); innerY++)
-                                {
-                                    if (weight[innerY, x] > -1)
-                                        AssignRegister(x, innerY, registerMap[innerY, x - 1]);
-                                    if (weight[innerY, labelIndex] > -1)
-                                        AssignRegister(labelIndex, innerY, registerMap[innerY, x]);
-                                }*/
+                                AssignRegister(x, y, registerMap[y, labelIndex]);
                             }
                             else
                             {
-                                AssignRegister(x, y, registerMap[y, labelIndex]);
+                                AssignRegister(x, y, registerMap[y, x - 1]);
                             }
                         }
                         else if (registerMap[y, x] == 0 && registerMap[y, x - 1] <= 0)
@@ -306,8 +300,6 @@ namespace Penguor.Compiler.Assembly
                 }
             }
 
-            // PrintRegisters();
-
             for (int x = 0; x < xMax; x++)
             {
                 HashSet<int> ints = new(registerMap.Length);
@@ -325,12 +317,12 @@ namespace Penguor.Compiler.Assembly
                 Console.WriteLine();
                 for (int y = 0; y < registerMap.Length / xMax; y++)
                 {
-                    Console.Write(string.Format("{0,-6}", y));
+                    Console.Write(string.Format("{0,-5}", y));
                     for (int x = 0; x < xMax; x++)
                     {
-                        Console.Write(string.Format("{0,-5}", registerMap[y, x]));
+                        Console.Write(string.Format("{0,-4}", registerMap[y, x]));
                     }
-                    Console.Write(function.Statements[y]);
+                    // Console.Write(function.Statements[y]);
                     Console.WriteLine();
                 }
             }
@@ -467,7 +459,7 @@ namespace Penguor.Compiler.Assembly
                         null => throw new NullReferenceException(),
                         string s => throw new PenguorCSException(s)
                     },
-                    IROPCode.LESS or IROPCode.GREATER => new RegisterAmd64[] { 0 },
+                    IROPCode.LESS or IROPCode.LESS_EQUALS or IROPCode.GREATER or IROPCode.EQUALS or IROPCode.INVERT => RegisterSetAmd64.GeneralPurpose,
                     _ => throw new PenguorCSException(statement.ToString())
                 };
             }
@@ -550,26 +542,28 @@ namespace Penguor.Compiler.Assembly
                         break;
                     case IROPCode.INVERT:
                         function.AddInstruction(
-                            AsmMnemonicAmd64.MOV,
+                            AsmMnemonicAmd64.XOR,
                             new AsmRegister(registers[x, x]),
-                            new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[0]), x])
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.MOV,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE))
                         );
                         function.AddInstruction(
                             AsmMnemonicAmd64.TEST,
-                            new AsmRegister(registers[x, x]),
-                            new AsmRegister(registers[x, x])
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
+
                         );
                         function.AddInstruction(
                             AsmMnemonicAmd64.SETZ,
-                            new AsmRegister(registers[x, x])
-                        );
-                        function.AddInstruction(
-                            AsmMnemonicAmd64.TEST,
-                            new AsmRegister(registers[x, x]),
-                            new AsmRegister(registers[x, x])
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
                         );
                         break;
                     case IROPCode.LESS:
+                    case IROPCode.LESS_EQUALS:
                     case IROPCode.GREATER:
                     case IROPCode.EQUALS:
                         function.AddInstruction(new AsmInstructionAmd64(
@@ -586,7 +580,12 @@ namespace Penguor.Compiler.Assembly
                         function.AddInstruction(AsmMnemonicAmd64.JNZ, new AsmString(statement.Operands[0].ToString()));
                         break;
                     case IROPCode.JTR:
-                        function.AddInstruction(AsmMnemonicAmd64.JMP, new AsmString(statement.Operands[0].ToString()));
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.TEST,
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
+                        );
+                        function.AddInstruction(AsmMnemonicAmd64.JZ, new AsmString(statement.Operands[0].ToString()));
                         break;
                     case IROPCode.JGE:
                         function.AddInstruction(AsmMnemonicAmd64.JGE, new AsmString(statement.Operands[0].ToString()));
@@ -599,6 +598,9 @@ namespace Penguor.Compiler.Assembly
                         break;
                     case IROPCode.JNL:
                         function.AddInstruction(AsmMnemonicAmd64.JNL, new AsmString(statement.Operands[0].ToString()));
+                        break;
+                    case IROPCode.JNLE:
+                        function.AddInstruction(AsmMnemonicAmd64.JNLE, new AsmString(statement.Operands[0].ToString()));
                         break;
                     case IROPCode.JL:
                         function.AddInstruction(AsmMnemonicAmd64.JL, new AsmString(statement.Operands[0].ToString()));
@@ -710,6 +712,86 @@ namespace Penguor.Compiler.Assembly
         private readonly Dictionary<string, int> stringConstants = new();
         private int _stringNum;
         private int StringNum { get => _stringNum++; }
+
+        private RegisterAmd64 GetRegisterBySize(RegisterAmd64 register, RegisterSize size) => size switch
+        {
+            RegisterSize.BYTE => register switch
+            {
+                AL or AX or EAX or RAX => AL,
+                BL or BX or EBX or RBX => BL,
+                CL or CX or ECX or RCX => CL,
+                DL or DX or EDX or RDX => DL,
+                DIL or DI or EDI or RDI => DIL,
+                SIL or SI or ESI or RSI => SIL,
+                BPL or BP or EBP or RBP => BPL,
+                SPL or SP or ESP or RSP => SPL,
+                R8B or R8W or R8D or R8 => R8B,
+                R9B or R9W or R9D or R9 => R9B,
+                R10B or R10W or R10D or R10 => R10B,
+                R11B or R11W or R11D or R11 => R11B,
+                R12B or R12W or R12D or R12 => R12B,
+                R13B or R13W or R13D or R13 => R13B,
+                R14B or R14W or R14D or R14 => R14B,
+                R15B or R15W or R15D or R15 => R15B,
+            },
+            RegisterSize.WORD => register switch
+            {
+                AL or AX or EAX or RAX => AX,
+                BL or BX or EBX or RBX => BX,
+                CL or CX or ECX or RCX => CX,
+                DL or DX or EDX or RDX => DX,
+                DIL or DI or EDI or RDI => DI,
+                SIL or SI or ESI or RSI => SI,
+                BPL or BP or EBP or RBP => BP,
+                SPL or SP or ESP or RSP => SP,
+                R8B or R8W or R8D or R8 => R8W,
+                R9B or R9W or R9D or R9 => R9W,
+                R10B or R10W or R10D or R10 => R10W,
+                R11B or R11W or R11D or R11 => R11W,
+                R12B or R12W or R12D or R12 => R12W,
+                R13B or R13W or R13D or R13 => R13W,
+                R14B or R14W or R14D or R14 => R14W,
+                R15B or R15W or R15D or R15 => R15W,
+            },
+            RegisterSize.DWORD => register switch
+            {
+                AL or AX or EAX or RAX => EAX,
+                BL or BX or EBX or RBX => EBX,
+                CL or CX or ECX or RCX => ECX,
+                DL or DX or EDX or RDX => EDX,
+                DIL or DI or EDI or RDI => EDI,
+                SIL or SI or ESI or RSI => ESI,
+                BPL or BP or EBP or RBP => EBP,
+                SPL or SP or ESP or RSP => ESP,
+                R8B or R8W or R8D or R8 => R8D,
+                R9B or R9W or R9D or R9 => R9D,
+                R10B or R10W or R10D or R10 => R10D,
+                R11B or R11W or R11D or R11 => R11D,
+                R12B or R12W or R12D or R12 => R12D,
+                R13B or R13W or R13D or R13 => R13D,
+                R14B or R14W or R14D or R14 => R14D,
+                R15B or R15W or R15D or R15 => R15D,
+            },
+            RegisterSize.QWORD => register switch
+            {
+                AL or AX or EAX or RAX => RAX,
+                BL or BX or EBX or RBX => RBX,
+                CL or CX or ECX or RCX => RCX,
+                DL or DX or EDX or RDX => RDX,
+                DIL or DI or EDI or RDI => RDI,
+                SIL or SI or ESI or RSI => RSI,
+                BPL or BP or EBP or RBP => RBP,
+                SPL or SP or ESP or RSP => RSP,
+                R8B or R8W or R8D or R8 => R8,
+                R9B or R9W or R9D or R9 => R9,
+                R10B or R10W or R10D or R10 => R10,
+                R11B or R11W or R11D or R11 => R11,
+                R12B or R12W or R12D or R12 => R12,
+                R13B or R13W or R13D or R13 => R13,
+                R14B or R14W or R14D or R14 => R14,
+                R15B or R15W or R15D or R15 => R15,
+            },
+        };
 
         private string GetString(IRString s)
         {

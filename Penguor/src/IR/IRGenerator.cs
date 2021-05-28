@@ -481,9 +481,9 @@ namespace Penguor.Compiler.IR
                 IROPCode.INVERT => IROPCode.JTR
             };
             if (hasElse)
-                AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".else", AddressType.Control)));
+                AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".else", AddressType.Control)), GetLastNumber());
             else
-                AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
+                AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)), GetLastNumber());
             SealBlock(conditionBlock);
 
             //content
