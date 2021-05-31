@@ -65,18 +65,62 @@ namespace Penguor.Compiler.Assembly
 
         private BitArray[] AnalyseLifetime(IRFunction function)
         {
-            List<BitArray> lifetimes = new(function.Statements.Count);
+            BitArray[] lifetimes = new BitArray[function.Statements.Count];
+            for (int i = 0; i < lifetimes.Length; i++)
+            {
+                lifetimes[i] = new BitArray(lifetimes.Length);
+            }
 
             Tuple<int, int>[] ranges = new Tuple<int, int>[function.Statements.Count];
 
             for (int x = 0; x < function.Statements.Count; x++)
             {
-                int number = function.Statements[x].Number;
-                IRReference numReference = new IRReference(number);
+                if (ranges[x] == null)
+                {
+                    ranges[x] = new Tuple<int, int>(x, x);
+                }
+                else
+                {
+                    ranges[x] = new Tuple<int, int>(ranges[x].Item1, x);
+                }
 
-                var bits = new BitArray(function.Statements.Count);
+                lifetimes[x][x] = true;
 
-                for (int y = 0; y < function.Statements.Count; y++)
+                foreach (var operand in function.Statements[x].Operands)
+                {
+                    if (operand is IRReference refOperand)
+                    {
+                        int index = function.Statements.FindIndex(s => s.Number == refOperand.Referenced);
+                        lifetimes[index][x] = true;
+                        if (ranges[index] == null)
+                        {
+                            ranges[index] = new Tuple<int, int>(x, x);
+                        }
+                        else
+                        {
+                            ranges[index] = new Tuple<int, int>(ranges[index].Item1, x);
+                        }
+                    }
+                    else if (operand is IRPhi phiOperand)
+                    {
+                        foreach (var phi in phiOperand.Operands)
+                        {
+                            int index = function.Statements.FindIndex(s => s.Number == phi.Referenced);
+                            lifetimes[index][x] = true;
+
+                            if (ranges[index] == null)
+                            {
+                                ranges[index] = new Tuple<int, int>(x, x);
+                            }
+                            else
+                            {
+                                ranges[index] = new Tuple<int, int>(ranges[index].Item1, x);
+                            }
+                        }
+                    }
+                }
+
+                /*for (int y = 0; y < function.Statements.Count; y++)
                 {
                     if (x == y)
                     {
@@ -84,7 +128,6 @@ namespace Penguor.Compiler.Assembly
                     }
                     else
                     {
-
                         bool referenced = false;
                         foreach (var operand in function.Statements[y].Operands)
                         {
@@ -107,8 +150,7 @@ namespace Penguor.Compiler.Assembly
                             ranges[x] = new Tuple<int, int>(ranges[x].Item1, y);
                         }
                     }
-                }
-                lifetimes.Add(bits);
+                }*/
             }
 
             for (int x = 0; x < function.Statements.Count; x++)
@@ -279,7 +321,6 @@ namespace Penguor.Compiler.Assembly
                         }
                         else if (x > 0)
                         {
-
                             registerMap[y, x] = registerMap[y, x - 1];
                             if (registerMap[y, x] != 0)
                                 registerOccupied[registerMap[y, x]][x] = y;
