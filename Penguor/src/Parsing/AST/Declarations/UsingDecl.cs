@@ -12,13 +12,13 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of UsingDecl
         /// </summary>
-        public UsingDecl(int id, int offset, CallExpr lib)
+        public UsingDecl(int id, int offset, TypeCallExpr lib)
         {
             Id = id;
             Offset = offset;
             Lib = lib;
         }
-        public CallExpr Lib { get; init; }
+        public TypeCallExpr Lib { get; init; }
 
         public override string ToString() => "using declaration";
 

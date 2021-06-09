@@ -374,8 +374,8 @@ namespace Penguor.Compiler.IR
 
         public int Visit(UsingDecl decl)
         {
-            scopes.Add(State.FromCall(decl.Lib));
-            AddStmt(IROPCode.USE, new IRState(State.FromCall(decl.Lib)));
+            scopes.Add(State.FromTypeCall(decl.Lib));
+            AddStmt(IROPCode.USE, new IRState(State.FromTypeCall(decl.Lib)));
             return 0;
         }
 
@@ -675,7 +675,7 @@ namespace Penguor.Compiler.IR
 
 
 
-        public IRReference Visit(CharExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRChar(expr.Value)));
+        public IRReference Visit(CharExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRChar(expr.Value[0])));
 
         public IRReference Visit(UnaryExpr expr)
         {

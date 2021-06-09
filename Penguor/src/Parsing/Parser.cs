@@ -138,7 +138,7 @@ namespace Penguor.Compiler.Parsing
         private Decl UsingDecl()
         {
             int offset = GetCurrent().Offset;
-            var call = CallExpr();
+            var call = TypeCall();
             GetEnding();
             return new UsingDecl(ID, offset, call);
         }
@@ -569,7 +569,7 @@ namespace Penguor.Compiler.Parsing
             if (Match(NULL)) return new NullExpr(ID, offset);
             if (Match(NUM_BASE)) return new NumExpr(ID, offset, int.Parse(GetPrevious().Name), Advance().Name, null);
             if (Match(STRING)) return new StringExpr(ID, offset, GetPrevious().Name);
-            if (Match(CHAR)) return new CharExpr(ID, offset, GetPrevious().Name[0]);
+            if (Match(CHAR)) return new CharExpr(ID, offset, GetPrevious().Name);
             return CallExpr();
         }
 
@@ -633,6 +633,24 @@ namespace Penguor.Compiler.Parsing
 
         private TypeCallExpr TypeCallExpr()
         {
+            return Either(ArrayTypeCall, TypeCall);
+        }
+
+        private TypeCallExpr TypeCall()
+        {
+            State name = new();
+            int offset = GetCurrent().Offset;
+
+            do
+            {
+                name.Add(new AddressFrame(Consume(IDF).Name, AddressType.TypeCall));
+            } while (Match(DOT));
+
+            return new TypeCallExpr(id, offset, name, new List<uint>(0));
+        }
+
+        private TypeCallExpr ArrayTypeCall()
+        {
             State name = new();
             int offset = GetCurrent().Offset;
 
@@ -642,6 +660,9 @@ namespace Penguor.Compiler.Parsing
             } while (Match(DOT));
 
             List<uint> dimensions = new();
+
+            if (!Check(LBRACK)) Except(1);
+
             while (Match(LBRACK))
             {
                 uint dim = 1;

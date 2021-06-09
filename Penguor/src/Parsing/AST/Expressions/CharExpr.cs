@@ -12,13 +12,13 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of CharExpr
         /// </summary>
-        public CharExpr(int id, int offset, char value)
+        public CharExpr(int id, int offset, string value)
         {
             Id = id;
             Offset = offset;
             Value = value;
         }
-        public char Value { get; init; }
+        public string Value { get; init; }
 
         public override string ToString() => "char expression";
 

@@ -11,7 +11,7 @@ Grouping Expr content
 Var TypeCallExpr type AddressFrame name
 Num int numBase string value double? numValue
 String string value
-Char char value
+Char string value
 ; Statement Stmt "Penguor\src\Parsing\AST\Statements"
 Compiler TokenType dir Token[] val
 Block List<Stmt> content
@@ -28,7 +28,7 @@ Return Expr? value
 Expr Expr expr
 ; Declaration Decl "Penguor\src\Parsing\AST\Declarations"
 Program List<Decl> declarations
-Using CallExpr lib
+Using TypeCallExpr lib
 Modified TokenType? accessMod TokenType? nonAccessMod Decl declaration
 System AddressFrame name CallExpr? parent BlockDecl content
 Data AddressFrame name CallExpr? parent BlockDecl content

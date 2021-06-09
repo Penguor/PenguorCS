@@ -119,38 +119,6 @@ namespace Penguor.Compiler.Assembly
                         }
                     }
                 }
-
-                /*for (int y = 0; y < function.Statements.Count; y++)
-                {
-                    if (x == y)
-                    {
-                        bits[y] = true;
-                    }
-                    else
-                    {
-                        bool referenced = false;
-                        foreach (var operand in function.Statements[y].Operands)
-                        {
-                            referenced = (operand is IRPhi phiOperand && phiOperand.Operands.Contains(numReference))
-                                || (operand is IRReference refOperand && refOperand == numReference);
-                            if (referenced) break;
-                        }
-
-                        bits[y] = referenced;
-                    }
-
-                    if (bits[y])
-                    {
-                        if (ranges[x] == null)
-                        {
-                            ranges[x] = new Tuple<int, int>(y, y);
-                        }
-                        else
-                        {
-                            ranges[x] = new Tuple<int, int>(ranges[x].Item1, y);
-                        }
-                    }
-                }*/
             }
 
             for (int x = 0; x < function.Statements.Count; x++)

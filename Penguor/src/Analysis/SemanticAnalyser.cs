@@ -219,7 +219,7 @@ namespace Penguor.Compiler.Analysis
 
         public Decl Visit(UsingDecl decl)
         {
-            var call = State.FromCall(decl.Lib);
+            var call = State.FromTypeCall(decl.Lib);
             if (builder.TableManager.FindTable(call))
                 scopes.Add(call);
             else builder.Except(21, decl.Offset, call.ToString());
