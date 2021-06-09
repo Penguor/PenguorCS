@@ -122,6 +122,13 @@ namespace Penguor.Compiler.Build
 
                     StreamReader reader = process.StandardOutput;
 
+                    do
+                    {
+                        if (!reader.EndOfStream)
+                            Console.WriteLine(reader.ReadToEnd());
+                    }
+                    while (!process.HasExited);
+
                     process.WaitForExit();
 
                     Console.WriteLine(reader.ReadToEnd());
@@ -142,9 +149,14 @@ namespace Penguor.Compiler.Build
 
                     StreamReader reader = process.StandardOutput;
 
-                    process.WaitForExit();
+                    do
+                    {
+                        if (!reader.EndOfStream)
+                            Console.WriteLine(reader.ReadToEnd());
+                    }
+                    while (!process.HasExited);
 
-                    Console.WriteLine(reader.ReadToEnd());
+                    process.WaitForExit();
                 }
             }
         }
