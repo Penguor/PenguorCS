@@ -5,22 +5,24 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A Call Expr
+    /// A Increment Expr
     /// </summary>
-    public sealed record CallExpr : Expr
+    public sealed record IncrementExpr : Expr
     {
         /// <summary>
-        /// creates a new instance of CallExpr
+        /// creates a new instance of IncrementExpr
         /// </summary>
-        public CallExpr(int id, int offset, List<Call> callee)
+        public IncrementExpr(int id, int offset, CallExpr child, TokenType postfix)
         {
             Id = id;
             Offset = offset;
-            Callee = callee;
+            Child = child;
+            Postfix = postfix;
         }
-        public List<Call> Callee { get; init; }
+        public CallExpr Child { get; init; }
+        public TokenType Postfix { get; init; }
 
-        public override string ToString() => "call expression";
+        public override string ToString() => "increment expression";
 
         /// <summary>
         /// returns Visit() of this instance
@@ -39,8 +41,8 @@ namespace Penguor.Compiler.Parsing.AST
     public partial interface IExprVisitor<T>
     {
         /// <summary>
-        /// visit a CallExpr
+        /// visit a IncrementExpr
         /// </summary>
-        T Visit(CallExpr expr);
+        T Visit(IncrementExpr expr);
     }
 }

@@ -21,7 +21,7 @@ void FizzBuzz(i32 count) {
 
         println()
 
-        i += 1
+        i++
     }
 }
 

@@ -673,8 +673,6 @@ namespace Penguor.Compiler.IR
 
         public IRReference Visit(StringExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRString(expr.Value)));
 
-
-
         public IRReference Visit(CharExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRChar(expr.Value[0])));
 
         public IRReference Visit(UnaryExpr expr)
@@ -718,6 +716,19 @@ namespace Penguor.Compiler.IR
         public IRReference Visit(TypeCallExpr expr)
         {
             throw new NotImplementedException();
+        }
+
+        public IRReference Visit(IncrementExpr expr)
+        {
+            var reference = expr.Child.Accept(this);
+            IROPCode code = expr.Postfix switch
+            {
+                TokenType.DPLUS => IROPCode.INCR,
+                TokenType.DMINUS => IROPCode.DECR
+            };
+            AddStmt(code, reference);
+            WriteVariable(State.FromCall(expr.Child), currentBlock, GetLastNumber());
+            return GetLastNumber();
         }
     }
 }

@@ -47,7 +47,7 @@
     {
       "id": "astGenFile",
       "type": "promptString",
-      "default": "",
+      "default": "${workspaceFolder}/Penguor/src/Parsing/AST/ASTgen.txt",
       "description": "The file containing the information for the ast node generation"
     },
     {

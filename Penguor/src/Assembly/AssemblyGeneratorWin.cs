@@ -523,6 +523,12 @@ namespace Penguor.Compiler.Assembly
                     case IROPCode.ASM:
                         function.AddInstruction(new AsmRawInstructionAmd64(((IRString)statement.Operands[0]).Value));
                         break;
+                    case IROPCode.INCR:
+                        function.AddInstruction(AsmMnemonicAmd64.INC, new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[0]), x]));
+                        break;
+                    case IROPCode.DECR:
+                        function.AddInstruction(AsmMnemonicAmd64.DEC, new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[0]), x]));
+                        break;
                     case IROPCode.ADD:
                         function.AddInstruction(
                             AsmMnemonicAmd64.MOV,

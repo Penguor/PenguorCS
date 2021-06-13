@@ -3,7 +3,8 @@
 Assign CallExpr lhs TokenType op Expr value
 Binary Expr lhs TokenType op Expr rhs
 Unary TokenType? op Expr rhs
-Call List<Call> callee TokenType? postfix
+Call List<Call> callee
+Increment CallExpr child TokenType postfix
 TypeCall State name List<uint> dimensions
 Boolean bool value
 Null

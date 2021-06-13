@@ -570,7 +570,17 @@ namespace Penguor.Compiler.Parsing
             if (Match(NUM_BASE)) return new NumExpr(ID, offset, int.Parse(GetPrevious().Name), Advance().Name, null);
             if (Match(STRING)) return new StringExpr(ID, offset, GetPrevious().Name);
             if (Match(CHAR)) return new CharExpr(ID, offset, GetPrevious().Name);
-            return CallExpr();
+            return IncrementExpr();
+        }
+
+        private Expr IncrementExpr()
+        {
+            var offset = GetCurrent().Offset;
+            var call = CallExpr();
+            if (Match(DPLUS, DMINUS))
+                return new IncrementExpr(id, offset, call, GetPrevious().Type);
+            else
+                return call;
         }
 
         private CallExpr CallExpr()
@@ -588,7 +598,7 @@ namespace Penguor.Compiler.Parsing
                     callees.Add(new IdfCall(id, GetCurrent().Offset, new AddressFrame(Consume(IDF).Name, AddressType.IdfCall)));
             } while (Match(DOT));
 
-            return new CallExpr(id, offset, callees, null);
+            return new CallExpr(id, offset, callees);
 
             FunctionCall FunctionCall()
             {

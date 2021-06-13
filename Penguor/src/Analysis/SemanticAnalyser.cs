@@ -617,5 +617,9 @@ namespace Penguor.Compiler.Analysis
             return decl with { Declaration = decl.Declaration.Accept(this) };
         }
 
+        public Expr Visit(IncrementExpr expr)
+        {
+            return expr with { Child = (CallExpr)expr.Child.Accept(this) };
+        }
     }
 }
