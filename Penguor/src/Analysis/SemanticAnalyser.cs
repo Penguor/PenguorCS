@@ -300,21 +300,44 @@ namespace Penguor.Compiler.Analysis
         public Stmt Visit(IfStmt stmt)
         {
             Expr condition = stmt.Condition.Accept(this);
+            if (condition is BooleanExpr booleanExpr)
+            {
+                if (booleanExpr.Value)
+                {
+                    return stmt.IfC.Accept(this);
+                }
+                else if (stmt.Elif.Count > 0)
+                {
+                    for (int i = 0; i < stmt.Elif.Count; i++)
+                    {
+                        if (stmt.Elif[i].Condition.Accept(this) is BooleanExpr expr && expr.Value)
+                        {
+                            return stmt.Elif[i].Accept(this);
+                        }
+                    }
+                }
+                else if (stmt.ElseC != null)
+                {
+                    return stmt.ElseC.Accept(this);
+                }
+            }
+
             if (pass == 1 || ((ExprAttribute?)condition.Attribute)!.Type.Equals(new State("bool")))
             {
                 scopes[0].Push(new AddressFrame($".if{stmt.Id}", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt ifC = stmt.IfC.Accept(this);
-                scopes[0].Pop();
 
+                scopes[0].Push(new AddressFrame(".else", AddressType.Control));
+                builder.TableManager.AddTable(scopes[0]);
                 List<ElifStmt> elif = new(stmt.Elif.Count);
                 foreach (var i in stmt.Elif)
                     elif.Add((ElifStmt)i.Accept(this));
 
-                scopes[0].Push(new AddressFrame($".else{stmt.Id}", AddressType.Control));
+                scopes[0].Push(new AddressFrame(".else", AddressType.Control));
                 builder.TableManager.AddTable(scopes[0]);
                 Stmt? elseC = stmt.ElseC?.Accept(this);
-                scopes[0].Pop();
+                scopes[0].Pop(3);
                 return stmt with { Condition = condition, IfC = ifC, Elif = elif, ElseC = elseC };
             }
             else
@@ -355,7 +378,7 @@ namespace Penguor.Compiler.Analysis
             else
             {
                 scopes[0].Pop();
-                return builder.Except(stmt, 1, stmt.Offset);
+                return builder.Except(stmt, 1, stmt.Condition.Offset);
             }
         }
 
