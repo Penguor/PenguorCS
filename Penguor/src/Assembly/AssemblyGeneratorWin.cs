@@ -592,9 +592,9 @@ namespace Penguor.Compiler.Assembly
                     case IROPCode.BCALL:
                         break;
                     case IROPCode.JMP:
-                        function.AddInstruction(AsmMnemonicAmd64.JNZ, new AsmString(statement.Operands[0].ToString()));
+                        function.AddInstruction(AsmMnemonicAmd64.JMP, new AsmString(statement.Operands[0].ToString()));
                         break;
-                    case IROPCode.JTR:
+                    case IROPCode.JFL:
                         function.AddInstruction(
                             AsmMnemonicAmd64.TEST,
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE)),

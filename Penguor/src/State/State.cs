@@ -218,15 +218,23 @@ namespace Penguor.Compiler
         /// </summary>
         public static State operator -(State minuend, State subtrahend)
         {
-            State temp = (State)minuend.Clone();
+            State minTemp = (State)minuend.Clone();
+            State subTemp = (State)subtrahend.Clone();
             //! work on this
-            //todo: this doesn't work the way it should
-            while (subtrahend.Count != 0 && temp.Count != 0)
+            //!this might be buggy
+            while (subTemp.Count != 0 && minTemp.Count != 0)
             {
-                if (temp[^1].Equals(subtrahend[^1])) temp.Pop();
-                else break;
+                if (minTemp[^1].Equals(subTemp[^1]))
+                {
+                    minTemp.Pop();
+                    subTemp.Pop();
+                }
+                else
+                {
+                    break;
+                }
             }
-            return temp;
+            return minTemp;
         }
 
         /// <summary>

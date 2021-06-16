@@ -431,14 +431,27 @@ namespace Penguor.Compiler.IR
             scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
             var conditionBlock = BeginBlock(scopes[0] + new AddressFrame(".c", AddressType.Control), true);
             stmt.Condition.Accept(this);
-            AddJumpStmt(IROPCode.JFL, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)));
+            IROPCode jumpCode = statements[^1].Code switch
+            {
+                IROPCode.LOAD => IROPCode.JFL,
+                IROPCode.LESS => IROPCode.JNL,
+                IROPCode.LESS_EQUALS => IROPCode.JNLE,
+                IROPCode.GREATER => IROPCode.JNG,
+                IROPCode.GREATER_EQUALS => IROPCode.JNGE,
+                IROPCode.EQUALS => IROPCode.JNE,
+                IROPCode.INVERT => IROPCode.JTR
+            };
+            AddJumpStmt(jumpCode, new IRState(scopes[0] + new AddressFrame(".e", AddressType.Control)), GetLastNumber());
             SealBlock(conditionBlock);
 
             //content
             var contentBlock = BeginBlock(scopes[0], true);
             stmt.Content.Accept(this);
 
-            AddJumpStmt(IROPCode.JMP, new IRState(scopes[0]));
+            AddJumpStmt(IROPCode.JMP, new IRState(scopes[0] - new State(new AddressFrame[] {
+                new AddressFrame(".else", AddressType.Control),
+                new AddressFrame($".elif{stmt.Id}", AddressType.Control)
+            }) + new AddressFrame(".e", AddressType.Control)));
             SealBlock(contentBlock);
 
             //rest
@@ -472,7 +485,7 @@ namespace Penguor.Compiler.IR
             stmt.Condition.Accept(this);
             IROPCode jumpCode = statements[^1].Code switch
             {
-                IROPCode.LOAD => IROPCode.JTR,
+                IROPCode.LOAD => IROPCode.JFL,
                 IROPCode.LESS => IROPCode.JNL,
                 IROPCode.LESS_EQUALS => IROPCode.JNLE,
                 IROPCode.GREATER => IROPCode.JNG,
@@ -499,16 +512,18 @@ namespace Penguor.Compiler.IR
             {
                 scopes[0].Push(new AddressFrame(".else", AddressType.Control));
                 AddLabel();
-                scopes[0].Pop();
-                foreach (var i in stmt.Elif)
+                for (int i = 0; i < stmt.Elif.Count; i++)
                 {
-                    i.Accept(this);
+                    stmt.Elif[i].Accept(this);
                 }
                 if (stmt.ElseC != null)
                 {
+                    scopes[0].Push(new AddressFrame(".else", AddressType.Control));
                     BeginBlock(scopes[0], true);
                     stmt.ElseC.Accept(this);
+                    scopes[0].Pop();
                 }
+                scopes[0].Pop();
             }
             scopes[0].Push(new AddressFrame(".e", AddressType.Control));
             AddLabel();

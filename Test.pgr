@@ -1,40 +1,16 @@
 void main() {
-    FizzBuzz(100)
+    if(true)
+        print("if")
+    else if(false)
+        print("else if")
+    else if(true)
+        print("else if 2")
+    else
+        print("else")
 }
 
-void FizzBuzz(i32 count) {
-    i32 i = 1
-    while(i <= count) {
-        bool fizzed = false
-        if(i % 3 == 0) {
-            print("Fizz")
-            fizzed = true
-        }
-        if(i % 5 == 0) {
-            print("Buzz")
-            fizzed = true
-        }
-
-        if(!fizzed) {
-            printNum(i)
-        }
-
-        println()
-
-        i++
-    }
-}
-
-void printNum(i32 num) {
-    print("%d", num)
-}
-
-void println() {
-    print("\n")
-}
-
-void print(str text) {
-    asm 
+void print() {
+    asm
 "SUB rsp, 32
 CALL printf"
 }

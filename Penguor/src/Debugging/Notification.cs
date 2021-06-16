@@ -48,9 +48,8 @@ namespace Penguor.Compiler.Debugging
         /// <summary>
         /// formats the message with the given input string
         /// </summary>
-        /// <param name="input">should be the message corresponding to MsgNumber</param>
-        public string Format(string input) => $"[{Type}-{string.Format("{0:D4}", Message)}] {string.Format(input, Args)} {(Type != MsgType.PGRCS ? GetSourcePosition(Offset, File) : "")}";
-
+        /// <param name="message">should be the message corresponding to MsgNumber</param>
+        public string Format(string message) => $"[{Type}-{string.Format("{0:D4}", Message)}] {string.Format(message, Args)} {(Type != MsgType.PGRCS ? GetSourcePosition(Offset, File) : "")}";
         private static string GetSourcePosition(int offset, string file)
         {
             string source;
