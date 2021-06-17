@@ -602,6 +602,14 @@ namespace Penguor.Compiler.Assembly
                         );
                         function.AddInstruction(AsmMnemonicAmd64.JZ, new AsmString(statement.Operands[0].ToString()));
                         break;
+                    case IROPCode.JTR:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.TEST,
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
+                        );
+                        function.AddInstruction(AsmMnemonicAmd64.JNZ, new AsmString(statement.Operands[0].ToString()));
+                        break;
                     case IROPCode.JGE:
                         function.AddInstruction(AsmMnemonicAmd64.JGE, new AsmString(statement.Operands[0].ToString()));
                         break;
