@@ -1,16 +1,29 @@
-void main() {
-    if(true)
-        print("if")
-    else if(false)
-        print("else if")
-    else if(true)
-        print("else if 2")
-    else
-        print("else")
+void print() 
+{    
+    asm
+"sub rsp, 32
+CALL printf"
 }
 
-void print() {
-    asm
-"SUB rsp, 32
-CALL printf"
+void main() {
+    print("%d", fib(0))
+    for(i32 i = 1; i <= 10; i++) {
+        print(", ")
+        print("%d", fib(i))
+    }
+
+    print("\n")
+}
+
+private i32 fib(i32 n)
+{
+    if(n == 0)
+        return 0
+    else if(n == 1)
+        return 1
+    else {
+        i32 fib1 = fib(n - 1) 
+        i32 fib2 = fib(n - 2)
+        return fib1 + fib2
+    }
 }

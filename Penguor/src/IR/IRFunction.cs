@@ -22,62 +22,65 @@ namespace Penguor.Compiler.IR
             while (hitCount > 0)
             {
                 hitCount = 0;
-                foreach (var statement in Statements)
+                for (int i = 0; i < Statements.Count; i++)
                 {
-                    if (statement.Code == IROPCode.REROUTE)
+                    if (Statements[i].Code == IROPCode.REROUTE)
                     {
-                        IRReference rerouteReference = new IRReference(statement.Number);
-                        IRReference newReference = (IRReference)statement.Operands[0];
-                        for (int i = 0; i < Statements.Count; i++)
+                        IRReference rerouteReference = new(Statements[i].Number);
+                        IRReference newReference = (IRReference)Statements[i].Operands[0];
+                        for (int j = 0; j < Statements.Count; j++)
                         {
-                            if (statement.Code != Statements[i].Code)
+                            if (Statements[i].Code != Statements[j].Code)
                             {
-                                for (int i2 = 0; i2 < Statements[i].Operands.Length; i2++)
+                                for (int k = 0; k < Statements[j].Operands.Length; k++)
                                 {
-                                    if (Statements[i].Operands[i2] is IRReference reference && reference.Equals(rerouteReference))
+                                    if (Statements[j].Operands[k] is IRReference reference && reference.Equals(rerouteReference))
                                     {
                                         hitCount++;
-                                        Statements[i].Operands[i2] = newReference with { };
+                                        Statements[j].Operands[k] = newReference with { };
                                     }
-                                    else if (Statements[i].Operands[i2] is IRPhi newPhi && newPhi.Operands.Contains(rerouteReference))
+                                    else if (Statements[j].Operands[k] is IRPhi newPhi && newPhi.Operands.Contains(rerouteReference))
                                     {
                                         hitCount++;
-                                        newPhi.Operands[newPhi.Operands.FindIndex(op => op.Equals(rerouteReference))] = newReference with { };
                                         newPhi.Operands.Remove(rerouteReference);
+                                        newPhi.Operands.Add(newReference);
                                     }
                                 }
                             }
                         }
                     }
-                    else if (statement.Code == IROPCode.PHI && statement.Operands[0] is IRPhi phi && phi.Operands.Count == 1)
+                    else if (Statements[i].Code == IROPCode.PHI && Statements[i].Operands[0] is IRPhi phi && phi.Operands.Count == 1)
                     {
-                        IRReference rerouteReference = new IRReference(statement.Number);
-                        IRReference newReference = phi.Operands[0];
-                        for (int i = 0; i < Statements.Count; i++)
+                        IRReference rerouteReference = new(Statements[i].Number);
+                        foreach (var newReference in phi.Operands)
                         {
-                            if (statement.Code != Statements[i].Code)
+                            for (int j = 0; j < Statements.Count; j++)
                             {
-                                for (int i2 = 0; i2 < Statements[i].Operands.Length; i2++)
+                                if (Statements[i].Code != Statements[j].Code)
                                 {
-                                    if (Statements[i].Operands[i2] is IRReference reference && reference.Equals(rerouteReference))
+                                    for (int k = 0; k < Statements[j].Operands.Length; k++)
                                     {
-                                        hitCount++;
-                                        Statements[i].Operands[i2] = newReference with { };
-                                    }
-                                    else if (Statements[i].Operands[i2] is IRPhi newPhi && newPhi.Operands.Contains(rerouteReference))
-                                    {
-                                        hitCount++;
-                                        newPhi.Operands[newPhi.Operands.FindIndex(op => op.Equals(rerouteReference))] = newReference with { };
-                                        newPhi.Operands.Remove(rerouteReference);
+                                        if (Statements[j].Operands[k] is IRReference reference && reference.Equals(rerouteReference))
+                                        {
+                                            hitCount++;
+                                            Statements[j].Operands[k] = newReference with { };
+                                        }
+                                        else if (Statements[j].Operands[k] is IRPhi newPhi && newPhi.Operands.Contains(rerouteReference))
+                                        {
+                                            hitCount++;
+                                            newPhi.Operands.Remove(rerouteReference);
+                                            newPhi.Operands.Add(newReference);
+                                        }
                                     }
                                 }
                             }
+                            Statements[i] = Statements[i] with { Code = IROPCode.REROUTE, Operands = new IRArgument[] { newReference with { } } };
                         }
                     }
                 }
             }
 
-            Statements.RemoveAll(s => s.Code == IROPCode.REROUTE);
+            Statements.RemoveAll(s => s.Code == IROPCode.REROUTE || (s.Code == IROPCode.PHI && s.Operands[0] is IRPhi phi && phi.Operands.Count == 1));
         }
 
         public void Add(IRStatement statement) => Statements.Add(statement);

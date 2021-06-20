@@ -132,7 +132,7 @@ namespace Penguor.Compiler.Parsing
                 symbol.NonAccessMod = nonAccessMod;
             }
 
-            return new ModifiedDecl(id, GetCurrent().Offset, accessMod, nonAccessMod, decl);
+            return new ModifiedDecl(ID, GetCurrent().Offset, accessMod, nonAccessMod, decl);
         }
 
         private Decl UsingDecl()
@@ -280,10 +280,9 @@ namespace Penguor.Compiler.Parsing
         {
             if (Match(HASHTAG)) return CompilerStmt();
             if (Check(LBRACE)) return BlockStmt();
-            if (Check(IDF) && LookAhead(1).Type == IDF) return VarStmt();
             if (Match(IF)) return IfStmt();
             if (Match(WHILE)) return WhileStmt();
-            if (Match(FOR)) return ForStmt();
+            if (Match(FOR)) return Either<Stmt>(ForeachStmt, ForStmt);
             if (Match(DO)) return DoStmt();
             if (Match(SWITCH)) return SwitchStmt();
             if (Match(ASM)) return AsmStmt();
@@ -383,6 +382,34 @@ namespace Penguor.Compiler.Parsing
         private ForStmt ForStmt()
         {
             int offset = GetPrevious().Offset;
+            int forID = ID;
+
+            state.Push(new AddressFrame($".for{forID}", AddressType.Control));
+            AddTable();
+
+            Consume(LPAREN);
+
+            Expr? init = Match(SEMICOLON) ? null : Expression();
+            if (init is not null)
+                Consume(SEMICOLON);
+            Expr? condition = Match(SEMICOLON) ? null : Expression();
+            if (condition is not null)
+                Consume(SEMICOLON);
+            Expr? change = Match(RPAREN) ? null : Expression();
+            if (change is not null)
+                Consume(RPAREN);
+
+            Stmt content = Statement();
+            CheckBraces(content, "for statement");
+
+            state.Pop();
+
+            return new ForStmt(forID, offset, init, condition, change, content);
+        }
+
+        private ForeachStmt ForeachStmt()
+        {
+            int offset = GetPrevious().Offset;
             Consume(LPAREN);
             VarExpr current = VarExpr(AddressType.VarExpr);
             Consume(COLON);
@@ -390,8 +417,8 @@ namespace Penguor.Compiler.Parsing
             Consume(RPAREN);
 
             Stmt content = Statement();
-            CheckBraces(content, "for statement");
-            return new ForStmt(ID, offset, current, vars, content);
+            CheckBraces(content, "foreach statement");
+            return new ForeachStmt(ID, offset, current, vars, content);
         }
 
         private DoStmt DoStmt()
@@ -485,7 +512,7 @@ namespace Penguor.Compiler.Parsing
         private Expr AssignExpr()
         {
             int offset = GetCurrent().Offset;
-            Expr lhs = CondOrExpr();
+            Expr lhs = Either(() => VarExpr(AddressType.VarStmt), CondOrExpr);
             if (Match(ASSIGN,
                       ADD_ASSIGN,
                       MUL_ASSIGN,
@@ -497,10 +524,19 @@ namespace Penguor.Compiler.Parsing
                       BW_OR_ASSIGN,
                       BW_XOR_ASSIGN))
             {
-                if (lhs is CallExpr e)
-                    return new AssignExpr(ID, offset, e, GetPrevious().Type, CondOrExpr());
+                if (lhs is CallExpr)
+                {
+                    return new AssignExpr(ID, offset, lhs, GetPrevious().Type, CondOrExpr());
+                }
+                else if (lhs is VarExpr expr)
+                {
+                    AddSymbol(expr.Name);
+                    return new AssignExpr(ID, offset, lhs, GetPrevious().Type, CondOrExpr());
+                }
                 else
+                {
                     return Except(new BinaryExpr(ID, offset, lhs, GetPrevious().Type, CondOrExpr()), 14, lhs.ToString());
+                }
             }
 
             return lhs;
@@ -578,7 +614,7 @@ namespace Penguor.Compiler.Parsing
             var offset = GetCurrent().Offset;
             var call = CallExpr();
             if (Match(DPLUS, DMINUS))
-                return new IncrementExpr(id, offset, call, GetPrevious().Type);
+                return new IncrementExpr(ID, offset, call, GetPrevious().Type);
             else
                 return call;
         }
@@ -595,10 +631,10 @@ namespace Penguor.Compiler.Parsing
                 else if (Check(LBRACK, 1))
                     callees.Add(ArrayCall());
                 else
-                    callees.Add(new IdfCall(id, GetCurrent().Offset, new AddressFrame(Consume(IDF).Name, AddressType.IdfCall)));
+                    callees.Add(new IdfCall(ID, GetCurrent().Offset, new AddressFrame(Consume(IDF).Name, AddressType.IdfCall)));
             } while (Match(DOT));
 
-            return new CallExpr(id, offset, callees);
+            return new CallExpr(ID, offset, callees);
 
             FunctionCall FunctionCall()
             {
@@ -637,7 +673,7 @@ namespace Penguor.Compiler.Parsing
                     Consume(RBRACK);
                 }
 
-                return new ArrayCall(id, offset, name, indices);
+                return new ArrayCall(ID, offset, name, indices);
             }
         }
 
@@ -656,7 +692,7 @@ namespace Penguor.Compiler.Parsing
                 name.Add(new AddressFrame(Consume(IDF).Name, AddressType.TypeCall));
             } while (Match(DOT));
 
-            return new TypeCallExpr(id, offset, name, new List<uint>(0));
+            return new TypeCallExpr(ID, offset, name, new List<uint>(0));
         }
 
         private TypeCallExpr ArrayTypeCall()
@@ -682,7 +718,7 @@ namespace Penguor.Compiler.Parsing
 
             name.Add(name.Pop() with { ArrayDimensions = dimensions });
 
-            return new TypeCallExpr(id, offset, name, dimensions);
+            return new TypeCallExpr(ID, offset, name, dimensions);
         }
 
         private GroupingExpr GroupingExpr()
@@ -823,11 +859,12 @@ namespace Penguor.Compiler.Parsing
             int savedCurrent = current;
             bool saveFailed = failed;
             failed = false;
+            bool saveBlocked = Logger.Blocked;
 
             Logger.Blocked = true;
 
             T result = parser();
-            Logger.Blocked = false;
+            Logger.Blocked = saveBlocked;
             if (failed)
             {
                 current = savedCurrent;

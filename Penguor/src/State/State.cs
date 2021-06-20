@@ -198,7 +198,7 @@ namespace Penguor.Compiler
         {
             AddressFrame[] frames = new AddressFrame[a.Count + b.Count];
             a.CopyTo(frames, 0);
-            b.CopyTo(frames, a.Count - 1);
+            b.CopyTo(frames, a.Count);
             return new State(frames);
         }
 

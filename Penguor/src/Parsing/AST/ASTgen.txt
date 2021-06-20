@@ -1,6 +1,6 @@
 ;; "Penguor\src\Parsing\AST"
 ; Expression Expr "Penguor\src\Parsing\AST\Expressions"
-Assign CallExpr lhs TokenType op Expr value
+Assign Expr lhs TokenType op Expr value
 Binary Expr lhs TokenType op Expr rhs
 Unary TokenType? op Expr rhs
 Call List<Call> callee
@@ -16,12 +16,12 @@ Char string value
 ; Statement Stmt "Penguor\src\Parsing\AST\Statements"
 Compiler TokenType dir Token[] val
 Block List<Stmt> content
-Var TypeCallExpr type AddressFrame name Expr? init
 If Expr condition Stmt ifC List<ElifStmt> elif Stmt? elseC
 Elif Expr condition Stmt content
 While Expr condition Stmt content
 Do Stmt content Expr condition
-For VarExpr currentVar CallExpr vars Stmt content
+For Expr? init Expr? condition Expr? change Stmt content
+Foreach VarExpr currentVar CallExpr vars Stmt content
 Switch Expr condition List<Stmt> cases Stmt? defaultCase
 Case Expr? condition List<Stmt> content
 Asm string[] contents

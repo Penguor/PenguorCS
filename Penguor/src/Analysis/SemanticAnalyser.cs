@@ -286,10 +286,35 @@ namespace Penguor.Compiler.Analysis
 
         public Stmt Visit(ForStmt stmt)
         {
-            var currentVar = stmt.CurrentVar.Accept(this);
-            var vars = stmt.Vars.Accept(this);
             scopes[0].Push(new AddressFrame($".for{stmt.Id}", AddressType.Control));
             builder.TableManager.AddTable(scopes[0]);
+
+            var init = stmt.Init?.Accept(this);
+            if (init is VarExpr varExpr)
+                AddVarExpr(varExpr);
+
+            var condition = stmt.Condition?.Accept(this);
+            var change = stmt.Change?.Accept(this);
+
+            var content = stmt.Content.Accept(this);
+            scopes[0].Pop();
+            if (pass == 1 || ((ExprAttribute?)condition?.Attribute)!.Type.Equals(new State("bool")))
+            {
+                return stmt with { Init = init, Condition = condition, Change = change, Content = content };
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+
+        public Stmt Visit(ForeachStmt stmt)
+        {
+            scopes[0].Push(new AddressFrame($".foreach{stmt.Id}", AddressType.Control));
+            builder.TableManager.AddTable(scopes[0]);
+
+            var currentVar = stmt.CurrentVar.Accept(this);
+            var vars = stmt.Vars.Accept(this);
             AddVarExpr(stmt.CurrentVar);
             var content = stmt.Content.Accept(this);
             scopes[0].Pop();
@@ -387,7 +412,22 @@ namespace Penguor.Compiler.Analysis
             //todo: verify operators
             var lhs = expr.Lhs.Accept(this);
             var rhs = expr.Value.Accept(this);
-            return expr with { Lhs = (CallExpr)lhs, Value = rhs, Attribute = new ExprAttribute(State.FromCall(expr.Lhs)) };
+
+            ASTAttribute? attribute;
+            if (lhs is CallExpr call)
+            {
+                attribute = call.Attribute;
+            }
+            else if (lhs is VarExpr varExpr)
+            {
+                attribute = new ExprAttribute(State.FromTypeCall(varExpr.Type));
+            }
+            else
+            {
+                throw new Exception();
+            }
+
+            return expr with { Lhs = lhs, Value = rhs, Attribute = attribute };
         }
 
         public Expr Visit(BinaryExpr expr)
@@ -454,7 +494,7 @@ namespace Penguor.Compiler.Analysis
                 if (lhs is BooleanExpr && rhs is BooleanExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
 
-                type = new State(new AddressFrame("f64", AddressType.IdfCall));
+                type = new State(new AddressFrame("i32", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.MINUS)
             {
@@ -462,7 +502,7 @@ namespace Penguor.Compiler.Analysis
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
 
-                type = new State(new AddressFrame("f64", AddressType.IdfCall));
+                type = new State(new AddressFrame("i32", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.MUL)
             {
@@ -470,7 +510,7 @@ namespace Penguor.Compiler.Analysis
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
 
-                type = new State(new AddressFrame("f64", AddressType.IdfCall));
+                type = new State(new AddressFrame("i32", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.DIV)
             {
@@ -478,7 +518,7 @@ namespace Penguor.Compiler.Analysis
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
 
-                type = new State(new AddressFrame("f64", AddressType.IdfCall));
+                type = new State(new AddressFrame("i32", AddressType.IdfCall));
             }
             else if (expr.Op == TokenType.PERCENT)
             {
@@ -486,7 +526,7 @@ namespace Penguor.Compiler.Analysis
                 if (lhs is StringExpr && rhs is StringExpr) throw new Exception();
                 if (lhs is NullExpr && rhs is NullExpr) throw new Exception();
 
-                type = new State(new AddressFrame("f64", AddressType.IdfCall));
+                type = new State(new AddressFrame("i32", AddressType.IdfCall));
             }
             else
             {
@@ -608,10 +648,13 @@ namespace Penguor.Compiler.Analysis
 
         public Expr Visit(VarExpr expr)
         {
-            expr.Type.Accept(this);
+            var type = (TypeCallExpr)expr.Type.Accept(this);
+            SetDataType(expr.Name, type);
+
             return expr with
             {
-                Attribute = new ExprAttribute(builder.TableManager.GetStateBySymbol(State.FromTypeCall(expr.Type), scopes.ToArray()) ?? throw new NullReferenceException())
+                Type = type,
+                Attribute = pass == 1 ? null : new ExprAttribute(builder.TableManager.GetStateBySymbol(State.FromTypeCall(type), scopes.ToArray()) ?? throw new NullReferenceException())
             };
         }
 

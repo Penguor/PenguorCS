@@ -12,7 +12,7 @@ namespace Penguor.Compiler.Parsing.AST
         /// <summary>
         /// creates a new instance of AssignExpr
         /// </summary>
-        public AssignExpr(int id, int offset, CallExpr lhs, TokenType op, Expr value)
+        public AssignExpr(int id, int offset, Expr lhs, TokenType op, Expr value)
         {
             Id = id;
             Offset = offset;
@@ -20,7 +20,7 @@ namespace Penguor.Compiler.Parsing.AST
             Op = op;
             Value = value;
         }
-        public CallExpr Lhs { get; init; }
+        public Expr Lhs { get; init; }
         public TokenType Op { get; init; }
         public Expr Value { get; init; }
 

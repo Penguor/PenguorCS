@@ -1,48 +1,29 @@
-void print(string a) 
+void print() 
 {    
     asm
 "sub rsp, 32
 CALL printf"
 }
 
-public system Fibonacci
+void main() {
+    print("%d", fib(0))
+    for(i32 i = 1; i <= 10; i++) {
+        print(", ")
+        print("%d", fib(i))
+    }
+
+    print("\n")
+}
+
+private i32 fib(i32 n)
 {
-    public void execute()
-    {
-        print(getFibonacci(0))
-        for(int i : range(1, 10))
-            print(", " + getFibonacci(i))
-
-        printLn()
-        print(fibMoivreBinet(0))
-
-        for(int i : range(1, 10))
-            print(", " + fibMoivreBinet(i))
-    }
-
-    // returns the fibonacci number at n
-    private int getFibonacci(int n)
-    {
-        if(n == 0)
-            return 0
-        elif(n == 1)
-            return 1
-        else
-            return getFibonacci(n - 1) + getFibonacci(n - 2)
-    }
-
-    // like the one above, but using a different algorithm
-    private int fibMoivreBinet(int n)
-    {
-        return (
-            (1 / 5) * (
-                (pow(
-                    (1 + sqrt(5)
-                ) / 2, n))
-                 -
-                (pow(
-                    (1 - sqrt(5)
-                ) / 2, n))
-            ))
+    if(n == 0)
+        return 0
+    else if(n == 1)
+        return 1
+    else {
+        i32 fib1 = fib(n - 1) 
+        i32 fib2 = fib(n - 2)
+        return fib1 + fib2
     }
 }

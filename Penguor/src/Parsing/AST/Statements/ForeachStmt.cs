@@ -5,28 +5,26 @@ using System.Collections.Generic;
 namespace Penguor.Compiler.Parsing.AST
 {
     /// <summary>
-    /// A For Stmt
+    /// A Foreach Stmt
     /// </summary>
-    public sealed record ForStmt : Stmt
+    public sealed record ForeachStmt : Stmt
     {
         /// <summary>
-        /// creates a new instance of ForStmt
+        /// creates a new instance of ForeachStmt
         /// </summary>
-        public ForStmt(int id, int offset, Expr? init, Expr? condition, Expr? change, Stmt content)
+        public ForeachStmt(int id, int offset, VarExpr currentvar, CallExpr vars, Stmt content)
         {
             Id = id;
             Offset = offset;
-            Init = init;
-            Condition = condition;
-            Change = change;
+            CurrentVar = currentvar;
+            Vars = vars;
             Content = content;
         }
-        public Expr? Init { get; init; }
-        public Expr? Condition { get; init; }
-        public Expr? Change { get; init; }
+        public VarExpr CurrentVar { get; init; }
+        public CallExpr Vars { get; init; }
         public Stmt Content { get; init; }
 
-        public override string ToString() => "for statement";
+        public override string ToString() => "foreach statement";
 
         /// <summary>
         /// returns Visit() of this instance
@@ -45,8 +43,8 @@ namespace Penguor.Compiler.Parsing.AST
     public partial interface IStmtVisitor<T>
     {
         /// <summary>
-        /// visit a ForStmt
+        /// visit a ForeachStmt
         /// </summary>
-        T Visit(ForStmt stmt);
+        T Visit(ForeachStmt stmt);
     }
 }

@@ -7,7 +7,7 @@ namespace Penguor.Compiler.IR
     /// </summary>
     public record IRPhi : IRArgument
     {
-        public List<IRReference> Operands { get; } = new();
+        public HashSet<IRReference> Operands { get; } = new();
         public List<IRReference> Users { get; } = new();
         public State Block { get; }
 
@@ -20,7 +20,11 @@ namespace Penguor.Compiler.IR
         /// adds a new operand to the phi function
         /// </summary>
         /// <param name="variable">the operand to add</param>
-        public void AppendOperand(IRReference variable) => Operands.Add(variable);
+        public void AppendOperand(IRReference variable)
+        {
+            if (!Operands.Contains(variable))
+                Operands.Add(variable);
+        }
 
         public void AddUser(IRReference user) => Users.Add(user);
 
