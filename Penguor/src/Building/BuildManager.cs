@@ -96,11 +96,15 @@ namespace Penguor.Compiler.Build
             string buildPath = Path.Combine(Path.GetDirectoryName(project)!, "build");
             Directory.CreateDirectory(buildPath);
 
-            foreach (var b in builders)
-                b.Emit(Path.GetDirectoryName(project)!);
+            List<bool> emitted = new(builders.Length);
+            for (int i = 0; i < builders.Length; i++)
+                emitted.Add(builders[i].Emit(Path.GetDirectoryName(project)!));
 
-            foreach (var b in builders)
-                b.Assemble(Path.GetDirectoryName(project)!);
+            for (int i = 0; i < builders.Length; i++)
+            {
+                if (emitted[i])
+                    builders[i].Assemble(Path.GetDirectoryName(project)!);
+            }
 
             StringBuilder objects = new();
             foreach (var b in builders)

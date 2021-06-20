@@ -542,11 +542,40 @@ namespace Penguor.Compiler.Parsing
             return lhs;
         }
 
-        private Expr CondOrExpr() => Check(OR, 1) ? new BinaryExpr(ID, GetCurrent().Offset, CondAndExpr(), Consume(OR).Type, CondOrExpr()) : CondAndExpr();
-        private Expr CondAndExpr() => Check(AND, 1) ? new BinaryExpr(ID, GetCurrent().Offset, BWOrExpr(), Consume(AND).Type, CondAndExpr()) : BWOrExpr();
-        private Expr BWOrExpr() => Check(BW_OR, 1) ? new BinaryExpr(ID, GetCurrent().Offset, BWXorExpr(), Consume(BW_OR).Type, BWOrExpr()) : BWXorExpr();
-        private Expr BWXorExpr() => Check(BW_XOR, 1) ? new BinaryExpr(ID, GetCurrent().Offset, BWAndExpr(), Consume(BW_XOR).Type, BWXorExpr()) : BWAndExpr();
-        private Expr BWAndExpr() => Check(BW_AND, 1) ? new BinaryExpr(ID, GetCurrent().Offset, EqualityExpr(), Consume(BW_AND).Type, BWAndExpr()) : EqualityExpr();
+        private Expr CondOrExpr()
+        {
+            int offset = GetCurrent().Offset;
+            var lhs = CondAndExpr();
+            return Match(OR) ? new BinaryExpr(ID, offset, lhs, OR, CondOrExpr()) : lhs;
+        }
+
+        private Expr CondAndExpr()
+        {
+            int offset = GetCurrent().Offset;
+            var lhs = BWOrExpr();
+            return Match(AND) ? new BinaryExpr(ID, offset, lhs, AND, CondAndExpr()) : lhs;
+        }
+
+        private Expr BWOrExpr()
+        {
+            int offset = GetCurrent().Offset;
+            var lhs = BWXorExpr();
+            return Match(BW_OR) ? new BinaryExpr(ID, offset, lhs, BW_OR, BWOrExpr()) : lhs;
+        }
+
+        private Expr BWXorExpr()
+        {
+            int offset = GetCurrent().Offset;
+            var lhs = BWAndExpr();
+            return Match(BW_XOR) ? new BinaryExpr(ID, offset, lhs, BW_XOR, BWXorExpr()) : lhs;
+        }
+
+        private Expr BWAndExpr()
+        {
+            int offset = GetCurrent().Offset;
+            var lhs = EqualityExpr();
+            return Match(BW_AND) ? new BinaryExpr(ID, offset, lhs, BW_AND, BWAndExpr()) : lhs;
+        }
 
         private Expr EqualityExpr()
         {

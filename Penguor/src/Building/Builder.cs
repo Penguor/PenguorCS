@@ -163,10 +163,15 @@ namespace Penguor.Compiler.Build
         /// <summary>
         /// emit the generated assembly
         /// </summary>
-        public void Emit(string directory)
+        public bool Emit(string directory)
         {
+            if (asmProgram!.Text.Functions.Count == 0 && asmProgram.Data.Variables.Count == 0)
+            {
+                return false;
+            }
             string assembly = asmProgram!.Emit(AsmSyntax.NASM);
             File.WriteAllText(Path.Combine(directory, "build/", Path.GetFileNameWithoutExtension(SourceFile) + ".asm"), assembly);
+            return true;
         }
 
         public void Assemble(string directory)

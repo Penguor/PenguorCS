@@ -472,7 +472,7 @@ namespace Penguor.Compiler.Assembly
                         null => throw new NullReferenceException(),
                         string s => throw new PenguorCSException(s)
                     },
-                    IROPCode.LESS or IROPCode.LESS_EQUALS or IROPCode.GREATER or IROPCode.EQUALS or IROPCode.INVERT => RegisterSetAmd64.GeneralPurpose,
+                    IROPCode.LESS or IROPCode.LESS_EQUALS or IROPCode.GREATER or IROPCode.EQUALS or IROPCode.INVERT or IROPCode.AND or IROPCode.OR => RegisterSetAmd64.GeneralPurpose,
                     IROPCode.RET => builder.TableManager.GetSymbol(function.Name).DataType?.ToString() switch
                     {
                         "i8" or "i16" or "i32" or "i64" or "u8" or "u16" or "u32" or "u64" or "str" or "void" => RegisterSetAmd64.Return64,
@@ -599,15 +599,119 @@ namespace Penguor.Compiler.Assembly
                             new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
                         );
                         break;
+                    case IROPCode.AND:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.XOR,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.MOV,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE))
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.AND,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
+                        );
+                        break;
+                    case IROPCode.OR:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.XOR,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.MOV,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE))
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.OR,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
+                        );
+                        break;
                     case IROPCode.LESS:
-                    case IROPCode.LESS_EQUALS:
-                    case IROPCode.GREATER:
-                    case IROPCode.EQUALS:
-                        function.AddInstruction(new AsmInstructionAmd64(
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.XOR,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
                             AsmMnemonicAmd64.CMP,
-                            new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[0]), x]),
-                            new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[1]), x])
-                        ));
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.SETL,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
+                        );
+                        break;
+                    case IROPCode.LESS_EQUALS:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.XOR,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.CMP,
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.SETLE,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
+                        );
+                        break;
+                    case IROPCode.GREATER:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.XOR,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.CMP,
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.SETG,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
+                        );
+                        break;
+                    case IROPCode.GREATER_EQUALS:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.XOR,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.CMP,
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.SETGE,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
+                        );
+                        break;
+                    case IROPCode.EQUALS:
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.XOR,
+                            new AsmRegister(registers[x, x]),
+                            new AsmRegister(registers[x, x])
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.CMP,
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
+                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.SETE,
+                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
+                        );
                         break;
                     case IROPCode.PHI:
                     case IROPCode.LOADPARAM:

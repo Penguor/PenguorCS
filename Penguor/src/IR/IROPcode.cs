@@ -16,6 +16,7 @@ namespace Penguor.Compiler.IR
         ADD, SUB, MUL, DIV, REMAINDER,
         INCR, DECR,
         LESS, GREATER, LESS_EQUALS, GREATER_EQUALS,
+        AND, OR,
         EQUALS,
         INVERT,
         ABS, CHS, // absolute, change sign

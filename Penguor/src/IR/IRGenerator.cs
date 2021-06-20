@@ -266,7 +266,7 @@ namespace Penguor.Compiler.IR
             }
             finally
             {
-                if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
+                // if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
             }
             return DecodeSSA(irProgram);
         }
@@ -301,8 +301,42 @@ namespace Penguor.Compiler.IR
 
             }
 
-            if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
+            // if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
             return ir;
+        }
+
+        private IROPCode GetJumpCode(IROPCode op, bool inverted)
+        {
+            if (inverted)
+            {
+                return op switch
+                {
+                    IROPCode.LOAD => IROPCode.JFL,
+                    IROPCode.LESS => IROPCode.JNL,
+                    IROPCode.LESS_EQUALS => IROPCode.JNLE,
+                    IROPCode.GREATER => IROPCode.JNG,
+                    IROPCode.GREATER_EQUALS => IROPCode.JNGE,
+                    IROPCode.EQUALS => IROPCode.JNE,
+                    IROPCode.AND => IROPCode.JFL,
+                    IROPCode.OR => IROPCode.JFL,
+                    IROPCode.INVERT => IROPCode.JFL,
+                };
+            }
+            else
+            {
+                return op switch
+                {
+                    IROPCode.LOAD => IROPCode.JTR,
+                    IROPCode.LESS => IROPCode.JL,
+                    IROPCode.LESS_EQUALS => IROPCode.JLE,
+                    IROPCode.GREATER => IROPCode.JG,
+                    IROPCode.GREATER_EQUALS => IROPCode.JGE,
+                    IROPCode.EQUALS => IROPCode.JE,
+                    IROPCode.AND => IROPCode.JTR,
+                    IROPCode.OR => IROPCode.JTR,
+                    IROPCode.INVERT => IROPCode.JTR,
+                };
+            }
         }
 
         public int Visit(BlockDecl decl)
@@ -432,16 +466,7 @@ namespace Penguor.Compiler.IR
             scopes[0].Push(new AddressFrame($".elif{stmt.Id}", AddressType.Control));
             var conditionBlock = BeginBlock(scopes[0] + new AddressFrame(".c", AddressType.Control), true);
             stmt.Condition.Accept(this);
-            IROPCode jumpCode = statements[^1].Code switch
-            {
-                IROPCode.LOAD => IROPCode.JFL,
-                IROPCode.LESS => IROPCode.JNL,
-                IROPCode.LESS_EQUALS => IROPCode.JNLE,
-                IROPCode.GREATER => IROPCode.JNG,
-                IROPCode.GREATER_EQUALS => IROPCode.JNGE,
-                IROPCode.EQUALS => IROPCode.JNE,
-                IROPCode.INVERT => IROPCode.JFL
-            };
+            IROPCode jumpCode = GetJumpCode(statements[^1].Code, true);
             AddJumpStmt(jumpCode, scopes[0] + new AddressFrame(".e", AddressType.Control), GetLastNumber());
             SealBlock(conditionBlock);
 
@@ -488,16 +513,7 @@ namespace Penguor.Compiler.IR
             {
                 stmt.Condition.Accept(this);
 
-                jumpCode = statements[^1].Code switch
-                {
-                    IROPCode.LOAD => IROPCode.JFL,
-                    IROPCode.LESS => IROPCode.JNL,
-                    IROPCode.LESS_EQUALS => IROPCode.JNLE,
-                    IROPCode.GREATER => IROPCode.JNG,
-                    IROPCode.GREATER_EQUALS => IROPCode.JNGE,
-                    IROPCode.EQUALS => IROPCode.JNE,
-                    IROPCode.INVERT => IROPCode.JTR,
-                };
+                jumpCode = GetJumpCode(statements[^1].Code, true);
             }
             else
             {
@@ -543,16 +559,7 @@ namespace Penguor.Compiler.IR
             var conditionBlock = BeginBlock(scopes[0] + new AddressFrame(".c", AddressType.Control), true);
             lastBlock = conditionBlock;
             stmt.Condition.Accept(this);
-            IROPCode jumpCode = statements[^1].Code switch
-            {
-                IROPCode.LOAD => IROPCode.JFL,
-                IROPCode.LESS => IROPCode.JNL,
-                IROPCode.LESS_EQUALS => IROPCode.JNLE,
-                IROPCode.GREATER => IROPCode.JNG,
-                IROPCode.GREATER_EQUALS => IROPCode.JNGE,
-                IROPCode.EQUALS => IROPCode.JNE,
-                IROPCode.INVERT => IROPCode.JFL
-            };
+            IROPCode jumpCode = GetJumpCode(statements[^1].Code, true);
             if (hasElse)
                 AddJumpStmt(jumpCode, scopes[0] + new AddressFrame(".else", AddressType.Control), GetLastNumber());
             else
@@ -641,15 +648,7 @@ namespace Penguor.Compiler.IR
             scopes[0].Pop();
 
             stmt.Condition.Accept(this);
-            IROPCode jumpCode = statements[^1].Code switch
-            {
-                IROPCode.LOAD => IROPCode.JFL,
-                IROPCode.LESS => IROPCode.JNL,
-                IROPCode.LESS_EQUALS => IROPCode.JNLE,
-                IROPCode.GREATER => IROPCode.JNG,
-                IROPCode.GREATER_EQUALS => IROPCode.JNGE,
-                IROPCode.EQUALS => IROPCode.JNE
-            };
+            IROPCode jumpCode = GetJumpCode(statements[^1].Code, true);
             AddJumpStmt(jumpCode, scopes[0] + new AddressFrame(".e", AddressType.Control), GetLastNumber());
 
             // content
@@ -721,16 +720,18 @@ namespace Penguor.Compiler.IR
                 TokenType.MINUS => IROPCode.SUB,
                 TokenType.MUL => IROPCode.MUL,
                 TokenType.DIV => IROPCode.DIV,
+                TokenType.PERCENT => IROPCode.REMAINDER,
                 TokenType.GREATER => IROPCode.GREATER,
                 TokenType.LESS => IROPCode.LESS,
                 TokenType.GREATER_EQUALS => IROPCode.GREATER_EQUALS,
                 TokenType.LESS_EQUALS => IROPCode.LESS_EQUALS,
                 TokenType.EQUALS => IROPCode.EQUALS,
-                TokenType.PERCENT => IROPCode.REMAINDER,
-                TokenType a => builder.Except(IROPCode.ERR, 9, expr.Offset, Token.ToString(a))
+                TokenType.AND => IROPCode.AND,
+                TokenType.OR => IROPCode.OR,
+                TokenType a => builder.Except(IROPCode.ERR, 1, expr.Offset, Token.ToString(a))
             }
             , addr1
-            , addr2));
+            , addr2, new IRState(((ExprAttribute)expr.Attribute!).Type)));
         }
 
         public IRReference Visit(BooleanExpr expr) => AddReference(AddStmt(IROPCode.LOAD, new IRBool(expr.Value)));

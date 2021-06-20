@@ -90,7 +90,8 @@ namespace Penguor.Compiler.Debugging
             {20, (LogLevel.Error, "The symbol '{0}' does not exist in the current scope")},
             {21, (LogLevel.Error, "Could not find library '{0}'")},
             {22, (LogLevel.Error, "Postfixed calls may not be chained")},
-            {23, (LogLevel.Error, "You may not put statement inside of this block")}
+            {23, (LogLevel.Error, "You may not put statement inside of this block")},
+            {24, (LogLevel.Error, " Operator '{0}' cannot be used on '{1}' and '{2}'")}
         };
 
         public static event EventHandler<OnLoggedEventArgs>? OnTryLogged;
