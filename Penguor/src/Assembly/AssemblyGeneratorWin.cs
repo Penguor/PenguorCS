@@ -42,6 +42,7 @@ namespace Penguor.Compiler.Assembly
         {
             program.AddGlobalLabel(new State("main"));
             program.AddExtern(new State("printf"));
+            program.AddExtern(new State("ExitProcess"));
 
             AsmTextSection text = new();
 
@@ -698,6 +699,11 @@ namespace Penguor.Compiler.Assembly
                     case IROPCode.RETN:
                         function.AddInstruction(AsmMnemonicAmd64.MOV, new AsmRegister(RSP), new AsmRegister(RBP));
                         function.AddInstruction(AsmMnemonicAmd64.POP, new AsmRegister(RBP));
+                        if (function.Name == "main")
+                        {
+                            function.AddInstruction(AsmMnemonicAmd64.MOV, new AsmRegister(RCX), new AsmNumber(0));
+                            function.AddInstruction(AsmMnemonicAmd64.CALL, new AsmString("ExitProcess"));
+                        }
                         function.AddInstruction(AsmMnemonicAmd64.RET);
                         break;
                     case IROPCode.LOADARG:
@@ -722,9 +728,9 @@ namespace Penguor.Compiler.Assembly
                             new AsmString(statement.Operands[0].ToString())
                         );
                         while (registersToPop.Count > 0)
-                            {
-                                function.AddInstruction(AsmMnemonicAmd64.POP, new AsmRegister(registersToPop.Pop()));
-                            }
+                        {
+                            function.AddInstruction(AsmMnemonicAmd64.POP, new AsmRegister(registersToPop.Pop()));
+                        }
                         break;
                     case IROPCode.MOV:
                         function.AddInstruction(

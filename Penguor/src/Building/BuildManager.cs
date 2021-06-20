@@ -36,7 +36,7 @@ namespace Penguor.Compiler.Build
         /// <param name="path">the file/project to build</param>
         /// <param name="stdLib">the path of the standard library</param>
         /// <param name="run">whether the program should be executed after building</param>
-        public static void SmartBuild(string path, string? stdLib, bool run = true)
+        public static int SmartBuild(string path, string? stdLib, bool run = true)
         {
             BuildManager.run = run;
             if (string.IsNullOrEmpty(stdLib)) stdLib = Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "stdlib/stdlib.pgrp");
@@ -47,22 +47,24 @@ namespace Penguor.Compiler.Build
                 string[] files = Directory.GetFiles(path, "*.pgrp", SearchOption.AllDirectories);
                 if (files.Length > 1) throw new PenguorCSException();
                 else if (files.Length < 1) throw new PenguorCSException();
-                else BuildProject(files[0], stdLib);
-                return;
+                else return BuildProject(files[0], stdLib);
             }
             if (!File.Exists(path))
             {
                 Logger.Log(new Notification(path, 0, 10, MsgType.PGR, path));
                 Environment.Exit(1);
+                return 1;
             }
             if (!File.Exists(stdLib))
             {
                 Logger.Log(new Notification(stdLib, 0, 6, MsgType.PGR, stdLib));
                 Environment.Exit(1);
+                return 1;
             }
 
-            if (Path.GetExtension(path) == ".pgr") BuildProject(path, stdLib, true);
-            else if (Path.GetExtension(path) == ".pgrp") BuildProject(path, stdLib);
+            if (Path.GetExtension(path) == ".pgr") return BuildProject(path, stdLib, true);
+            else if (Path.GetExtension(path) == ".pgrp") return BuildProject(path, stdLib);
+            return 1;
         }
 
         /// <summary>
@@ -71,7 +73,7 @@ namespace Penguor.Compiler.Build
         /// <param name="project">the path of the project file</param>
         /// <param name="stdLib">the path of the standard library</param>
         /// <param name="singleFile">whether <paramref name="project"/> is a single file</param>
-        public static void BuildProject(string project, string? stdLib, bool singleFile = false)
+        public static int BuildProject(string project, string? stdLib, bool singleFile = false)
         {
             List<string> files = singleFile ? new(new string[] { project }) : new(Directory.GetFiles(Path.GetDirectoryName(project)!, "*.pgr", SearchOption.AllDirectories));
             if (stdLib != null) files.AddRange(Directory.GetFiles(Path.GetDirectoryName(stdLib)!, "*.pgr", SearchOption.AllDirectories));
@@ -132,6 +134,8 @@ namespace Penguor.Compiler.Build
                     process.WaitForExit();
 
                     Console.WriteLine(reader.ReadToEnd());
+
+                    return process.ExitCode;
                 }
             }
             if (OperatingSystem.IsLinux())
@@ -157,8 +161,13 @@ namespace Penguor.Compiler.Build
                     while (!process.HasExited);
 
                     process.WaitForExit();
+
+                    Console.WriteLine(reader.ReadToEnd());
+
+                    return process.ExitCode;
                 }
             }
+            return 0;
         }
 
         /// <summary>
