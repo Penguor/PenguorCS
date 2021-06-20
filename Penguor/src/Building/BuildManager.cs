@@ -113,7 +113,6 @@ namespace Penguor.Compiler.Build
                 if (run)
                 {
                     using Process process = new Process();
-                    Console.WriteLine(Path.Combine(buildPath, "out.exe"));
                     process.StartInfo.FileName = Path.Combine(buildPath, "out.exe");
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardOutput = true;
