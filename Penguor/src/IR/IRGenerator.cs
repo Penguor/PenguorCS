@@ -822,7 +822,8 @@ namespace Penguor.Compiler.IR
             IROPCode code = expr.Postfix switch
             {
                 TokenType.DPLUS => IROPCode.INCR,
-                TokenType.DMINUS => IROPCode.DECR
+                TokenType.DMINUS => IROPCode.DECR,
+                TokenType other => throw new PenguorCSException($"invalid Token {Token.ToString(other)} in Increment Expression (ir generation)")
             };
             AddStmt(code, reference);
             WriteVariable(State.FromCall(expr.Child), currentBlock, GetLastNumber());
