@@ -268,8 +268,6 @@ namespace Penguor.Compiler.IR
             {
                 if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
             }
-            Console.WriteLine("blocks: " + blocks.Count);
-            Console.WriteLine("sealed blocks: " + sealedBlocks.Count);
             return DecodeSSA(irProgram);
         }
 
