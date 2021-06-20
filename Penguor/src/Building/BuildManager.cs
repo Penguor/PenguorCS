@@ -145,7 +145,7 @@ namespace Penguor.Compiler.Build
             if (OperatingSystem.IsLinux())
             {
                 Process.Start("gcc", $"{objects} -o {Path.Combine(buildPath, "out")}").WaitForExit();
-                if (run)
+                if (false)
                 {
                     using Process process = new Process();
                     process.StartInfo.FileName = Path.Combine(buildPath, "out");
