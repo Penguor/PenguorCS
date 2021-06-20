@@ -1,13 +1,13 @@
 
 
 using System;
-using System.Threading.Tasks;
 using System.CommandLine;
+using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
+using System.Threading.Tasks;
 using Penguor.Compiler.Build;
 using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Tools;
-using System.CommandLine.Builder;
 
 namespace Penguor.Compiler
 {
@@ -30,7 +30,7 @@ namespace Penguor.Compiler
             buildCommand.Handler = CommandHandler.Create<string, bool, string, string>(Build);
             rootCommand.AddCommand(buildCommand);
 
-            // with debug builds, the tools command provides access to several developer tools
+            // in debug builds, the tools command provides access to several developer tools
 #if DEBUG
             var toolsCommand = new Command("tools", "tools for Penguor Compiler development");
 
@@ -69,7 +69,7 @@ namespace Penguor.Compiler
                 if (benchmark)
                     BuildManager.Benchmark(input);
                 else
-                    BuildManager.SmartBuild(input, stdLib);
+                    Environment.Exit(BuildManager.SmartBuild(input, stdLib));
             }
         }
     }
