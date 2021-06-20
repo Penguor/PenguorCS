@@ -522,7 +522,7 @@ namespace Penguor.Compiler.IR
 
             if (jumpCode != IROPCode.ERR)
             {
-                AddJumpStmt(jumpCode, scopes[0] + new AddressFrame(".e", AddressType.Control));
+                AddJumpStmt(jumpCode, scopes[0] + new AddressFrame(".e", AddressType.Control), GetLastNumber());
             }
 
             // content
