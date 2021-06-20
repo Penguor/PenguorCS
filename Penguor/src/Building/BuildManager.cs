@@ -140,7 +140,7 @@ namespace Penguor.Compiler.Build
                 if (run)
                 {
                     using Process process = new Process();
-                    process.StartInfo.FileName = "./build/out";
+                    process.StartInfo.FileName = Path.Combine(buildPath, "out");
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardOutput = true;
                     process.StartInfo.CreateNoWindow = true;
