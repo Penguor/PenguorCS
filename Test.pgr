@@ -1,22 +1,5 @@
+extern void printf()
+
 void main() {
-    if(true && false || 6 < 5)
-    {
-        print("true")
-    }
-    else
-    {
-        print("false")
-        exit(1)
-    }
-}
-
-void print() 
-{    
-    asm
-"sub rsp, 32
-CALL printf"
-}
-
-void exit(i32 code) {
-    asm "CALL ExitProcess"
+    printf("true")
 }

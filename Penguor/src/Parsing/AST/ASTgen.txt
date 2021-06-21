@@ -15,6 +15,7 @@ String string value
 Char string value
 ; Statement Stmt "Penguor\src\Parsing\AST\Statements"
 Compiler TokenType dir Token[] val
+Var TypeCallExpr type AddressFrame name
 Block List<Stmt> content
 If Expr condition Stmt ifC List<ElifStmt> elif Stmt? elseC
 Elif Expr condition Stmt content
@@ -30,6 +31,7 @@ Expr Expr expr
 ; Declaration Decl "Penguor\src\Parsing\AST\Declarations"
 Program List<Decl> declarations
 Using TypeCallExpr lib
+Extern TypeCallExpr returns AddressFrame name List<VarExpr> parameters
 Modified TokenType? accessMod TokenType? nonAccessMod Decl declaration
 System AddressFrame name CallExpr? parent BlockDecl content
 Data AddressFrame name CallExpr? parent BlockDecl content

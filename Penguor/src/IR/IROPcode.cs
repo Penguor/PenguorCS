@@ -10,7 +10,7 @@ namespace Penguor.Compiler.IR
         LABEL, LIB, FUNC,
         USE,
         LOAD, LOADARG, LOADPARAM,
-        DEF, DFE, ASSIGN, DFL, DFLE, // define, define empty, assign, define local
+        DEFEXT, // define extern
         BCALL, ECALL, CALL,
         RET, RETN,
         ADD, SUB, MUL, DIV, REMAINDER,

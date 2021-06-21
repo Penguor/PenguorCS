@@ -131,6 +131,7 @@ namespace Penguor.Compiler.Parsing
             RETURN => "return",
             ASM => "asm",
             NUM_BASE => "numeric base",
+            EXTERN => "extern",
             _ => throw new System.ArgumentException("this TokenType either doesn't exist or it wasn't added to the ToString() method yet", nameof(type))
         };
 

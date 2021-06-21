@@ -169,8 +169,8 @@ namespace Penguor.Compiler.Analysis
         {
             SetDataType(decl.Name, decl.Returns);
             List<VarExpr> parameters = new(decl.Parameters.Count);
-            foreach (var i in decl.Parameters) parameters.Add((VarExpr)i.Accept(this));
             scopes[0].Push(decl.Name);
+            foreach (var i in decl.Parameters) parameters.Add((VarExpr)i.Accept(this));
             foreach (var i in parameters)
             {
                 var symbol = builder.TableManager.GetSymbol(i.Name, scopes);
@@ -385,8 +385,7 @@ namespace Penguor.Compiler.Analysis
         public Stmt Visit(VarStmt stmt)
         {
             SetDataType(stmt.Name, stmt.Type);
-            var init = stmt.Init?.Accept(this);
-            return stmt with { Init = init };
+            return stmt;
         }
 
         public Stmt Visit(WhileStmt stmt)
@@ -698,6 +697,23 @@ namespace Penguor.Compiler.Analysis
         public Expr Visit(IncrementExpr expr)
         {
             return expr with { Child = (CallExpr)expr.Child.Accept(this) };
+        }
+
+        public Decl Visit(ExternDecl decl)
+        {
+            SetDataType(decl.Name, decl.Returns);
+
+            List<VarExpr> parameters = new(decl.Parameters.Count);
+            scopes[0].Push(decl.Name);
+            foreach (var i in decl.Parameters) parameters.Add((VarExpr)i.Accept(this));
+            foreach (var i in parameters)
+            {
+                var symbol = builder.TableManager.GetSymbol(i.Name, scopes);
+                if (symbol != null) symbol.DataType = builder.TableManager.GetStateBySymbol(State.FromTypeCall(i.Type), scopes.ToArray());
+            }
+            scopes[0].Pop();
+
+            return decl with { Parameters = parameters };
         }
     }
 }

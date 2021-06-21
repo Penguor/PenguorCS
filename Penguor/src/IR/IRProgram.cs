@@ -12,6 +12,7 @@ namespace Penguor.Compiler.IR
         /// The child declarations of the program
         /// </summary>
         public List<IRFunction> Functions { get; init; } = new();
+        public List<IRStatement> GlobalStatements { get; init; } = new();
 
         /// <summary>
         /// append a new statement to the end of the list
@@ -23,6 +24,9 @@ namespace Penguor.Compiler.IR
         public override string ToString()
         {
             StringBuilder builder = new();
+            builder.AppendLine();
+            foreach (var i in GlobalStatements)
+                builder.AppendLine(i.ToString());
             builder.AppendLine();
             foreach (var i in Functions)
                 builder.AppendLine(i.ToString());

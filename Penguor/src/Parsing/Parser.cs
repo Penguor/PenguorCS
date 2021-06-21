@@ -95,6 +95,7 @@ namespace Penguor.Compiler.Parsing
         private Decl EmbeddedDeclaration()
         {
             if (Match(USING)) return UsingDecl();
+            if (Match(EXTERN)) return ExternDecl();
             if (Check(IDF) && LookAhead(1).Type == IDF && LookAhead(2).Type == LPAREN)
                 return FunctionDecl();
             return StmtDecl();
@@ -141,6 +142,36 @@ namespace Penguor.Compiler.Parsing
             var call = TypeCall();
             GetEnding();
             return new UsingDecl(ID, offset, call);
+        }
+
+        private ExternDecl ExternDecl()
+        {
+            int offset = GetCurrent().Offset;
+            var variable = VarExpr(AddressType.FunctionDecl);
+            AddressFrame name = variable.Name;
+            AddSymbol(name);
+            state.Push(name);
+            AddTable();
+
+            Consume(LPAREN);
+            List<VarExpr> parameters = new();
+            if (!Match(RPAREN))
+            {
+                while (true)
+                {
+                    VarExpr var = VarExpr(AddressType.VarExpr);
+                    parameters.Add(var);
+                    AddSymbol(var.Name);
+                    if (Match(COMMA)) continue;
+                    Consume(RPAREN);
+                    break;
+                }
+            }
+
+            GetEnding();
+
+            state.Pop();
+            return new ExternDecl(ID, offset, variable.Type, name, parameters);
         }
 
         private SystemDecl SystemDecl()
@@ -287,6 +318,9 @@ namespace Penguor.Compiler.Parsing
             if (Match(SWITCH)) return SwitchStmt();
             if (Match(ASM)) return AsmStmt();
             if (Match(RETURN)) return ReturnStmt();
+            Stmt? stmt;
+            if ((stmt = Try(VarStmt)) is not null)
+                return stmt;
             return ExprStmt();
         }
 
@@ -322,7 +356,7 @@ namespace Penguor.Compiler.Parsing
         private VarStmt VarStmt()
         {
             var variable = VarExpr(AddressType.VarStmt);
-            VarStmt stmt = new(ID, GetCurrent().Offset, variable.Type, variable.Name, Match(ASSIGN) ? CondOrExpr() : null);
+            VarStmt stmt = new(ID, GetCurrent().Offset, variable.Type, variable.Name);
             AddSymbol(stmt.Name);
             GetEnding();
             return stmt;

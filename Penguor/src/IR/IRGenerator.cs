@@ -211,6 +211,14 @@ namespace Penguor.Compiler.IR
             return num;
         }
 
+        private int AddGlobalStmt(IROPCode code, params IRArgument[] operands)
+        {
+            var num = InstructionNumber;
+            statements.Add(new IRStatement(num, code, operands));
+            irProgram.GlobalStatements.Add(new IRStatement(num, code, operands));
+            return num;
+        }
+
         private IRReference AddReference(int referenced)
         {
             if (statements[referenced].Code == IROPCode.PHI) ((IRPhi)statements[referenced].Operands[0]).AddUser(GetLastNumber());
@@ -301,7 +309,7 @@ namespace Penguor.Compiler.IR
 
             }
 
-            // if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
+            if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
             return ir;
         }
 
@@ -628,11 +636,6 @@ namespace Penguor.Compiler.IR
 
         public int Visit(VarStmt stmt)
         {
-            State name = builder.TableManager.GetStateBySymbol(stmt.Name, scopes) ?? throw new Exception();
-            if (stmt.Init != null)
-            {
-                WriteVariable(name, currentBlock, stmt.Init.Accept(this));
-            }
             return 0;
         }
 
@@ -828,6 +831,12 @@ namespace Penguor.Compiler.IR
             AddStmt(code, reference);
             WriteVariable(State.FromCall(expr.Child), currentBlock, GetLastNumber());
             return GetLastNumber();
+        }
+
+        public int Visit(ExternDecl decl)
+        {
+            AddGlobalStmt(IROPCode.DEFEXT, new IRState(new State(decl.Name.ToString())));
+            return 0;
         }
     }
 }

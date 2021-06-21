@@ -1,13 +1,8 @@
+extern void printf();
+
 void printLn(str a)
 {
-    print(a); print("\n")
-}
-
-void print(str a) 
-{    
-    asm
-"sub rsp, 32
-CALL printf"
+    printf(a); printf("\n")
 }
 
 void main() : printLn("Hello World!")

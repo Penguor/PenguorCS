@@ -21,8 +21,8 @@ namespace Penguor.Compiler.Assembly
         };
 
         private readonly Builder builder;
-        private readonly List<IRFunction> functions;
-        private AsmProgram program = new AsmProgram();
+        private readonly IRProgram irProgram;
+        private readonly AsmProgram program = new();
 
         private readonly Dictionary<IRReference, IRArgument> loaded = new();
 
@@ -34,23 +34,24 @@ namespace Penguor.Compiler.Assembly
         public AssemblyGeneratorWinAmd64(IRProgram program, Builder builder) : base(program)
         {
             this.builder = builder;
-            functions = program.Functions;
+            irProgram = program;
         }
 
         /// <inheritdoc/>
         public override AsmProgram Generate()
         {
             program.AddGlobalLabel(new State("main"));
-            program.AddExtern(new State("printf"));
             program.AddExtern(new State("ExitProcess"));
 
             AsmTextSection text = new();
 
-            foreach (var i in functions)
+            foreach (var i in irProgram.Functions)
             {
                 var registers = GetRegisters(i);
                 text.AddFunction(GenerateAssembly(i, registers));
             }
+
+            ProcessGlobalStatements();
 
             program.Text = text;
 
@@ -828,8 +829,18 @@ namespace Penguor.Compiler.Assembly
                             }
                         }
                         function.AddInstruction(
+                            AsmMnemonicAmd64.SUB,
+                            new AsmRegister(RSP),
+                            new AsmNumber(32)
+                        );
+                        function.AddInstruction(
                             AsmMnemonicAmd64.CALL,
                             new AsmString(statement.Operands[0].ToString())
+                        );
+                        function.AddInstruction(
+                            AsmMnemonicAmd64.ADD,
+                            new AsmRegister(RSP),
+                            new AsmNumber(32)
                         );
                         while (registersToPop.Count > 0)
                         {
@@ -943,6 +954,21 @@ namespace Penguor.Compiler.Assembly
                 R15B or R15W or R15D or R15 => R15,
             },
         };
+
+        private void ProcessGlobalStatements()
+        {
+            foreach (var statement in irProgram.GlobalStatements)
+            {
+                switch (statement.Code)
+                {
+                    case IROPCode.DEFEXT:
+                        program.AddExtern(((IRState)statement.Operands[0]).State);
+                        break;
+                    default:
+                        throw new PenguorCSException(statement.ToString());
+                }
+            }
+        }
 
         private string GetString(IRString s)
         {

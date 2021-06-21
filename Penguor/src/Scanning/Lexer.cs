@@ -139,6 +139,9 @@ namespace Penguor.Compiler.Lexing
                         case "return":
                             AddToken(TokenType.RETURN);
                             continue;
+                        case "extern":
+                            AddToken(TokenType.EXTERN);
+                            continue;
                         default:
                             // if none of the keywords is matched, the Token is an identifier
                             AddToken(TokenType.IDF, idf);

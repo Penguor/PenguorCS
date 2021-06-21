@@ -1,3 +1,5 @@
+extern void printf();
+
 void main() {
     FizzBuzz(100)
 }
@@ -7,11 +9,11 @@ void FizzBuzz(i32 count) {
     while(i <= count) {
         bool fizzed = false
         if(i % 3 == 0) {
-            print("Fizz")
+            printf("Fizz")
             fizzed = true
         }
         if(i % 5 == 0) {
-            print("Buzz")
+            printf("Buzz")
             fizzed = true
         }
 
@@ -26,15 +28,9 @@ void FizzBuzz(i32 count) {
 }
 
 void printNum(i32 num) {
-    print("%d", num)
+    printf("%d", num)
 }
 
 void println() {
-    print("\n")
-}
-
-void print(str text) {
-    asm 
-"SUB rsp, 32
-CALL printf"
+    printf("\n")
 }
