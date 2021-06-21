@@ -256,7 +256,7 @@ namespace Penguor.Compiler.Assembly
                             argCount = calls.Pop();
                             AssignRegister(x, y, FindAndEmptyRegister(y, x));
                         }
-                        else if (function.Statements[x].Code is IROPCode.LOADPARAM or IROPCode.LOADARG && x == y)
+                        else if (function.Statements[x].Code is IROPCode.LDARGDIR or IROPCode.LOADPARAM or IROPCode.LOADARG && x == y)
                         {
                             RegisterAmd64 newRegister = 0;
                             switch (function.Statements[x].Operands[0].ToString())
@@ -452,7 +452,7 @@ namespace Penguor.Compiler.Assembly
             {
                 return statement.Code switch
                 {
-                    IROPCode.LOADARG or IROPCode.LOADPARAM => statement.Operands[0].ToString() switch
+                    IROPCode.LOADARG or IROPCode.LDARGDIR or IROPCode.LOADPARAM => statement.Operands[0].ToString() switch
                     {
                         "i8" or "i16" or "i32" or "i64" or "u8" or "u16" or "u32" or "u64" or "str" => RegisterSetAmd64.GeneralPurpose,
                         "f64" => RegisterSetAmd64.XMM
@@ -564,11 +564,12 @@ namespace Penguor.Compiler.Assembly
                             new AsmRegister(registers[DecodeStatementFromReference(statement.Operands[1]), x])
                         );
                         break;
+                    case IROPCode.LDARGDIR:
                     case IROPCode.LOAD:
                         function.AddInstruction(new AsmInstructionAmd64(
                             AsmMnemonicAmd64.MOV,
                             new AsmRegister(registers[x, x]),
-                            statement.Operands[0] switch
+                            statement.Operands[statement.Code == IROPCode.LOAD ? 0 : 1] switch
                             {
                                 IRInt num => new AsmNumber(num.Value),
                                 IRString str => new AsmString(GetString(str)),

@@ -136,19 +136,20 @@ namespace Penguor.Compiler.Build
             if (!lexerFinished) Lex();
             if (!parserFinished) Parse();
 
-            SemanticAnalyser analyser = new SemanticAnalyser(program ?? throw new ArgumentNullException(nameof(program)), this);
+            SemanticAnalyser analyser = new(program ?? throw new NullReferenceException(nameof(program)), this);
 
             program = (ProgramDecl)analyser.Analyse(pass);
         }
-
 
         /// <summary>
         /// Generate IR code from the ast
         /// </summary>
         public void GenerateIR()
         {
-            IRGenerator generator = new IRGenerator(program ?? throw new ArgumentNullException(nameof(program)), this);
+            IRGenerator generator = new(program ?? throw new NullReferenceException(nameof(program)), this);
             ir = generator.Generate();
+            IROptimizer optimizer = new(ir);
+            ir = optimizer.Optimize();
         }
 
         /// <summary>
@@ -156,7 +157,7 @@ namespace Penguor.Compiler.Build
         /// </summary>
         public void GenerateAsm()
         {
-            AssemblyGeneratorWinAmd64 generator = new AssemblyGeneratorWinAmd64(ir ?? throw new ArgumentNullException(nameof(program)), this);
+            AssemblyGeneratorWinAmd64 generator = new(ir ?? throw new NullReferenceException(nameof(program)), this);
             asmProgram = generator.Generate();
         }
 

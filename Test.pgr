@@ -1,6 +1,7 @@
 extern void printf()
 
 void main() {
+    i32 i = 1
     printf("%d", fib(40))
 }
 

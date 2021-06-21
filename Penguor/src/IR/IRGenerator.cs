@@ -6,8 +6,6 @@ using Penguor.Compiler.Debugging;
 using Penguor.Compiler.Parsing;
 using Penguor.Compiler.Parsing.AST;
 
-#pragma warning disable 1591
-
 namespace Penguor.Compiler.IR
 {
     public class IRGenerator : IExceptionHandler, IDeclVisitor<int>, IStmtVisitor<int>, IExprVisitor<IRReference>

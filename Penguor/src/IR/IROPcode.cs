@@ -10,6 +10,7 @@ namespace Penguor.Compiler.IR
         LABEL, LIB, FUNC,
         USE,
         LOAD, LOADARG, LOADPARAM,
+        LDARGDIR, // load arg direct
         DEFEXT, // define extern
         BCALL, ECALL, CALL,
         RET, RETN,
