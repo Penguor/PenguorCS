@@ -1,5 +1,13 @@
 extern void printf()
 
 void main() {
-    printf("true")
+    printf("%d", fib(40))
+}
+
+private i32 fib(i32 n)
+{
+    if(n <= 1)
+        return n
+    else
+        return fib(n - 1) + fib(n - 2)
 }

@@ -586,7 +586,7 @@ namespace Penguor.Compiler.IR
             if (hasElse)
             {
                 scopes[0].Push(new AddressFrame(".else", AddressType.Control));
-                AddLabel();
+                var outerElseBlock = AddLabel();
                 for (int i = 0; i < stmt.Elif.Count; i++)
                 {
                     stmt.Elif[i].Accept(this);
@@ -607,6 +607,7 @@ namespace Penguor.Compiler.IR
                     scopes[0].Pop();
                 }
                 scopes[0].Pop();
+                SealBlock(outerElseBlock);
             }
             scopes[0].Push(new AddressFrame(".e", AddressType.Control));
             AddLabel();
