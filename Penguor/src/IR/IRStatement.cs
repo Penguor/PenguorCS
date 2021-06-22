@@ -38,9 +38,18 @@ namespace Penguor.Compiler.IR
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (Code is IROPCode.LABEL or IROPCode.LIB or IROPCode.FUNC)
-                return $"({Number:D4}) {Code} {Operands[0]}{':'}";
-            return $"({Number:D4})     {Code} {string.Join(' ', (IEnumerable<IRArgument>)Operands)}";
+            switch (Code)
+            {
+                case IROPCode.LABEL:
+                case IROPCode.LIB:
+                case IROPCode.FUNC:
+                    return $"({Number:D4}) {Code} {Operands[0]}{':'}";
+                case IROPCode.MOV:
+                    return $"({Number:D4})     {Code} {Operands[0]} -> {Operands[1]}";
+                default:
+                    return $"({Number:D4})     {Code} {string.Join(' ', (IEnumerable<IRArgument>)Operands)}";
+            }
+
         }
     }
 }

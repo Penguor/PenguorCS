@@ -25,7 +25,6 @@ namespace Penguor.Compiler.IR
         JL, JNL, JLE, JNLE, // jump if less, jump if less or equal
         JG, JNG, JGE, JNGE, // jump if greater, jump if greater or equal
         JE, JNE, // jump if equal, jump if not equal
-        GOTO,
         ERR, // invalid opcode, returned on error
         UNDEF, // undefined
         ASM,

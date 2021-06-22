@@ -433,6 +433,11 @@ namespace Penguor.Compiler.Assembly
                     }
                 }
 
+                if (highestWeight == -1)
+                {
+                    return STACK;
+                }
+
                 if (highestY > y)
                 {
                     newRegister = registerMap[highestY, x - 1];
@@ -647,10 +652,7 @@ namespace Penguor.Compiler.Assembly
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
                         );
-                        function.AddInstruction(
-                            AsmMnemonicAmd64.SETL,
-                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
-                        );
+                        ShouldSetBool(AsmMnemonicAmd64.SETL);
                         break;
                     case IROPCode.LESS_EQUALS:
                         function.AddInstruction(
@@ -663,10 +665,7 @@ namespace Penguor.Compiler.Assembly
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
                         );
-                        function.AddInstruction(
-                            AsmMnemonicAmd64.SETLE,
-                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
-                        );
+                        ShouldSetBool(AsmMnemonicAmd64.SETLE);
                         break;
                     case IROPCode.GREATER:
                         function.AddInstruction(
@@ -679,10 +678,7 @@ namespace Penguor.Compiler.Assembly
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
                         );
-                        function.AddInstruction(
-                            AsmMnemonicAmd64.SETG,
-                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
-                        );
+                        ShouldSetBool(AsmMnemonicAmd64.SETG);
                         break;
                     case IROPCode.GREATER_EQUALS:
                         function.AddInstruction(
@@ -695,10 +691,7 @@ namespace Penguor.Compiler.Assembly
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
                         );
-                        function.AddInstruction(
-                            AsmMnemonicAmd64.SETGE,
-                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
-                        );
+                        ShouldSetBool(AsmMnemonicAmd64.SETGE);
                         break;
                     case IROPCode.EQUALS:
                         function.AddInstruction(
@@ -711,10 +704,7 @@ namespace Penguor.Compiler.Assembly
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
                             new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
                         );
-                        function.AddInstruction(
-                            AsmMnemonicAmd64.SETE,
-                            new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
-                        );
+                        ShouldSetBool(AsmMnemonicAmd64.SETE);
                         break;
                     case IROPCode.PHI:
                     case IROPCode.LOADPARAM:
@@ -824,7 +814,9 @@ namespace Penguor.Compiler.Assembly
                         Stack<RegisterAmd64> registersToPop = new();
                         for (int y = 0; y < registers.GetLength(0); y++)
                         {
-                            if (RegisterSetAmd64.Volatile.Contains(registers[y, x]) && registers[y, x] != registers[x, x])
+                            if (RegisterSetAmd64.Volatile.Contains(registers[y, x])
+                                && registers[y, x] != registers[x, x]
+                                && !statement.Operands.Any(op => op is IRReference reference && reference.Referenced == irFunction.Statements[y].Number))
                             {
                                 registersToPop.Push(registers[y, x]);
                                 function.AddInstruction(AsmMnemonicAmd64.PUSH, new AsmRegister(registers[y, x]));
@@ -870,6 +862,18 @@ namespace Penguor.Compiler.Assembly
                     throw new Exception();
                 else
                     return irFunction.Statements.FindIndex(s => s.Number == reference.Referenced);
+            }
+
+            void ShouldSetBool(AsmMnemonicAmd64 setCode)
+            {
+                var nextStatement = irFunction.Statements[x + 1];
+                if (!(IROPCodeSet.Jump.Contains(nextStatement.Code) && nextStatement.Operands.Contains(new IRReference(irFunction.Statements[x].Number))))
+                {
+                    function.AddInstruction(
+                        setCode,
+                        new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
+                    );
+                }
             }
         }
 

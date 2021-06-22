@@ -1,13 +1,16 @@
-extern void printf()
+extern void printf();
 
 void main() {
-    i32 i = 1
-    printf("%d", fib(40))
+    printf("%d", fib(0))
+    for(i32 i = 1; i <= 20; i++) {
+        printf(", ")
+        printf("%d", fib(i))
+    }
 }
 
 private i32 fib(i32 n)
 {
-    if(n <= 1)
+    if (n <= 1)
         return n
     else
         return fib(n - 1) + fib(n - 2)
