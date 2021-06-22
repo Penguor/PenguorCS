@@ -193,7 +193,8 @@ namespace Penguor.Compiler.Assembly
                             IROPCode.BCALL or
                             IROPCode.CALL or
                             IROPCode.LOADPARAM or
-                            IROPCode.RET
+                            IROPCode.RET or
+                            IROPCode.LOAD
                         || jumpCodes.Contains(function.Statements[y].Code)))
                 {
                     for (int x = 0; x < weight.GetLength(1); x++)
@@ -575,7 +576,7 @@ namespace Penguor.Compiler.Assembly
                                 IRString str => new AsmString(GetString(str)),
                                 IRBool bl => new AsmNumber(bl.Value ? 1 : 0),
                                 IRChar chr => new AsmNumber(chr.Value),
-                                _ => throw new Exception()
+                                _ => throw new PenguorCSException(statement.Operands[statement.Code == IROPCode.LOAD ? 0 : 1].GetType().ToString())
                             }
                         ));
                         break;

@@ -18,6 +18,7 @@ namespace Penguor.Compiler.IR
         public IRProgram Optimize()
         {
             LoadArg();
+            StripLoads();
             if (program.Functions.Count != 0) Logger.Log(program.ToString(), LogLevel.Debug);
             return program;
         }
@@ -29,13 +30,38 @@ namespace Penguor.Compiler.IR
                 List<int> toRemove = new();
                 for (int i = 0; i < function.Statements.Count; i++)
                 {
-                    if (function.Statements[i].Code is LOADARG && function.Statements[i - 1].Code is LOAD)
+                    if (function.Statements[i].Code is LOADARG)
                     {
-                        function.Statements[i] = function.Statements[i] with { Code = LDARGDIR, Operands = new IRArgument[] { function.Statements[i].Operands[0], function.Statements[i - 1].Operands[0] } };
-                        if (!function.Statements.Any(s => s.Operands.Any(op => op is IRReference reference && reference.Referenced == function.Statements[i - 1].Number)))
+                        var referencedIndex = function.Statements.FindIndex(s => s.Number == ((IRReference)function.Statements[i].Operands[1]).Referenced);
+                        var referenced = function.Statements[referencedIndex];
+                        if (referenced?.Code is LOAD)
                         {
-                            toRemove.Add(i - 1);
+                            function.Statements[i] = function.Statements[i] with { Code = LDARGDIR, Operands = new IRArgument[] { function.Statements[i].Operands[0], referenced.Operands[0] } };
+                            if (!function.Statements.Any(s => s.Operands.Any(op => op is IRReference reference && reference.Referenced == referenced.Number)))
+                            {
+                                toRemove.Add(referencedIndex);
+                            }
                         }
+                    }
+                }
+                toRemove.Sort();
+                for (int i = toRemove.Count - 1; i >= 0; i--)
+                {
+                    function.Statements.RemoveAt(toRemove[i]);
+                }
+            }
+        }
+
+        private void StripLoads()
+        {
+            foreach (var function in program.Functions)
+            {
+                List<int> toRemove = new();
+                for (int i = 0; i < function.Statements.Count; i++)
+                {
+                    if (function.Statements[i].Code is LOAD && !function.Statements.Any(s => s.Operands.Any(op => op is IRReference reference && reference.Referenced == function.Statements[i].Number)))
+                    {
+                        toRemove.Add(i);
                     }
                 }
                 toRemove.Sort();
