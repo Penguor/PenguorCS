@@ -107,8 +107,11 @@ namespace Penguor.Compiler.IR
                 same = op;
             }
             if (same == null)
+            {
                 //todo: create undefined
-                same = new IRReference(0);
+                same = new IRReference(-1);
+            }
+
             irPhi.Users.Remove(phi);
 
             for (int i = 0; i < statements.Count; i++)
@@ -304,10 +307,9 @@ namespace Penguor.Compiler.IR
                 {
                     function.Statements.Insert(insert[i].Item1, insert[i].Item2);
                 }
-
             }
 
-            if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
+            // if (statements.Count != 0) Logger.Log(irProgram.ToString(), LogLevel.Debug);
             return ir;
         }
 
@@ -536,6 +538,7 @@ namespace Penguor.Compiler.IR
             stmt.Content.Accept(this);
             stmt.Change?.Accept(this);
             AddJumpStmt(IROPCode.JMP, conditionBlock);
+            SealBlock(currentBlock);
             SealBlock(contentBlock);
 
             SealBlock(conditionBlock);

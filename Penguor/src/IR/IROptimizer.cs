@@ -31,9 +31,17 @@ namespace Penguor.Compiler.IR
                         var referenced = function.Statements[referencedIndex];
                         if (referenced?.Code is LOAD)
                         {
-                            function.Statements[i] = current with { Code = LDARGDIR, Operands = new IRArgument[] { current.Operands[0], referenced.Operands[0] } };
-                            if (!function.Statements.Any(s => s.Operands.Any(op => op is IRReference reference && reference.Referenced == referenced.Number)))
+                            if (referenced.Number == (current.Number - 1))
                             {
+                                function.Statements[i] = current with { Code = LDARGDIR, Operands = new IRArgument[] { current.Operands[0], referenced.Operands[0] } };
+                                if (!function.Statements.Any(s => s.Operands.Any(op => op is IRReference reference && reference.Referenced == referenced.Number)))
+                                {
+                                    toRemove.Add(referencedIndex);
+                                }
+                            }
+                            else if (!function.Statements.Any(s => s.Operands.Any(op => op is IRReference reference && reference.Referenced == referenced.Number)))
+                            {
+                                function.Statements[i] = current with { Code = LDARGDIR, Operands = new IRArgument[] { current.Operands[0], referenced.Operands[0] } };
                                 toRemove.Add(referencedIndex);
                             }
                         }

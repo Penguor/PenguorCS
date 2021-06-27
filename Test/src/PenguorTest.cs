@@ -1,32 +1,34 @@
-
-
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Penguor.Compiler.Build;
-using Penguor.Compiler.Parsing.AST;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Penguor.Compiler.Tests
 {
     public class PenguorTest
     {
-        [Fact]
-        public void TestHelloWorld()
+        private readonly StringWriter output;
+        public PenguorTest()
         {
-            BuildManager.TableManager = new SymbolTableManager();
-            Assert.Equal(0, BuildManager.SmartBuild("Files/HelloWorld/HelloWorld.pgr", null, true));
+            output = new StringWriter();
+            Console.SetOut(output);
         }
 
-        [Fact]
-        public void TestFizzBuzz()
+        [Theory,
+        MemberData(nameof(GetFiles))]
+        public void TestFiles(string directory)
         {
             BuildManager.TableManager = new SymbolTableManager();
-            Assert.Equal(0, BuildManager.SmartBuild("Files/FizzBuzz/FizzBuzz.pgr", null, true));
+            BuildManager.SmartBuild(Path.Combine(directory, "Program.pgr"), null, true);
+            Assert.Equal(File.ReadAllText(Path.Combine(directory, "out")), output.ToString().Replace("\r", "").Trim());
         }
 
-        [Fact]
-        public void TestFibonacci()
+        public static IEnumerable<object[]> GetFiles()
         {
-            BuildManager.TableManager = new SymbolTableManager();
-            Assert.Equal(0, BuildManager.SmartBuild("Files/Fibonacci/Fibonacci.pgr", null, true));
+            return Directory.GetDirectories("Files").Select(s => new object[] { s });
         }
     }
 }

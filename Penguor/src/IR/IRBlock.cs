@@ -22,6 +22,8 @@ namespace Penguor.Compiler.IR
         /// </summary>
         public IRReference? First { get; set; }
 
+        public List<IRStatement> Statements { get; } = new();
+
         /// <summary>
         /// creates a new instance of IRBlock
         /// </summary>

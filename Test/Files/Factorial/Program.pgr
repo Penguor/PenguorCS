@@ -1,0 +1,22 @@
+extern void printf();
+
+void main() {
+    printFactorials(5)
+}
+
+void printFactorials(i32 count) {
+    for (i32 i = 0; i <= count; i++) {
+        printf("%d: %d\n", i, factorial(i))
+    }
+}
+
+i32 factorial(i32 n) {
+    if(n <= 1)
+        return 1
+
+    i32 result = 1
+    for (i32 i = 1; i <= n; i++) {
+        result *= i
+    }
+    return result
+}

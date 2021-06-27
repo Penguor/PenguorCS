@@ -13,13 +13,6 @@ namespace Penguor.Compiler.Assembly
     /// </summary>
     public sealed class AssemblyGeneratorWinAmd64 : AssemblyGenerator
     {
-        private static readonly IROPCode[] jumpCodes = {
-                    IROPCode.JMP, IROPCode.JTR, IROPCode.JFL,
-        IROPCode.JL, IROPCode.JNL, IROPCode.JLE, IROPCode.JNLE,
-        IROPCode.JG, IROPCode.JNG, IROPCode.JGE, IROPCode.JNGE,
-        IROPCode.JE, IROPCode.JNE,
-        };
-
         private readonly Builder builder;
         private readonly IRProgram irProgram;
         private readonly AsmProgram program = new();
@@ -125,7 +118,7 @@ namespace Penguor.Compiler.Assembly
 
             for (int x = 0; x < function.Statements.Count; x++)
             {
-                if (jumpCodes.Contains(function.Statements[x].Code))
+                if (IROPCodeSet.Jump.Contains(function.Statements[x].Code))
                 {
                     var labelIndex = function.Statements.FindIndex(s => s.Operands.Length > 0 && s.Code == IROPCode.LABEL && s.Operands[0].Equals(function.Statements[x].Operands[0]));
 
@@ -140,7 +133,7 @@ namespace Penguor.Compiler.Assembly
             }
 
             // Console.WriteLine(function.Statements[0].ToString());
-            // for (int i = 0; i < lifetimes.Count; i++)
+            // for (int i = 0; i < lifetimes.Length; i++)
             // {
             //     foreach (bool item in lifetimes[i])
             //     {
@@ -195,7 +188,7 @@ namespace Penguor.Compiler.Assembly
                             IROPCode.LOADPARAM or
                             IROPCode.RET or
                             IROPCode.LOAD
-                        || jumpCodes.Contains(function.Statements[y].Code)))
+                        || IROPCodeSet.Jump.Contains(function.Statements[y].Code)))
                 {
                     for (int x = 0; x < weight.GetLength(1); x++)
                     {
@@ -276,7 +269,7 @@ namespace Penguor.Compiler.Assembly
                             AssignRegister(x, y, newRegister);
                             argCount++;
                         }
-                        else if (jumpCodes.Contains(function.Statements[x].Code))
+                        else if (IROPCodeSet.Jump.Contains(function.Statements[x].Code))
                         {
                             var labelIndex = function.Statements.FindIndex(s => s.Operands.Length > 0 && s.Operands[0].Equals(function.Statements[x].Operands[0]));
 
@@ -315,6 +308,8 @@ namespace Penguor.Compiler.Assembly
                 }
             }
 
+            PrintRegisters();
+
             for (int x = 0; x < xMax; x++)
             {
                 HashSet<int> ints = new(registerMap.Length);
@@ -330,10 +325,17 @@ namespace Penguor.Compiler.Assembly
             void PrintRegisters()
             {
                 Console.WriteLine();
-                for (int y = 0; y < registerMap.Length / xMax; y++)
+                Console.Write("     \u2503 ");
+                for (int x = 0; x < registerMap.GetLength(0); x++)
                 {
-                    Console.Write(string.Format("{0,-5}", y) + "| ");
-                    for (int x = 0; x < xMax; x++)
+                    Console.Write(string.Format("{0,-4}", x));
+                }
+                Console.WriteLine();
+                Console.WriteLine(new string('\u2501', 5) + "\u254b" + new string('\u2501', (registerMap.GetLength(0) * 4) + 1));
+                for (int y = 0; y < registerMap.GetLength(0); y++)
+                {
+                    Console.Write(string.Format("{0,-5}", y) + "\u2503 ");
+                    for (int x = 0; x < registerMap.GetLength(1); x++)
                     {
                         Console.Write(string.Format("{0,-4}", registerMap[y, x] == STACK ? "STK" : registerMap[y, x]));
                     }
@@ -461,7 +463,7 @@ namespace Penguor.Compiler.Assembly
                     IROPCode.LOADARG or IROPCode.LDARGDIR or IROPCode.LOADPARAM => statement.Operands[0].ToString() switch
                     {
                         "i8" or "i16" or "i32" or "i64" or "u8" or "u16" or "u32" or "u64" or "str" => RegisterSetAmd64.GeneralPurpose,
-                        "f64" => RegisterSetAmd64.XMM
+                        "f32" or "f64" => RegisterSetAmd64.XMM
                     },
                     IROPCode.LOAD => statement.Operands[0] switch
                     {
@@ -507,14 +509,12 @@ namespace Penguor.Compiler.Assembly
                     {
                         if (registers[y, x] == 0 || registers[y, x - 1] == 0)
                         {
-                            continue;
                         }
                         else if (registers[y, x - 1] == STACK && registers[y, x] != STACK)
                         {
                         }
                         else if (registers[y, x - 1] != STACK && registers[y, x] == STACK)
                         {
-
                         }
                         else
                         {
@@ -660,11 +660,7 @@ namespace Penguor.Compiler.Assembly
                             new AsmRegister(registers[x, x]),
                             new AsmRegister(registers[x, x])
                         );
-                        function.AddInstruction(
-                            AsmMnemonicAmd64.CMP,
-                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[0]), x], RegisterSize.BYTE)),
-                            new AsmRegister(GetRegisterBySize(registers[DecodeStatementFromReference(statement.Operands[1]), x], RegisterSize.BYTE))
-                        );
+                        CreateComparison();
                         ShouldSetBool(AsmMnemonicAmd64.SETLE);
                         break;
                     case IROPCode.GREATER:
@@ -874,6 +870,15 @@ namespace Penguor.Compiler.Assembly
                         new AsmRegister(GetRegisterBySize(registers[x, x], RegisterSize.BYTE))
                     );
                 }
+            }
+
+            void CreateComparison()
+            {
+                function.AddInstruction(
+                    AsmMnemonicAmd64.CMP,
+                    new AsmRegister(registers[DecodeStatementFromReference(irFunction.Statements[x].Operands[0]), x]),
+                    new AsmRegister(registers[DecodeStatementFromReference(irFunction.Statements[x].Operands[1]), x])
+                );
             }
         }
 

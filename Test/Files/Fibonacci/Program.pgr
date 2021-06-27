@@ -8,8 +8,7 @@ void main() {
     }
 }
 
-private i32 fib(i32 n)
-{
+private i32 fib(i32 n) {
     if (n <= 1)
         return n
     else

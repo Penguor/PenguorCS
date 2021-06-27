@@ -22,8 +22,7 @@ namespace Penguor.Compiler.IR
         /// <param name="variable">the operand to add</param>
         public void AppendOperand(IRReference variable)
         {
-            if (!Operands.Contains(variable))
-                Operands.Add(variable);
+            Operands.Add(variable);
         }
 
         public void AddUser(IRReference user) => Users.Add(user);

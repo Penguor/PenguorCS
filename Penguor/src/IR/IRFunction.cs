@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Penguor.Compiler.IR
@@ -76,6 +77,11 @@ namespace Penguor.Compiler.IR
                             }
                             Statements[i] = Statements[i] with { Code = IROPCode.REROUTE, Operands = new IRArgument[] { newReference with { } } };
                         }
+                    }
+                    else if (Statements[i].Code == IROPCode.PHI && Statements[i].Operands[0] is IRPhi phi1 && phi1.Operands.Any(s => s.Referenced == Statements[i].Number))
+                    {
+                        hitCount++;
+                        phi1.Operands.RemoveWhere(op => op == new IRReference(Statements[i].Number));
                     }
                 }
             }
