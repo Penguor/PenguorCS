@@ -17,7 +17,7 @@ namespace Penguor.Compiler.IR
 
         public IRProgram Optimize()
         {
-            foreach (var function in program.Functions)
+            /*foreach (var function in program.Functions)
             {
                 SortedSet<int> toRemove = new();
                 for (int i = 0; i < function.Statements.Count; i++)
@@ -63,7 +63,7 @@ namespace Penguor.Compiler.IR
                     function.Statements.RemoveAt(toRemoveArray[i]);
                 }
             }
-            if (program.Functions.Count != 0) Logger.Log(program.ToString(), LogLevel.Debug);
+            if (program.Functions.Count != 0) Logger.Log(program.ToString(), LogLevel.Debug);*/
             return program;
         }
     }

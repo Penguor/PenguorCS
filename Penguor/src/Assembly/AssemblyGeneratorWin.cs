@@ -37,8 +37,7 @@ namespace Penguor.Compiler.Assembly
             program.AddExtern(new State("ExitProcess"));
 
             AsmTextSection text = new();
-
-            foreach (var i in irProgram.Functions)
+            foreach ((_, var i) in irProgram.Functions)
             {
                 var registers = GetRegisters(i);
                 text.AddFunction(GenerateAssembly(i, registers));
